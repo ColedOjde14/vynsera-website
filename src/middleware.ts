@@ -1,4 +1,4 @@
-// middleware.ts
+// src/middleware.ts
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
@@ -8,14 +8,14 @@ const isProtectedRoute = createRouteMatcher([
 
 export default clerkMiddleware((auth, req) => {
   if (isProtectedRoute(req)) {
-    auth.protect();  // ← This is the fixed syntax
+    auth.protect();  // Protects the route - redirects to sign-in if not logged in
   }
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Skip Next.js internals and static files
+    '/((?!_next/static|_next/image|favicon.ico).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
