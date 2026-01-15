@@ -1,18 +1,15 @@
 // src/app/portal/page.tsx
-import { currentUser } from "@clerk/nextjs/server";  // Server-side only
-import { UserButton } from "@clerk/nextjs";          // Client-side UI
+import { auth } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 export default async function PortalDashboard() {
-  const user = await currentUser();
+  const { userId } = await auth();  // ← Add await here! This fixes the Promise type error
 
-  // Redirect if not logged in
-  if (!user) {
+  // If no user ID (not logged in), redirect to sign-in
+  if (!userId) {
     redirect("/sign-in");
   }
-
-  // Get display name (first name or email fallback)
-  const displayName = user.firstName || user.emailAddresses[0]?.emailAddress.split('@')[0] || "Client";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white p-6 sm:p-8">
@@ -21,14 +18,14 @@ export default async function PortalDashboard() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-6">
           <div>
             <h1 className="text-4xl sm:text-5xl font-bold">
-              Welcome, {displayName}!
+              Welcome to Your Portal!
             </h1>
             <p className="mt-3 text-indigo-300 text-lg">
-              Your Vynsera Client Portal
+              Your secure Vynsera client area
             </p>
           </div>
 
-          {/* User profile/logout button - Client component */}
+          {/* User profile/logout button */}
           <UserButton afterSignOutUrl="/" />
         </div>
 
@@ -38,7 +35,7 @@ export default async function PortalDashboard() {
             Dashboard Overview
           </h2>
           <p className="text-indigo-200/80 text-base sm:text-lg mb-6">
-            Hello! This is your secure client area. Here you can:
+            Hello! This is your client dashboard. Here you can:
           </p>
           <ul className="list-disc list-inside text-indigo-200/80 space-y-3 text-base sm:text-lg">
             <li>View active services and hosting plans</li>
