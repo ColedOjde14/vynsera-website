@@ -10,6 +10,9 @@ export default async function PortalDashboard() {
     redirect("/sign-in");
   }
 
+  const role = user.publicMetadata.role as string | undefined;
+  const isAdminOrSupport = role === "admin" || role === "support";
+
   const displayName = user.firstName || user.emailAddresses[0]?.emailAddress.split('@')[0] || "Client";
 
   return (
@@ -32,6 +35,7 @@ export default async function PortalDashboard() {
               { label: "Work Orders", href: "/portal/orders" },
               { label: "Support Tickets", href: "/portal/support" },
               { label: "Account Settings", href: "/portal/settings" },
+              ...(isAdminOrSupport ? [{ label: "Admin Panel", href: "/admin", active: false }] : []),
             ].map((item) => (
               <a
                 key={item.label}
@@ -80,7 +84,7 @@ export default async function PortalDashboard() {
                 Welcome, {displayName}
               </h1>
               <p className="mt-2 text-indigo-300 text-lg">
-                Your Vynsera Client Portal • Powered by Innovation
+                {isAdminOrSupport ? "Admin / Support Dashboard" : "Your Vynsera Client Portal"} • Powered by Innovation
               </p>
             </div>
 
@@ -97,68 +101,67 @@ export default async function PortalDashboard() {
           </div>
         </header>
 
-        {/* Main Dashboard Content */}
+        {/* Main Content */}
         <main className="max-w-7xl mx-auto p-6 sm:p-8 pb-24 lg:pb-8">
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {[
-              { title: "Active Services", value: "0", color: "indigo" },
-              { title: "Open Work Orders", value: "0", color: "purple" },
-              { title: "Pending Invoices", value: "$0.00", color: "pink" },
-              { title: "Uptime This Month", value: "100%", color: "green" },
-            ].map((stat, i) => (
-              <div
-                key={stat.title}
-                className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10"
-              >
-                <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">
-                  {stat.title}
+          {isAdminOrSupport ? (
+            <div className="space-y-12">
+              <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+                <h2 className="text-3xl font-bold text-indigo-200 mb-6">
+                  Admin / Support Overview
+                </h2>
+                <p className="text-indigo-300 mb-6">
+                  Track and manage all client tickets, work orders, billing, and more.
                 </p>
-                <p className={`text-4xl font-bold bg-gradient-to-r from-${stat.color}-400 to-${stat.color}-600 bg-clip-text text-transparent`}>
-                  {stat.value}
-                </p>
+                {/* Future: Tables/lists of all tickets/orders */}
               </div>
-            ))}
-          </div>
-
-          {/* Services Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 hover:border-indigo-400 transition-all">
-              <h3 className="text-2xl font-semibold text-indigo-200 mb-6">Active Services</h3>
-              <p className="text-indigo-200/80 text-center py-12">
-                No active services yet. Explore our offerings to get started.
-              </p>
             </div>
+          ) : (
+            <div className="space-y-12">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {[
+                  { title: "Active Services", value: "0", color: "indigo" },
+                  { title: "Open Work Orders", value: "0", color: "purple" },
+                  { title: "Pending Invoices", value: "$0.00", color: "pink" },
+                  { title: "Uptime This Month", value: "100%", color: "green" },
+                ].map((stat, i) => (
+                  <div
+                    key={stat.title}
+                    className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10"
+                  >
+                    <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">
+                      {stat.title}
+                    </p>
+                    <p className={`text-4xl font-bold bg-gradient-to-r from-${stat.color}-400 to-${stat.color}-600 bg-clip-text text-transparent`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
 
-            <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 hover:border-indigo-400 transition-all">
-              <h3 className="text-2xl font-semibold text-indigo-200 mb-6">Recent Invoices</h3>
-              <p className="text-indigo-200/80 text-center py-12">
-                No invoices yet. Your first service will appear here.
-              </p>
+              {/* Quick Actions - Functional */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  { title: "Submit Support Ticket", color: "indigo", href: "#" }, // Modal trigger
+                  { title: "View All Work Orders", color: "purple", href: "/portal/orders" },
+                  { title: "Update Billing Info", color: "pink", href: "/portal/billing" },
+                ].map((action) => (
+                  <a
+                    key={action.title}
+                    href={action.href}
+                    className={`bg-gradient-to-r from-${action.color}-900/40 to-${action.color}-900/30 border border-${action.color}-500/30 rounded-2xl p-8 text-left hover:border-white/80 hover:shadow-2xl hover:shadow-white/30 transition-all duration-500 transform hover:scale-105`}
+                  >
+                    <h3 className="text-xl font-semibold text-indigo-200 mb-3">
+                      {action.title}
+                    </h3>
+                    <p className="text-indigo-300">
+                      Get help or manage your account in one click.
+                    </p>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Quick Actions - Consistent white border on hover + glow */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: "Submit Support Ticket", color: "indigo", href: "/portal/support" },
-              { title: "View All Work Orders", color: "purple", href: "/portal/orders" },
-              { title: "Update Billing Info", color: "pink", href: "/portal/billing" },
-            ].map((action) => (
-              <a
-                key={action.title}
-                href={action.href}
-                className={`bg-gradient-to-r from-${action.color}-900/40 to-${action.color}-900/30 border border-white/20 rounded-2xl p-8 text-left hover:border-white/80 hover:shadow-2xl hover:shadow-white/30 transition-all duration-500 transform hover:scale-105`}
-              >
-                <h3 className="text-xl font-semibold text-indigo-200 mb-3">
-                  {action.title}
-                </h3>
-                <p className="text-indigo-300">
-                  Get help or manage your account in one click.
-                </p>
-              </a>
-            ))}
-          </div>
+          )}
         </main>
       </div>
     </div>
