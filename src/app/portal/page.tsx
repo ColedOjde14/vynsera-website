@@ -4,9 +4,9 @@ import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 export default async function PortalDashboard() {
-  const { userId } = await auth();  // ← Add await here! This fixes the Promise type error
+  const { userId } = await auth();  // ← This 'await' fixes the Promise type error
 
-  // If no user ID (not logged in), redirect to sign-in
+  // If not logged in, redirect to sign-in
   if (!userId) {
     redirect("/sign-in");
   }
