@@ -1,7 +1,7 @@
 // src/app/portal/page.tsx
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import ClientPortalContent from "@/components/ClientPortalContent"; // We'll create this next
+import ClientPortalContent from "@/components/ClientPortalContent";
 
 export default async function PortalDashboard() {
   const user = await currentUser();

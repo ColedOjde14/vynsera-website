@@ -17,17 +17,25 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData();
+    formData.append('subject', subject);
+    formData.append('description', description);
+    formData.append('priority', priority);
+    if (attachment) {
+      formData.append('attachment', attachment);
+    }
+
     try {
       const response = await fetch('/api/support-tickets', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, subject, description, priority }),
+        body: formData,
       });
 
       const data = await response.json();
@@ -38,6 +46,7 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
         setSubject('');
         setDescription('');
         setPriority('Medium');
+        setAttachment(null);
       } else {
         toast.error(data.error || 'Failed to submit ticket.');
       }
@@ -166,7 +175,7 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
             </div>
           </div>
 
-          {/* Quick Actions - FIXED: Identical classes for all three */}
+          {/* Quick Actions - Identical classes for all three */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <button
               onClick={() => setIsModalOpen(true)}
@@ -273,6 +282,16 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
                             <option value="High">High</option>
                             <option value="Urgent">Urgent</option>
                           </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-indigo-300 text-sm mb-2">Attachment (optional, max 5MB)</label>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                            className="w-full bg-black/50 border border-indigo-500/50 rounded-lg p-4 text-white file:bg-indigo-600 file:text-white file:border-0 file:rounded-lg file:px-4 file:py-2 file:cursor-pointer"
+                          />
                         </div>
 
                         <div className="flex justify-end gap-4 mt-8">
