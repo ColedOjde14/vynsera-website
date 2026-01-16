@@ -1,7 +1,7 @@
 // src/app/admin/page.tsx
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { neon } from '@neondatabase/serverless';  // ← This import was missing
+import { neon } from '@neondatabase/serverless';
 import AdminClientContent from "@/components/AdminClientContent";
 
 export default async function AdminDashboard() {
@@ -15,20 +15,20 @@ export default async function AdminDashboard() {
   const isAdminOrSupport = role === "admin" || role === "support";
 
   if (!isAdminOrSupport) {
-    redirect("/portal"); // Non-admins go back to client portal
+    redirect("/portal");
   }
 
   const displayName = user.firstName || user.emailAddresses[0]?.emailAddress.split('@')[0] || "Admin";
 
   const sql = neon(process.env.DATABASE_URL!);
 
-  // Fetch stats for overview
+  // Stats
   const totalTickets = await sql`SELECT COUNT(*) as count FROM support_tickets`;
   const openTickets = await sql`SELECT COUNT(*) as count FROM support_tickets WHERE status = 'Open'`;
   const totalOrders = await sql`SELECT COUNT(*) as count FROM work_orders`;
   const pendingOrders = await sql`SELECT COUNT(*) as count FROM work_orders WHERE status = 'Pending'`;
 
-  // Recent tickets (last 10)
+  // Recent tickets
   const recentTickets = await sql`
     SELECT id, user_id, subject, priority, status, created_at
     FROM support_tickets
@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
     LIMIT 10
   `;
 
-  // Recent orders (last 10)
+  // Recent orders
   const recentOrders = await sql`
     SELECT id, user_id, title, status, created_at
     FROM work_orders

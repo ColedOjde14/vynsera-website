@@ -1,11 +1,21 @@
 // src/app/sign-in/[[...sign-in]]/page.tsx
 import { SignIn } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const user = await currentUser();
+
+  // If already logged in, redirect based on role
+  if (user) {
+    const role = user.publicMetadata.role as string | undefined;
+    const isAdminOrSupport = role === "admin" || role === "support";
+    redirect(isAdminOrSupport ? "/admin" : "/portal");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 p-6">
       <div className="w-full max-w-md">
-        {/* Optional branding above the sign-in box */}
         <div className="text-center mb-10">
           <img
             src="/logo.png"
@@ -14,43 +24,30 @@ export default function SignInPage() {
           />
           <h1 className="text-3xl font-bold text-white">Welcome to Vynsera</h1>
           <p className="mt-2 text-indigo-300">
-            Sign in to access your client portal
+            Sign in to access your portal
           </p>
         </div>
 
-        {/* Clerk Sign-In Component - styled to match Vynsera */}
         <SignIn
           appearance={{
             elements: {
-              // Main container
               rootBox: "w-full",
               card: "bg-black/50 backdrop-blur-lg border border-indigo-500/30 shadow-2xl rounded-2xl",
-              
-              // Header
               headerTitle: "text-white text-2xl font-bold",
               headerSubtitle: "text-indigo-300 text-base",
-
-              // Form fields
               formFieldLabel: "text-indigo-200",
               formFieldInput: "bg-black/40 border-indigo-500/50 text-white placeholder:text-indigo-400 rounded-lg",
               formFieldErrorText: "text-pink-400",
-
-              // Buttons
               formButtonPrimary: "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-full shadow-lg",
               formButtonSecondary: "bg-transparent border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10",
-
-              // Links
               footerActionLink: "text-indigo-400 hover:text-indigo-300",
               footerActionText: "text-indigo-300",
-
-              // Social buttons (if enabled later)
-              socialButtonsBlockButton: "bg-black/40 border border-indigo-500/30 text-white hover:bg-indigo-500/10",
             },
           }}
           routing="path"
           path="/sign-in"
           signUpUrl="/sign-up"
-          afterSignInUrl="/portal"
+          afterSignInUrl="/portal"  // Fallback - actual redirect happens in code above
           afterSignUpUrl="/portal"
         />
       </div>
