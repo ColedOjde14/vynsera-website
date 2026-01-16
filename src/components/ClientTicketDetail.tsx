@@ -41,7 +41,7 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
         toast.success('Reply sent!');
         setNewMessage('');
         setAttachment(null);
-        // Refresh to show new message (simple for now)
+        // Refresh to show new message
         window.location.reload();
       } else {
         toast.error(data.error || 'Failed to send reply.');
@@ -96,8 +96,10 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
               >
                 <div className={`max-w-[80%] rounded-2xl p-6 ${
                   msg.user_id === userId
-                    ? "bg-indigo-600/30 border border-indigo-500/50"
-                    : "bg-gray-800/50 border border-gray-700/50"
+                    ? "bg-indigo-600/30 border border-indigo-500/50"  // Your messages: indigo
+                    : isAdminOrSupport
+                      ? "bg-purple-600/30 border border-purple-500/50"  // Client messages (from admin view): purple
+                      : "bg-gray-800/50 border border-gray-700/50"  // Support messages (from client view): gray
                 }`}>
                   <p className="text-indigo-100 whitespace-pre-wrap">{msg.message}</p>
                   {msg.attachment_url && (
@@ -111,7 +113,7 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
                     </a>
                   )}
                   <p className="mt-3 text-xs text-indigo-400">
-                    {new Date(msg.created_at).toLocaleString()} • {msg.user_id === userId ? 'You' : (isAdminOrSupport ? 'Support' : 'Client')}
+                    {new Date(msg.created_at).toLocaleString()} • {msg.user_id === userId ? 'You' : (isAdminOrSupport ? 'Client' : 'Support')}
                   </p>
                 </div>
               </div>
