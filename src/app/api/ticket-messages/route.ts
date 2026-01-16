@@ -11,6 +11,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const role = user.publicMetadata.role as string | undefined;
+  const isAdminOrSupport = role === "admin" || role === "support";
+
   const formData = await request.formData();
   const ticketId = formData.get('ticketId') as string;
   const message = formData.get('message') as string;
@@ -18,6 +21,11 @@ export async function POST(request: Request) {
 
   if (!ticketId || !message) {
     return NextResponse.json({ error: 'Missing ticket ID or message' }, { status: 400 });
+  }
+
+  const parsedTicketId = parseInt(ticketId, 10);
+  if (isNaN(parsedTicketId)) {
+    return NextResponse.json({ error: 'Invalid ticket ID' }, { status: 400 });
   }
 
   let attachmentUrl = null;
@@ -42,28 +50,31 @@ export async function POST(request: Request) {
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    // Verify the ticket exists and belongs to the user (clients can only reply to their own)
+    // Verify ticket exists and user has access
     const [ticket] = await sql`
-      SELECT id FROM support_tickets WHERE id = ${ticketId} AND user_id = ${user.id}
+      SELECT id FROM support_tickets
+      WHERE id = ${parsedTicketId}
+      ${!isAdminOrSupport ? sql`AND user_id = ${user.id}` : sql``}
     `;
 
     if (!ticket) {
       return NextResponse.json({ error: 'Ticket not found or unauthorized' }, { status: 403 });
     }
 
+    // Insert new message
     await sql`
       INSERT INTO ticket_messages (ticket_id, user_id, message, attachment_url)
-      VALUES (${ticketId}, ${user.id}, ${message}, ${attachmentUrl})
+      VALUES (${parsedTicketId}, ${user.id}, ${message}, ${attachmentUrl})
     `;
 
-    // Optional: Update ticket updated_at
+    // Update ticket timestamp
     await sql`
       UPDATE support_tickets
       SET updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${ticketId}
+      WHERE id = ${parsedTicketId}
     `;
 
-    return NextResponse.json({ success: true, message: 'Message sent!' });
+    return NextResponse.json({ success: true, message: 'Reply sent!' });
   } catch (error) {
     console.error('Message insert error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
