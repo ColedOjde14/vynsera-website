@@ -24,24 +24,24 @@ export default async function SupportTicketsPage() {
     if (isAdminOrSupport) {
       // Admins see ALL tickets
       tickets = await sql`
-        SELECT id, user_id, subject, description, priority, status, created_at
-        FROM support_tickets
-        ORDER BY created_at DESC
-        LIMIT 50
+        SELECT t.id, t.user_id, t.subject, t.priority, t.status, t.created_at, u.first_name || ' ' || u.last_name as client_name
+        FROM support_tickets t
+        LEFT JOIN users u ON t.user_id = u.id
+        ORDER BY t.created_at DESC
+        LIMIT 100
       `;
     } else {
       // Clients see only their own
       tickets = await sql`
-        SELECT id, subject, description, priority, status, created_at
+        SELECT id, subject, priority, status, created_at
         FROM support_tickets
         WHERE user_id = ${userId}
         ORDER BY created_at DESC
-        LIMIT 50
+        LIMIT 100
       `;
     }
   } catch (error) {
     console.error('Ticket fetch error:', error);
-    // Fallback to empty array on error
   }
 
   return (
@@ -74,45 +74,44 @@ export default async function SupportTicketsPage() {
         ) : (
           <div className="space-y-6">
             {tickets.map((ticket) => (
-              <div
+              <a
                 key={ticket.id}
-                className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10"
+                href={`/portal/support/${ticket.id}`}
+                className="block bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-6 hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/20 transition-all duration-300"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                  <h3 className="text-xl font-semibold text-indigo-200">
-                    {ticket.subject}
-                  </h3>
-                  <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-                    ticket.priority === 'Urgent' ? 'bg-red-600/30 text-red-300' :
-                    ticket.priority === 'High' ? 'bg-orange-600/30 text-orange-300' :
-                    ticket.priority === 'Medium' ? 'bg-yellow-600/30 text-yellow-300' :
-                    'bg-green-600/30 text-green-300'
-                  }`}>
-                    {ticket.priority}
-                  </span>
-                </div>
-
-                <p className="text-indigo-200/80 mb-4">
-                  {ticket.description}
-                </p>
-
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm text-indigo-300 gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <span className="font-medium">
-                      Status: {ticket.status}
-                    </span>
-                    <span className="ml-4">
-                      Created: {new Date(ticket.created_at).toLocaleDateString()}
-                    </span>
+                    <h3 className="text-xl font-semibold text-indigo-200">
+                      {ticket.subject}
+                    </h3>
+                    <p className="text-sm text-indigo-300 mt-1">
+                      {isAdminOrSupport ? `Client: ${ticket.client_name || ticket.user_id.slice(0, 8)}...` : ''}
+                    </p>
                   </div>
 
-                  {isAdminOrSupport && (
-                    <div className="text-indigo-400">
-                      Client ID: {ticket.user_id.slice(0, 8)}...
-                    </div>
-                  )}
+                  <div className="flex gap-4 items-center">
+                    <span className={`px-4 py-1 rounded-full text-sm font-medium ${
+                      ticket.priority === 'Urgent' ? 'bg-red-600/30 text-red-300' :
+                      ticket.priority === 'High' ? 'bg-orange-600/30 text-orange-300' :
+                      ticket.priority === 'Medium' ? 'bg-yellow-600/30 text-yellow-300' :
+                      'bg-green-600/30 text-green-300'
+                    }`}>
+                      {ticket.priority}
+                    </span>
+                    <span className={`px-4 py-1 rounded-full text-sm font-medium ${
+                      ticket.status === 'Open' ? 'bg-green-600/30 text-green-300' :
+                      ticket.status === 'In Progress' ? 'bg-yellow-600/30 text-yellow-300' :
+                      'bg-gray-600/30 text-gray-300'
+                    }`}>
+                      {ticket.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
+
+                <p className="mt-4 text-indigo-200/80 text-sm">
+                  Created: {new Date(ticket.created_at).toLocaleString()}
+                </p>
+              </a>
             ))}
           </div>
         )}
