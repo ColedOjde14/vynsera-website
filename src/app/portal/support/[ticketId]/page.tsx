@@ -2,6 +2,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { neon } from '@neondatabase/serverless';
+import PortalHeader from "@/components/PortalHeader";
 import ClientTicketDetail from "@/components/ClientTicketDetail";
 
 export default async function TicketDetailPage({ params }: { params: Promise<{ ticketId: string }> }) {
@@ -51,5 +52,14 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ t
     ORDER BY created_at ASC
   `;
 
-  return <ClientTicketDetail ticket={ticket} messages={messages} userId={user.id} isAdminOrSupport={isAdminOrSupport} />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
+      <PortalHeader
+        title={`Ticket #${ticket.id}: ${ticket.subject}`}
+        subtitle={isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : "Your Support Ticket"}
+      />
+
+      <ClientTicketDetail ticket={ticket} messages={messages} userId={user.id} isAdminOrSupport={isAdminOrSupport} />
+    </div>
+  );
 }
