@@ -1,5 +1,5 @@
 // src/components/ClientTicketDetail.tsx
-'use client';
+'use client';  // ← This MUST be the first line (fixes UserButton import)
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -41,7 +41,7 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
         toast.success('Reply sent!');
         setNewMessage('');
         setAttachment(null);
-        // Refresh to show new message
+        // Refresh to show new message (simple for now)
         window.location.reload();
       } else {
         toast.error(data.error || 'Failed to send reply.');
@@ -56,23 +56,35 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
-      {/* Header */}
-      <header className="bg-black/40 backdrop-blur-md border-b border-indigo-500/20 p-6 sm:p-8 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            Ticket #{ticket.id}: {ticket.subject}
-          </h1>
-          <p className="mt-2 text-indigo-300 text-lg">
-            {isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : "Your Support Ticket"} • Created {new Date(ticket.created_at).toLocaleString()}
-          </p>
-          <p className="mt-1 text-sm">
-            Priority: <span className={`font-medium ${
-              ticket.priority === 'Urgent' ? 'text-red-400' :
-              ticket.priority === 'High' ? 'text-orange-400' :
-              ticket.priority === 'Medium' ? 'text-yellow-400' :
-              'text-green-400'
-            }`}>{ticket.priority}</span> • Status: <span className="font-medium text-indigo-300">{ticket.status}</span>
-          </p>
+      {/* Header with Back Button */}
+      <header className="bg-black/40 backdrop-blur-md border-b border-indigo-500/20 p-6 sm:p-8 sticky top-0 z-40 transition-all duration-300">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => window.history.back()}
+              className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+            >
+              ← Back to List
+            </button>
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                Ticket #{ticket.id}: {ticket.subject}
+              </h1>
+              <p className="mt-2 text-indigo-300 text-lg">
+                {isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : "Your Support Ticket"} • Created {new Date(ticket.created_at).toLocaleString()}
+              </p>
+              <p className="mt-1 text-sm">
+                Priority: <span className={`font-medium ${
+                  ticket.priority === 'Urgent' ? 'text-red-400' :
+                  ticket.priority === 'High' ? 'text-orange-400' :
+                  ticket.priority === 'Medium' ? 'text-yellow-400' :
+                  'text-green-400'
+                }`}>{ticket.priority}</span> • Status: <span className="font-medium text-indigo-300">{ticket.status}</span>
+              </p>
+            </div>
+          </div>
+
+          <UserButton afterSignOutUrl="/" />
         </div>
       </header>
 
@@ -98,8 +110,8 @@ export default function ClientTicketDetail({ ticket, messages, userId, isAdminOr
                   msg.user_id === userId
                     ? "bg-indigo-600/30 border border-indigo-500/50"  // Your messages: indigo
                     : isAdminOrSupport
-                      ? "bg-purple-600/30 border border-purple-500/50"  // Client messages (from admin view): purple
-                      : "bg-gray-800/50 border border-gray-700/50"  // Support messages (from client view): gray
+                      ? "bg-purple-600/30 border border-purple-500/50"  // Client messages (admin view): purple
+                      : "bg-gray-800/50 border border-gray-700/50"  // Support messages (client view): gray
                 }`}>
                   <p className="text-indigo-100 whitespace-pre-wrap">{msg.message}</p>
                   {msg.attachment_url && (
