@@ -22,7 +22,7 @@ export default async function SupportTicketsPage() {
 
   try {
     if (isAdminOrSupport) {
-      // Admins see ALL tickets (simple query, no join)
+      // Admins see ALL tickets
       tickets = await sql`
         SELECT id, user_id, subject, priority, status, created_at
         FROM support_tickets
@@ -45,15 +45,25 @@ export default async function SupportTicketsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
-      {/* Header */}
+      {/* Header with Back Button */}
       <header className="bg-black/40 backdrop-blur-md border-b border-indigo-500/20 p-6 sm:p-8 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            Support Tickets
-          </h1>
-          <p className="mt-2 text-indigo-300 text-lg">
-            {isAdminOrSupport ? "Manage all client tickets" : "Your support tickets"} • {displayName}
-          </p>
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="flex items-center gap-4">
+            <a
+              href="/portal"
+              className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+            >
+              ← Return to Dashboard
+            </a>
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                Support Tickets
+              </h1>
+              <p className="mt-2 text-indigo-300 text-lg">
+                {isAdminOrSupport ? "Manage all client tickets" : "Your support tickets"} • {displayName}
+              </p>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -99,7 +109,7 @@ export default async function SupportTicketsPage() {
                     </span>
                     <span className={`px-4 py-1 rounded-full text-sm font-medium ${
                       ticket.status === 'Open' ? 'bg-green-600/30 text-green-300' :
-                      ticket.status === 'In Progress' ? 'bg-yellow-600/30 text-yellow-300' :
+                      ticket.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
                       'bg-gray-600/30 text-gray-300'
                     }`}>
                       {ticket.status}
