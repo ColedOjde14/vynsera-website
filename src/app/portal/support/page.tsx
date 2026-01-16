@@ -22,12 +22,11 @@ export default async function SupportTicketsPage() {
 
   try {
     if (isAdminOrSupport) {
-      // Admins see ALL tickets
+      // Admins see ALL tickets (simple query, no join)
       tickets = await sql`
-        SELECT t.id, t.user_id, t.subject, t.priority, t.status, t.created_at, u.first_name || ' ' || u.last_name as client_name
-        FROM support_tickets t
-        LEFT JOIN users u ON t.user_id = u.id
-        ORDER BY t.created_at DESC
+        SELECT id, user_id, subject, priority, status, created_at
+        FROM support_tickets
+        ORDER BY created_at DESC
         LIMIT 100
       `;
     } else {
@@ -85,7 +84,7 @@ export default async function SupportTicketsPage() {
                       {ticket.subject}
                     </h3>
                     <p className="text-sm text-indigo-300 mt-1">
-                      {isAdminOrSupport ? `Client: ${ticket.client_name || ticket.user_id.slice(0, 8)}...` : ''}
+                      {isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : ''}
                     </p>
                   </div>
 
