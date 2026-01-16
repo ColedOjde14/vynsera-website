@@ -1,8 +1,9 @@
 // src/components/ClientTicketDetail.tsx
-'use client';  // ← This MUST be the first line (fixes UserButton import)
+'use client';  // ← This line is required (fixes UserButton import error)
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { UserButton } from '@clerk/nextjs';
 
 interface TicketDetailProps {
   ticket: any;
