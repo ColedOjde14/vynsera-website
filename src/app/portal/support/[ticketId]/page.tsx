@@ -4,8 +4,10 @@ import { redirect, notFound } from "next/navigation";
 import { neon } from '@neondatabase/serverless';
 import { UserButton } from "@clerk/nextjs";
 
-export default async function TicketDetailPage({ params }: { params: { ticketId: string } }) {
-  const ticketId = parseInt(params.ticketId, 10);
+export default async function TicketDetailPage({ params }: { params: Promise<{ ticketId: string }> }) {
+  const resolvedParams = await params;  // Await the Promise
+  const ticketId = parseInt(resolvedParams.ticketId, 10);
+
   if (isNaN(ticketId)) {
     notFound();
   }
