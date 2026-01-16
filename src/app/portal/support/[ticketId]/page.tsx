@@ -34,7 +34,7 @@ export default async function TicketDetailPage({ params }: { params: { ticketId:
 
   // Clients can only view their own tickets
   if (!isAdminOrSupport && ticket.user_id !== user.id) {
-    return <div className="p-8 text-center text-red-400 text-xl">Unauthorized to view this ticket</div>;
+    return <div className="p-8 text-center text-red-400 text-xl font-bold">Unauthorized to view this ticket</div>;
   }
 
   // Fetch all messages for this ticket
@@ -54,7 +54,7 @@ export default async function TicketDetailPage({ params }: { params: { ticketId:
             Ticket #{ticket.id}: {ticket.subject}
           </h1>
           <p className="mt-2 text-indigo-300 text-lg">
-            {isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : "Your Support Ticket"} • {new Date(ticket.created_at).toLocaleString()}
+            {isAdminOrSupport ? `Client ID: ${ticket.user_id.slice(0, 8)}...` : "Your Support Ticket"} • Created {new Date(ticket.created_at).toLocaleString()}
           </p>
           <p className="mt-1 text-sm">
             Priority: <span className={`font-medium ${
