@@ -24,16 +24,24 @@ export default function AdminClientContent({
 }: AdminClientProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
-      {/* Header */}
+      {/* Header with Back Button */}
       <header className="bg-black/40 backdrop-blur-md border-b border-indigo-500/20 p-6 sm:p-8 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Admin Panel
-            </h1>
-            <p className="mt-2 text-indigo-300 text-lg">
-              Welcome, {displayName} • Manage Vynsera Operations
-            </p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => window.history.back()}
+              className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+            >
+              ← Back
+            </button>
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                Admin Panel
+              </h1>
+              <p className="mt-2 text-indigo-300 text-lg">
+                Welcome, {displayName} • Manage Vynsera Operations
+              </p>
+            </div>
           </div>
 
           <UserButton afterSignOutUrl="/" />
@@ -73,7 +81,7 @@ export default function AdminClientContent({
           </div>
         </div>
 
-        {/* Recent Tickets - With Management Controls */}
+        {/* Recent Tickets - Clickable with Management Controls */}
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Tickets</h2>
           {recentTickets.length === 0 ? (

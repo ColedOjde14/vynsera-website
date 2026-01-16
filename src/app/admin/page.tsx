@@ -22,13 +22,11 @@ export default async function AdminDashboard() {
 
   const sql = neon(process.env.DATABASE_URL!);
 
-  // Stats
   const totalTickets = await sql`SELECT COUNT(*) as count FROM support_tickets`;
   const openTickets = await sql`SELECT COUNT(*) as count FROM support_tickets WHERE status = 'Open'`;
   const totalOrders = await sql`SELECT COUNT(*) as count FROM work_orders`;
   const pendingOrders = await sql`SELECT COUNT(*) as count FROM work_orders WHERE status = 'Pending'`;
 
-  // Recent tickets
   const recentTickets = await sql`
     SELECT id, user_id, subject, priority, status, created_at
     FROM support_tickets
@@ -36,7 +34,6 @@ export default async function AdminDashboard() {
     LIMIT 10
   `;
 
-  // Recent orders
   const recentOrders = await sql`
     SELECT id, user_id, title, status, created_at
     FROM work_orders
