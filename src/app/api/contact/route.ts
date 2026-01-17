@@ -4,11 +4,9 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
+    const body = await request.json();
 
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const message = formData.get('message') as string;
+    const { name, email, message } = body;
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -21,8 +19,7 @@ export async function POST(request: Request) {
       VALUES (${name}, ${email}, ${message}, CURRENT_TIMESTAMP)
     `;
 
-    // Redirect to confirmation page on success
-    return NextResponse.redirect(new URL('/contact-success', request.url));
+    return NextResponse.json({ success: true, message: 'Message sent!' });
   } catch (error) {
     console.error('Contact submission error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
