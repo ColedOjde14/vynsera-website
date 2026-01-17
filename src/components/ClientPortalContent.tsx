@@ -50,26 +50,39 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
 
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
-      {/* Quick Stats Grid */}
+      {/* Quick Stats Grid - Replaced Uptime with My Tickets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {[
-          { title: "Active Services", value: "0", color: "indigo" },
-          { title: "Open Work Orders", value: "0", color: "purple" },
-          { title: "Pending Invoices", value: "$0.00", color: "pink" },
-          { title: "Uptime This Month", value: "100%", color: "green" },
-        ].map((stat, i) => (
-          <div
-            key={stat.title}
-            className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10"
-          >
-            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">
-              {stat.title}
-            </p>
-            <p className={`text-4xl font-bold bg-gradient-to-r from-${stat.color}-400 to-${stat.color}-600 bg-clip-text text-transparent`}>
-              {stat.value}
-            </p>
-          </div>
-        ))}
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Active Services</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">
+            0
+          </p>
+        </div>
+
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Work Orders</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+            0
+          </p>
+        </div>
+
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Pending Invoices</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
+            $0.00
+          </p>
+        </div>
+
+        {/* New: My Tickets - clickable link to /portal/support */}
+        <a
+          href="/portal/support"
+          className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer"
+        >
+          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">My Tickets</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+            View
+          </p>
+        </a>
       </div>
 
       {/* Services Grid */}

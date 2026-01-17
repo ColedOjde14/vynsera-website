@@ -2,7 +2,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { neon } from '@neondatabase/serverless';
-import PortalHeader from "@/components/PortalHeader";
 import AdminClientContent from "@/components/AdminClientContent";
 
 export default async function AdminDashboard() {
@@ -42,19 +41,24 @@ export default async function AdminDashboard() {
     LIMIT 10
   `;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
-      <PortalHeader title="Admin Panel" subtitle={`Welcome, ${displayName} • Manage Vynsera Operations`} />
+  // New: Fetch contact submissions
+  const contactSubmissions = await sql`
+    SELECT id, name, email, message, created_at
+    FROM contact_submissions
+    ORDER BY created_at DESC
+    LIMIT 10
+  `;
 
-      <AdminClientContent
-        displayName={displayName}
-        totalTickets={totalTickets[0].count}
-        openTickets={openTickets[0].count}
-        totalOrders={totalOrders[0].count}
-        pendingOrders={pendingOrders[0].count}
-        recentTickets={recentTickets}
-        recentOrders={recentOrders}
-      />
-    </div>
+  return (
+    <AdminClientContent
+      displayName={displayName}
+      totalTickets={totalTickets[0].count}
+      openTickets={openTickets[0].count}
+      totalOrders={totalOrders[0].count}
+      pendingOrders={pendingOrders[0].count}
+      recentTickets={recentTickets}
+      recentOrders={recentOrders}
+      contactSubmissions={contactSubmissions}
+    />
   );
 }
