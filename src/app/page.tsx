@@ -1,7 +1,47 @@
 // src/app/page.tsx
+'use client';  // Add this at the top to enable JS fetch
+
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import Link from "next/link";
 
 export default function Home() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Message sent!');
+        setName('');
+        setEmail('');
+        setMessage('');
+        // Redirect to confirmation page
+        window.location.href = '/contact-success';
+      } else {
+        toast.error(data.error || 'Failed to send message.');
+      }
+    } catch (error) {
+      toast.error('Network error. Try again.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
       {/* Hero Section */}
@@ -50,12 +90,13 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-12 text-indigo-200">
             Contact Us
           </h2>
-          <form action="/api/contact" method="POST" className="space-y-6 bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <form onSubmit={handleSubmit} className="space-y-6 bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
             <div>
               <label className="block text-indigo-300 text-sm mb-2">Name</label>
               <input
                 type="text"
-                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full bg-black/50 border border-indigo-500/50 rounded-lg p-4 text-white placeholder:text-indigo-400 focus:outline-none focus:border-indigo-400"
                 placeholder="Your name"
@@ -66,7 +107,8 @@ export default function Home() {
               <label className="block text-indigo-300 text-sm mb-2">Email</label>
               <input
                 type="email"
-                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-black/50 border border-indigo-500/50 rounded-lg p-4 text-white placeholder:text-indigo-400 focus:outline-none focus:border-indigo-400"
                 placeholder="your@email.com"
@@ -76,7 +118,8 @@ export default function Home() {
             <div>
               <label className="block text-indigo-300 text-sm mb-2">Message</label>
               <textarea
-                name="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 required
                 rows={6}
                 className="w-full bg-black/50 border border-indigo-500/50 rounded-lg p-4 text-white placeholder:text-indigo-400 focus:outline-none focus:border-indigo-400"
@@ -87,9 +130,10 @@ export default function Home() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
+                disabled={loading}
+                className={`px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Send Message
+                {loading ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>

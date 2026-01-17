@@ -24,3 +24,9 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
+
+// src/app/layout.tsx (add to imports and inside <body>)
+import { Toaster } from 'react-hot-toast';
+
+// Inside <body>
+<Toaster position="top-center" />
