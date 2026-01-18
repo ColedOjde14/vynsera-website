@@ -1,7 +1,31 @@
 // src/app/page.tsx
-import Link from "next/link";
+'use client';
+
+import { useUser } from '@clerk/nextjs';
+import Link from 'next/link';
+import toast from 'react-hot-toast';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      toast.success("You're now logged in!", {
+        duration: 4000,
+        position: 'top-center',
+      });
+    }
+  }, [isLoaded, isSignedIn]);
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950" />; // Loading
+  }
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isAdminOrSupport = role === 'admin' || role === 'support';
+  const portalUrl = isAdminOrSupport ? '/admin' : '/portal';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white flex flex-col overflow-x-hidden">
       {/* Hero Section */}
@@ -25,7 +49,7 @@ export default function Home() {
             Where bold vision meets flawless execution.
           </p>
 
-          {/* Large CTA + Client Login Below */}
+          {/* Dynamic CTA + Login/Portal Button */}
           <div className="mt-20 flex flex-col items-center gap-8">
             <Link
               href="/services"
@@ -34,12 +58,21 @@ export default function Home() {
               View Our Services
             </Link>
 
-            <Link
-              href="https://accounts.vynseracorp.com/sign-in"
-              className="px-12 py-6 rounded-full border-2 border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 transition-all duration-300 text-xl font-medium backdrop-blur-sm"
-            >
-              Client Login
-            </Link>
+            {isSignedIn ? (
+              <Link
+                href={portalUrl}
+                className="px-12 py-6 rounded-full border-2 border-green-500/60 text-green-300 hover:bg-green-500/10 hover:border-green-400 transition-all duration-300 text-xl font-medium backdrop-blur-sm"
+              >
+                Access Portal
+              </Link>
+            ) : (
+              <Link
+                href="https://accounts.vynseracorp.com/sign-in"
+                className="px-12 py-6 rounded-full border-2 border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 transition-all duration-300 text-xl font-medium backdrop-blur-sm"
+              >
+                Client Login
+              </Link>
+            )}
           </div>
         </div>
       </header>
