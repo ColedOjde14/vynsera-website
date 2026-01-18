@@ -53,14 +53,12 @@ export default function ServiceRequestForm({
         body: formData,
       });
 
-      // If the response is a redirect (status 3xx), it will automatically follow it
-      // We don't need to parse JSON on success because the server redirects
-      if (response.ok || response.redirected) {
+      const data = await response.json();
+
+      if (response.ok) {
         toast.success('Request submitted!');
-        // No need to manually redirect - server handles it
+        window.location.href = '/services/request-confirmation'; // Client-side redirect
       } else {
-        // Only parse JSON on error (non-redirect responses)
-        const data = await response.json();
         toast.error(data.error || 'Failed to submit request.');
       }
     } catch (error) {

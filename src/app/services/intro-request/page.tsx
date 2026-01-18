@@ -40,12 +40,13 @@ export default function IntroRequest() {
         body: formData,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      // Check for success or redirect - client handles redirect
+      if (response.redirected || response.ok) {
         toast.success('Request submitted!');
-        window.location.href = '/';
+        window.location.href = '/services/request-confirmation';
       } else {
+        // Parse JSON only on error
+        const data = await response.json();
         toast.error(data.error || 'Failed to submit request.');
       }
     } catch (error) {

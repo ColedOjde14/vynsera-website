@@ -29,9 +29,11 @@ export default function AdminClientContent({
 }: AdminClientProps) {
   const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
+  const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this submission? This cannot be undone.')) return;
+  const handleDeleteContact = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
 
     setDeletingId(id);
     try {
@@ -44,8 +46,7 @@ export default function AdminClientContent({
       const data = await response.json();
 
       if (response.ok) {
-        alert('Submission deleted!');
-        // Refresh to update list
+        alert('Contact submission deleted!');
         window.location.reload();
       } else {
         alert(data.error || 'Failed to delete submission.');
@@ -55,6 +56,100 @@ export default function AdminClientContent({
       console.error(error);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleUpdateServiceRequest = async (requestId: number, newStatus: string) => {
+    setUpdatingRequestId(requestId);
+    try {
+      const response = await fetch('/api/service-request-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: newStatus }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Status updated!');
+        window.location.reload();
+      } else {
+        toast.error(data.error || 'Failed to update status.');
+      }
+    } catch (error) {
+      toast.error('Network error. Try again.');
+      console.error(error);
+    } finally {
+      setUpdatingRequestId(null);
+    }
+  };
+
+  const handleDeleteServiceRequest = async (requestId: number) => {
+    if (!confirm('Are you sure you want to delete this service request? This cannot be undone.')) return;
+
+    try {
+      const response = await fetch('/api/service-request-update', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Request deleted!');
+        window.location.reload();
+      } else {
+        toast.error(data.error || 'Failed to delete request.');
+      }
+    } catch (error) {
+      toast.error('Network error.');
+      console.error(error);
+    }
+  };
+
+  const handleDownloadPDF = (req: any) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Service Request #${req.id}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+              h1 { color: #4f46e5; text-align: center; }
+              .field { margin-bottom: 16px; }
+              .label { font-weight: bold; color: #6366f1; }
+              .value { margin-left: 8px; }
+              hr { border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+            </style>
+          </head>
+          <body>
+            <h1>Service Request #${req.id}</h1>
+            <hr>
+            <div class="field"><span class="label">Service:</span> <span class="value">${req.service_slug.replace(/-/g, ' ').toUpperCase()}</span></div>
+            <div class="field"><span class="label">Name:</span> <span class="value">${req.name}</span></div>
+            <div class="field"><span class="label">Email:</span> <span class="value">${req.email}</span></div>
+            <div class="field"><span class="label">Phone:</span> <span class="value">${req.phone || 'N/A'}</span></div>
+            <div class="field"><span class="label">Budget:</span> <span class="value">${req.budget}</span></div>
+            <div class="field"><span class="label">Timeline:</span> <span class="value">${req.timeline}</span></div>
+            <div class="field"><span class="label">Details:</span><br><span class="value">${req.details.replace(/\n/g, '<br>')}</span></div>
+            <div class="field"><span class="label">Submitted:</span> <span class="value">${new Date(req.created_at).toLocaleString()}</span></div>
+            <div class="field"><span class="label">Status:</span> <span class="value">${req.status}</span></div>
+            ${req.files?.length > 0 ? `
+              <div class="field"><span class="label">Files:</span><br>
+                <span class="value">${req.files.map((url: string, i: number) => `<a href="${url}" target="_blank">File ${i + 1}</a>`).join(', ')}</span>
+              </div>
+            ` : ''}
+            <hr>
+            <p style="text-align:center; color:#6b7280; margin-top:40px;">
+              Generated by Vynsera Admin Panel - ${new Date().toLocaleString()}
+            </p>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
     }
   };
 
@@ -228,7 +323,8 @@ export default function AdminClientContent({
             {serviceRequests.map((req) => (
               <div
                 key={req.id}
-                className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
+                onClick={() => setSelectedServiceRequest(req)}
+                className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
@@ -240,28 +336,20 @@ export default function AdminClientContent({
                     </p>
                   </div>
                   <p className="text-sm text-indigo-300">
-                    {new Date(req.created_at).toLocaleString()}
+                    {new Date(req.created_at).toLocaleString()} • Status: {req.status}
                   </p>
                 </div>
 
-                <p className="mt-4 text-indigo-200/80">
-                  <strong>Details:</strong> {req.details}
+                <p className="mt-4 text-indigo-200/80 line-clamp-3">
+                  {req.details}
                 </p>
-                <p className="mt-2 text-indigo-200/80">
-                  <strong>Budget:</strong> {req.budget} • <strong>Timeline:</strong> {req.timeline}
-                </p>
-                {req.files?.length > 0 && (
-                  <p className="mt-2 text-indigo-300">
-                    <strong>Files:</strong> {req.files.join(', ')}
-                  </p>
-                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Modal for Full Submission View + Delete */}
+      {/* Modal for Contact Submission */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -286,7 +374,7 @@ export default function AdminClientContent({
               </button>
 
               <button
-                onClick={() => handleDelete(selectedSubmission.id)}
+                onClick={() => handleDeleteContact(selectedSubmission.id)}
                 disabled={deletingId === selectedSubmission.id}
                 className={`px-6 py-3 rounded-full bg-red-600/70 text-white hover:bg-red-500/70 transition-all ${deletingId === selectedSubmission.id ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
@@ -296,6 +384,127 @@ export default function AdminClientContent({
           </div>
         </div>
       )}
+
+      {/* Modal for Service Request Details */}
+      {selectedServiceRequest && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-indigo-200 mb-6">
+              Service Request #{selectedServiceRequest.id}
+            </h2>
+
+            <div className="space-y-4 text-indigo-300">
+              <p><strong>Service:</strong> {selectedServiceRequest.service_slug.replace(/-/g, ' ').toUpperCase()}</p>
+              <p><strong>Name:</strong> {selectedServiceRequest.name}</p>
+              <p><strong>Email:</strong> {selectedServiceRequest.email}</p>
+              <p><strong>Phone:</strong> {selectedServiceRequest.phone || 'N/A'}</p>
+              <p><strong>Budget:</strong> {selectedServiceRequest.budget}</p>
+              <p><strong>Timeline:</strong> {selectedServiceRequest.timeline}</p>
+              <p><strong>Details:</strong></p>
+              <p className="whitespace-pre-wrap">{selectedServiceRequest.details}</p>
+              <p><strong>Submitted:</strong> {new Date(selectedServiceRequest.created_at).toLocaleString()}</p>
+              <p><strong>Status:</strong> {selectedServiceRequest.status}</p>
+
+              {selectedServiceRequest.files?.length > 0 && (
+                <div>
+                  <p><strong>Files:</strong></p>
+                  <ul className="list-disc list-inside">
+                    {selectedServiceRequest.files.map((url: string, i: number) => (
+                      <li key={i}>
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-200 underline">
+                          File {i + 1}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-4 justify-end">
+              <button
+                onClick={() => setSelectedServiceRequest(null)}
+                className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+              >
+                Close
+              </button>
+
+              <button
+                onClick={() => handleDownloadPDF(selectedServiceRequest)}
+                className="px-6 py-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all"
+              >
+                Download as PDF
+              </button>
+
+              <select
+                value={selectedServiceRequest.status}
+                onChange={(e) => handleUpdateServiceRequest(selectedServiceRequest.id, e.target.value)}
+                disabled={updatingRequestId === selectedServiceRequest.id}
+                className="bg-black/50 border border-indigo-500/50 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-400 min-w-[160px]"
+              >
+                <option value="New">New</option>
+                <option value="Client Contacted">Client Contacted</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Declined">Declined</option>
+              </select>
+
+              <button
+                onClick={() => handleDeleteServiceRequest(selectedServiceRequest.id)}
+                disabled={updatingRequestId === selectedServiceRequest.id}
+                className={`px-6 py-3 rounded-full bg-red-700 text-white hover:bg-red-600 transition-all ${updatingRequestId === selectedServiceRequest.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Delete Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
+
+// Helper function for PDF download (simple print window)
+const handleDownloadPDF = (req: any) => {
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Service Request #${req.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+            h1 { color: #4f46e5; text-align: center; }
+            .field { margin-bottom: 16px; }
+            .label { font-weight: bold; color: #6366f1; }
+            .value { margin-left: 8px; }
+            hr { border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <h1>Service Request #${req.id}</h1>
+          <hr>
+          <div class="field"><span class="label">Service:</span> <span class="value">${req.service_slug.replace(/-/g, ' ').toUpperCase()}</span></div>
+          <div class="field"><span class="label">Name:</span> <span class="value">${req.name}</span></div>
+          <div class="field"><span class="label">Email:</span> <span class="value">${req.email}</span></div>
+          <div class="field"><span class="label">Phone:</span> <span class="value">${req.phone || 'N/A'}</span></div>
+          <div class="field"><span class="label">Budget:</span> <span class="value">${req.budget}</span></div>
+          <div class="field"><span class="label">Timeline:</span> <span class="value">${req.timeline}</span></div>
+          <div class="field"><span class="label">Details:</span><br><span class="value">${req.details.replace(/\n/g, '<br>')}</span></div>
+          <div class="field"><span class="label">Submitted:</span> <span class="value">${new Date(req.created_at).toLocaleString()}</span></div>
+          <div class="field"><span class="label">Status:</span> <span class="value">${req.status}</span></div>
+          ${req.files?.length > 0 ? `
+            <div class="field"><span class="label">Files:</span><br>
+              <span class="value">${req.files.map((url: string, i: number) => `<a href="${url}" target="_blank">File ${i + 1}</a>`).join(', ')}</span>
+            </div>
+          ` : ''}
+          <hr>
+          <p style="text-align:center; color:#6b7280; margin-top:40px;">
+            Generated by Vynsera Admin Panel - ${new Date().toLocaleString()}
+          </p>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+  }
+};

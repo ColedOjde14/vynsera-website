@@ -1,6 +1,9 @@
 // src/app/services/request-confirmation/page.tsx
 import Link from "next/link";
 
+export const revalidate = 0; // Force dynamic, no cache
+export const dynamic = 'force-dynamic';
+
 export default function RequestConfirmation() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white flex items-center justify-center p-6">

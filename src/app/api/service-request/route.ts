@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Handle files
+    // Handle multiple file attachments (optional)
     const files: string[] = [];
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('files') && value instanceof File && value.size > 0) {
@@ -45,13 +45,10 @@ export async function POST(request: Request) {
       VALUES (${serviceSlug}, ${name}, ${email}, ${phone}, ${budget}, ${timeline}, ${details}, ${files}, CURRENT_TIMESTAMP)
     `;
 
-    return NextResponse.redirect(new URL('/services/request-confirmation', request.url));
-  } catch (error: any) {
-    console.error('Service request error details:', {
-      message: error.message,
-      stack: error.stack,
-      cause: error.cause,
-    });
-    return NextResponse.json({ error: error.message || 'Failed to submit request' }, { status: 500 });
+    // Return JSON success - client will redirect
+    return NextResponse.json({ success: true, message: 'Request submitted!' });
+  } catch (error) {
+    console.error('Service request error:', error);
+    return NextResponse.json({ error: 'Failed to submit request' }, { status: 500 });
   }
 }
