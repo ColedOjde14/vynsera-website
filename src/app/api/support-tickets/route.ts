@@ -11,26 +11,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let formData: FormData;
-
-  try {
-    formData = await request.formData();
-  } catch (error) {
-    // Fallback if not FormData (plain JSON)
-    const body = await request.json();
-    formData = new FormData();
-    formData.append('subject', body.subject || '');
-    formData.append('description', body.description || '');
-    formData.append('priority', body.priority || 'Medium');
-  }
+  const formData = await request.formData();
 
   const subject = formData.get('subject') as string;
   const description = formData.get('description') as string;
-  const priority = formData.get('priority') as string || 'Medium';
+  const priority = formData.get('priority') as string || 'Medium'; // Default to Medium for clients
   const attachment = formData.get('attachment') as File | null;
 
   if (!subject || !description) {
-    return NextResponse.json({ error: 'Missing subject or description' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   let attachmentUrl = null;
@@ -55,21 +44,14 @@ export async function POST(request: Request) {
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    const [ticket] = await sql`
-      INSERT INTO support_tickets (user_id, subject, description, priority, attachment_url)
-      VALUES (${user.id}, ${subject}, ${description}, ${priority}, ${attachmentUrl})
-      RETURNING id
-    `;
-
-    // Add initial message
     await sql`
-      INSERT INTO ticket_messages (ticket_id, user_id, message, attachment_url)
-      VALUES (${ticket.id}, ${user.id}, ${description}, ${attachmentUrl})
+      INSERT INTO support_tickets (user_id, subject, description, priority, status, attachment_url, created_at)
+      VALUES (${user.id}, ${subject}, ${description}, ${priority}, 'Open', ${attachmentUrl}, CURRENT_TIMESTAMP)
     `;
 
-    return NextResponse.json({ success: true, ticketId: ticket.id, message: 'Ticket submitted successfully!' });
+    return NextResponse.json({ success: true, message: 'Ticket created!' });
   } catch (error) {
     console.error('Ticket insert error:', error);
-    return NextResponse.json({ error: 'Failed to submit ticket' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
   }
 }
