@@ -1,4 +1,6 @@
 // src/middleware.ts
+export const runtime = 'nodejs'; // ← This forces Vercel to use Node.js instead of Edge - fixes the 500 crash
+
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
@@ -7,7 +9,6 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  // Protect only the routes we actually want
   if (isProtectedRoute(req)) {
     auth.protect();
   }
@@ -15,7 +16,6 @@ export default clerkMiddleware((auth, req) => {
 
 export const config = {
   matcher: [
-    // Everything except static files, images, favicon, etc.
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
     '/(api|trpc)(.*)',
   ],
