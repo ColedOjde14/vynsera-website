@@ -5,24 +5,26 @@ const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
 ]);
 
-// Explicitly public routes — Clerk auth + static + API
+// Explicitly public Clerk routes (required for sign-in/up to work)
 const isPublicRoute = createRouteMatcher([
-  '/',                        // Home page
+  '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/sso-callback(.*)',
-  '/forgot-password(.*)',     // Optional: if you use password reset
-  '/reset-password(.*)',      // Optional: if you use password reset
-  '/api(.*)',                 // All API routes (contact, tickets, service-request, etc.)
-  '/_next(.*)',               // Next.js internals
-  '/static(.*)',              // Static assets
+  '/forgot-password(.*)',
+  '/reset-password(.*)',
+  '/api(.*)',
+  '/_next(.*)',
+  '/static(.*)',
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
+  // Await auth() first
+  const { protect } = await auth();
+
   // Only protect specific routes
   if (isProtectedRoute(req)) {
-    // Optional: redirect unauthenticated users to sign-in with original URL preserved
-    auth().protect({
+    protect({
       redirectUrl: `/sign-in?redirect_url=${encodeURIComponent(req.url)}`,
     });
   }
@@ -31,7 +33,6 @@ export default clerkMiddleware((auth, req) => {
 
 export const config = {
   matcher: [
-    // Run middleware on almost everything
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
     '/(api|trpc)(.*)',
   ],
