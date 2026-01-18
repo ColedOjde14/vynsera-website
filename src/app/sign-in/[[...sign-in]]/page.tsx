@@ -10,18 +10,24 @@ export default function SignInPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoaded) return; // Wait for Clerk to load
+    // Wait for Clerk to fully load
+    if (!isLoaded) return;
 
+    // If signed in and user data is available
     if (isSignedIn && user) {
       const role = user.publicMetadata.role as string | undefined;
       const isAdminOrSupport = role === 'admin' || role === 'support';
 
       // Redirect based on role
-      router.replace(isAdminOrSupport ? '/admin' : '/portal');
+      if (isAdminOrSupport) {
+        router.replace('/admin');
+      } else {
+        router.replace('/portal');
+      }
     }
   }, [isLoaded, isSignedIn, user, router]);
 
-  // Show loading while Clerk is checking auth
+  // Show loading state while Clerk checks auth
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950">
@@ -64,7 +70,8 @@ export default function SignInPage() {
           routing="path"
           path="/sign-in"
           signUpUrl="/sign-up"
-          afterSignInUrl="/portal"  // Fallback - client-side logic overrides this
+          // Fallback redirect (client-side logic overrides this)
+          afterSignInUrl="/portal"
           afterSignUpUrl="/portal"
         />
       </div>
