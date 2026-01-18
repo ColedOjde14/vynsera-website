@@ -77,7 +77,7 @@ export default function Home() {
                 href="/services"
                 className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-500 hover:to-indigo-500 transition-all shadow-lg text-lg font-medium"
               >
-                Coming Soon - Services
+                Services
               </Link>
             </div>
           </div>
