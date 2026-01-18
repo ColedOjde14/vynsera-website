@@ -1,3 +1,4 @@
+// src/middleware.ts
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
@@ -5,7 +6,7 @@ const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
 ]);
 
-// Explicitly public Clerk routes (required for sign-in/up to work)
+// Explicitly public Clerk routes (prevents 404 on sign-in/up/sso)
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
@@ -19,16 +20,18 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Await auth() first
-  const { protect } = await auth();
+  // Await the auth object
+  const authObject = await auth();
 
   // Only protect specific routes
   if (isProtectedRoute(req)) {
-    protect({
+    // Use the protect method on the resolved auth object
+    authObject.protect({
       redirectUrl: `/sign-in?redirect_url=${encodeURIComponent(req.url)}`,
     });
   }
-  // All other routes (including public Clerk ones) are allowed without auth
+
+  // Public routes (including Clerk auth) are allowed without protection
 });
 
 export const config = {
