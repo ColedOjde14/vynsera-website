@@ -5,6 +5,8 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";  // ← This import fixes the VS Code flag
 
 interface ClientPortalProps {
   displayName: string;
@@ -32,7 +34,7 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
     try {
       const response = await fetch('/api/support-tickets', {
         method: 'POST',
-        body: formData, // Send as FormData - matches API route
+        body: formData,
       });
 
       const data = await response.json();
@@ -56,7 +58,31 @@ export default function ClientPortalContent({ displayName, userId }: ClientPorta
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white">
-      {/* Header - Single, from page level */}
+      {/* Header with Return to Homepage */}
+      <header className="bg-black/40 backdrop-blur-md border-b border-indigo-500/20 p-6 sm:p-8 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              Welcome, {displayName}!
+            </h1>
+            <p className="mt-2 text-indigo-300 text-lg">
+              Your Vynsera Client Portal
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all duration-300 text-lg font-medium"
+            >
+              Return to Homepage
+            </Link>
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Dashboard Content */}
       <main className="max-w-7xl mx-auto p-6 sm:p-8 pb-24 lg:pb-8">
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
