@@ -1,4 +1,6 @@
 // src/middleware.ts
+export const runtime = 'nodejs'; // ← This fixes the crash (forces Node.js instead of Edge)
+
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
