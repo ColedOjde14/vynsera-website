@@ -35,7 +35,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/sign-in"
+              href="https://accounts.vynseracorp.com/sign-in"
               className="px-12 py-6 rounded-full border-2 border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 transition-all duration-300 text-xl font-medium backdrop-blur-sm"
             >
               Client Login
