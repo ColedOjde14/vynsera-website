@@ -1,5 +1,5 @@
 // src/middleware.ts
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher, auth } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/portal(.*)',
@@ -20,13 +20,10 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Await the auth object
-  const authObject = await auth();
-
   // Only protect specific routes
   if (isProtectedRoute(req)) {
-    // Use the protect method on the resolved auth object
-    authObject.protect({
+    // Use top-level protect() - no destructuring or await on auth()
+    auth.protect({
       redirectUrl: `/sign-in?redirect_url=${encodeURIComponent(req.url)}`,
     });
   }
