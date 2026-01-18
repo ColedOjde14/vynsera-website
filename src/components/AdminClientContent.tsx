@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { UserButton } from "@clerk/nextjs";
+import toast from 'react-hot-toast';  // ← This fixes the "toast is not defined" error
 
 interface AdminClientProps {
   displayName: string;
@@ -340,8 +341,8 @@ export default function AdminClientContent({
                   </p>
                 </div>
 
-                <p className="mt-4 text-indigo-200/80 line-clamp-3">
-                  {req.details}
+                <p className="mt-4 text-indigo-200/80">
+                  <strong>Details:</strong> {req.details}
                 </p>
               </div>
             ))}
