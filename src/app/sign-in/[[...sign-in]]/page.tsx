@@ -1,16 +1,33 @@
 // src/app/sign-in/[[...sign-in]]/page.tsx
-import { SignIn } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+'use client';
 
-export default async function SignInPage() {
-  const user = await currentUser();
+import { SignIn, useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-  // If already logged in, redirect based on role
-  if (user) {
-    const role = user.publicMetadata.role as string | undefined;
-    const isAdminOrSupport = role === "admin" || role === "support";
-    redirect(isAdminOrSupport ? "/admin" : "/portal");
+export default function SignInPage() {
+  const { isLoaded, isSignedIn, user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoaded) return; // Wait for Clerk to load
+
+    if (isSignedIn && user) {
+      const role = user.publicMetadata.role as string | undefined;
+      const isAdminOrSupport = role === 'admin' || role === 'support';
+
+      // Redirect based on role
+      router.replace(isAdminOrSupport ? '/admin' : '/portal');
+    }
+  }, [isLoaded, isSignedIn, user, router]);
+
+  // Show loading while Clerk is checking auth
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950">
+        <p className="text-xl text-indigo-300">Loading...</p>
+      </div>
+    );
   }
 
   return (
@@ -47,7 +64,7 @@ export default async function SignInPage() {
           routing="path"
           path="/sign-in"
           signUpUrl="/sign-up"
-          afterSignInUrl="/portal"  // Fallback - actual redirect happens in code above
+          afterSignInUrl="/portal"  // Fallback - client-side logic overrides this
           afterSignUpUrl="/portal"
         />
       </div>
