@@ -51,17 +51,28 @@ export default function AdminClientContent({
         });
         const data = await response.json();
 
-        console.log('API Response for clients:', data); // Debug: Check what comes back
+        console.log('Raw API Response:', data); // Debug: full object
 
         if (response.ok) {
-          // Safe access - Clerk v5+ returns { data: [...] }
-          const fetchedUsers = data.data || data.users || [];
-          console.log('Extracted users array:', fetchedUsers); // Debug: confirm it's an array
+          // Clerk v5+ returns { data: [...], totalCount: N }
+          let fetchedUsers = [];
+
+          if (Array.isArray(data.data)) {
+            fetchedUsers = data.data;
+          } else if (Array.isArray(data.users)) {
+            fetchedUsers = data.users;
+          } else if (Array.isArray(data)) {
+            fetchedUsers = data;
+          }
+
+          console.log('Extracted users array (length):', fetchedUsers.length);
+          console.log('First user example:', fetchedUsers[0]);
+
           setClients(fetchedUsers);
         } else {
           console.error('API error response:', data);
           toast.error(data.error || 'Failed to load clients');
-          setClients([]); // fallback empty array
+          setClients([]); // fallback
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -443,8 +454,10 @@ export default function AdminClientContent({
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Client Management</h2>
           {loadingClients ? (
             <p className="text-indigo-300 text-center py-12">Loading clients...</p>
-          ) : clients.length === 0 ? (
-            <p className="text-indigo-300 text-center py-12">No clients yet</p>
+          ) : !Array.isArray(clients) || clients.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">
+              {Array.isArray(clients) ? 'No clients yet' : 'Error loading clients - check console'}
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-indigo-500/20">
@@ -458,8 +471,8 @@ export default function AdminClientContent({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-indigo-500/20">
-                  {clients.map((client) => (
-                    <tr key={client.id} className="hover:bg-black/30 transition-colors">
+                  {clients.map((client, index) => (
+                    <tr key={client.id || index} className="hover:bg-black/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
                         {client.firstName || 'N/A'} {client.lastName || ''}
                       </td>
@@ -632,7 +645,7 @@ export default function AdminClientContent({
       )}
     </main>
   );
-};
+}
 
 // Helper function for PDF download (simple print window)
 const handleDownloadPDF = (req: any) => {
