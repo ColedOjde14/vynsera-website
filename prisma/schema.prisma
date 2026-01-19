@@ -1,14 +1,13 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // url line is NOT allowed here in Prisma 7+
+  // No url line - Prisma 7+ handles in code
 }
 
+// Clerk users
 model User {
   id        String   @id // Clerk user ID
   email     String?  @unique
@@ -21,11 +20,72 @@ model User {
 
   serviceAssignments ServiceAssignment[]
   workOrders         WorkOrder[]
-  serviceRequests    ServiceRequest[] // optional relation
+  serviceRequests    ServiceRequest[]
+  supportTickets     SupportTicket[]
+  ticketMessages     TicketMessage[]
 
   @@map("users")
 }
 
+// Service Request (from your old forms)
+model ServiceRequest {
+  id          Int      @id @default(autoincrement())
+  userId      String?
+  serviceSlug String
+  name        String
+  email       String
+  phone       String?
+  budget      String?
+  timeline    String?
+  details     String?
+  files       String[]
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([serviceSlug])
+  @@index([status])
+  @@map("service_requests")
+}
+
+// Support Tickets (from your portal)
+model SupportTicket {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  subject     String
+  description String
+  priority    String   @default("medium")
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  messages    TicketMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+// Ticket Messages (replies to tickets)
+model TicketMessage {
+  id          Int      @id @default(autoincrement())
+  ticketId    Int
+  userId      String
+  message     String
+  createdAt   DateTime @default(now())
+
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@index([userId])
+  @@map("ticket_messages")
+}
+
+// New: Service Assignment (admin assigns to client)
 model ServiceAssignment {
   id           Int      @id @default(autoincrement())
   userId       String
@@ -40,6 +100,7 @@ model ServiceAssignment {
   @@map("service_assignments")
 }
 
+// New: Work Order (admin creates for client)
 model WorkOrder {
   id          Int      @id @default(autoincrement())
   userId      String
@@ -56,26 +117,4 @@ model WorkOrder {
   @@index([userId])
   @@index([status])
   @@map("work_orders")
-}
-
-model ServiceRequest {
-  id          Int      @id @default(autoincrement())
-  userId      String?
-  serviceSlug String
-  name        String
-  email       String
-  phone       String?
-  budget      String?
-  timeline    String?
-  details     String?
-  files       String[] // array of file URLs
-  status      String   @default("new")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User?    @relation(fields: [userId], references: [id])
-
-  @@index([serviceSlug])
-  @@index([status])
-  @@map("service_requests")
 }
