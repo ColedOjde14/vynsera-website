@@ -51,20 +51,11 @@ export default function AdminClientContent({
         });
         const data = await response.json();
 
-        console.log('Raw API Response:', data); // Debug: full object
+        console.log('Raw API Response:', data); // Debug
 
         if (response.ok) {
-          // Clerk v5+ returns { data: [...], totalCount: N }
-          let fetchedUsers = [];
-
-          if (Array.isArray(data.data)) {
-            fetchedUsers = data.data;
-          } else if (Array.isArray(data.users)) {
-            fetchedUsers = data.users;
-          } else if (Array.isArray(data)) {
-            fetchedUsers = data;
-          }
-
+          // Correct extraction for this exact response shape: { users: { data: [...], totalCount: N } }
+          const fetchedUsers = data.users?.data || data.data || data.users || [];
           console.log('Extracted users array (length):', fetchedUsers.length);
           console.log('First user example:', fetchedUsers[0]);
 
@@ -72,12 +63,12 @@ export default function AdminClientContent({
         } else {
           console.error('API error response:', data);
           toast.error(data.error || 'Failed to load clients');
-          setClients([]); // fallback
+          setClients([]);
         }
       } catch (err) {
         console.error('Fetch error:', err);
         toast.error('Network error loading clients');
-        setClients([]); // fallback
+        setClients([]);
       } finally {
         setLoadingClients(false);
       }
@@ -645,7 +636,7 @@ export default function AdminClientContent({
       )}
     </main>
   );
-}
+};
 
 // Helper function for PDF download (simple print window)
 const handleDownloadPDF = (req: any) => {
