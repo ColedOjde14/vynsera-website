@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";  // ← This import fixes the VS Code flag
+import { UserButton } from "@clerk/nextjs";
 
 interface ClientPortalProps {
   displayName: string;
