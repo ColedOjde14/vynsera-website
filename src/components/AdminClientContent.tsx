@@ -157,6 +157,16 @@ export default function AdminClientContent({
 
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
+      {/* Return to Homepage Button - Top of Dashboard */}
+      <div className="mb-8 flex justify-start">
+        <Link
+          href="/"
+          className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all duration-300 text-lg font-medium"
+        >
+          Return to Homepage
+        </Link>
+      </div>
+
       {/* Overview Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
