@@ -1,10 +1,12 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // No url line - Prisma 7+ handles it in code
+  // url line is NOT allowed here in Prisma 7+
 }
 
 model User {
@@ -19,7 +21,7 @@ model User {
 
   serviceAssignments ServiceAssignment[]
   workOrders         WorkOrder[]
-  serviceRequests    ServiceRequest[] // optional relation if you want
+  serviceRequests    ServiceRequest[] // optional relation
 
   @@map("users")
 }
@@ -58,6 +60,7 @@ model WorkOrder {
 
 model ServiceRequest {
   id          Int      @id @default(autoincrement())
+  userId      String?
   serviceSlug String
   name        String
   email       String
@@ -71,7 +74,6 @@ model ServiceRequest {
   updatedAt   DateTime @updatedAt
 
   user        User?    @relation(fields: [userId], references: [id])
-  userId      String?
 
   @@index([serviceSlug])
   @@index([status])
