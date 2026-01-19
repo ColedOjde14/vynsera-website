@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    turbopack: false, // Correct key to disable Turbopack
+    turbo: false, // Correct key to disable Turbopack (Next.js 16+)
   },
 };
 

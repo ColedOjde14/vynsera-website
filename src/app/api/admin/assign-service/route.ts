@@ -1,4 +1,3 @@
-// src/app/api/admin/assign-service/route.ts
 export const runtime = 'nodejs';
 
 import { currentUser } from '@clerk/nextjs/server';

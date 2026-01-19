@@ -1,8 +1,7 @@
 // src/app/api/admin/clients/route.ts
 export const runtime = 'nodejs';
 
-import { currentUser } from '@clerk/nextjs/server';
-import prisma from '@/lib/prisma';
+import { currentUser, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -18,23 +17,17 @@ export async function GET() {
   }
 
   try {
-    const usersList = await prisma.user.findMany({
-      take: 100,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
+    // v4 syntax: call clerkClient() to get the client
+    const client = await clerkClient();
+    const usersList = await client.users.getUserList({
+      limit: 100,
     });
 
     return NextResponse.json({ users: usersList }, { status: 200 });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
-      { users: [], error: 'Failed to fetch clients' },
+      { error: 'Failed to fetch clients' },
       { status: 500 }
     );
   }
