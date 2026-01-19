@@ -1,32 +1,23 @@
 // src/app/api/admin/clients/route.ts
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { currentUser, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// Extend the type for publicMetadata to include role
-interface ExtendedSessionClaims {
-  publicMetadata?: {
-    role?: string;
-  };
-}
-
 export async function GET() {
-  const authData = await auth();
-  const { userId, sessionClaims } = authData;
+  const user = await currentUser();
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Safe access with type assertion + fallback
-  const claims = sessionClaims as ExtendedSessionClaims | null;
-  const role = claims?.publicMetadata?.role;
-
+  const role = user.publicMetadata.role as string | undefined;
   if (role !== 'admin' && role !== 'support') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    const { data: users } = await clerkClient.users.getUserList({
+    // v4 syntax: call clerkClient() to get the client
+    const client = await clerkClient();
+    const users = await client.users.getUserList({
       limit: 100,
     });
 
