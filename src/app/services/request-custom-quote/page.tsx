@@ -20,7 +20,7 @@ export default function RequestCustomQuote() {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('serviceSlug', 'custom-quote'); // Identifies this as custom quote request
+    formData.append('serviceSlug', 'custom-quote');
     formData.append('name', name);
     formData.append('email', email);
     formData.append('phone', phone);
