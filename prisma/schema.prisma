@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // No url line - Prisma 7+ handles it in code
+}
+
+model User {
+  id        String   @id // Clerk user ID
+  email     String?  @unique
+  firstName String?
+  lastName  String?
+  role      String?  // "admin", "support", "client"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceAssignments ServiceAssignment[]
+  workOrders         WorkOrder[]
+  serviceRequests    ServiceRequest[] // optional relation if you want
+
+  @@map("users")
+}
+
+model ServiceAssignment {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  serviceSlug  String
+  assignedAt   DateTime @default(now())
+  status       String   @default("assigned")
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, serviceSlug])
+  @@index([userId])
+  @@map("service_assignments")
+}
+
+model WorkOrder {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  title       String
+  description String?
+  serviceSlug String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  dueDate     DateTime?
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("work_orders")
+}
+
+model ServiceRequest {
+  id          Int      @id @default(autoincrement())
+  serviceSlug String
+  name        String
+  email       String
+  phone       String?
+  budget      String?
+  timeline    String?
+  details     String?
+  files       String[] // array of file URLs
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@index([serviceSlug])
+  @@index([status])
+  @@map("service_requests")
+}

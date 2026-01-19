@@ -39,6 +39,11 @@ export default function AdminClientContent({
   const [loadingClients, setLoadingClients] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
+  // New states for assign service modal
+  const [selectedUserForAssignment, setSelectedUserForAssignment] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string>('');
+  const [assigning, setAssigning] = useState(false);
+
   // New tab state
   const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients'>('overview');
 
@@ -51,10 +56,9 @@ export default function AdminClientContent({
         });
         const data = await response.json();
 
-        console.log('Raw API Response:', data); // Debug
+        console.log('Raw API Response for clients:', data);
 
         if (response.ok) {
-          // Correct extraction for this exact response shape: { users: { data: [...], totalCount: N } }
           const fetchedUsers = data.users?.data || data.data || data.users || [];
           console.log('Extracted users array (length):', fetchedUsers.length);
           console.log('First user example:', fetchedUsers[0]);
@@ -478,8 +482,20 @@ export default function AdminClientContent({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
+                          onClick={() => setSelectedUserForAssignment(client.id)}
+                          className="text-indigo-400 hover:text-indigo-200 mr-4"
+                        >
+                          Assign Service
+                        </button>
+                        <button
                           onClick={() => setSelectedClient(client)}
                           className="text-indigo-400 hover:text-indigo-200"
+                        >
+                          Create Work Order
+                        </button>
+                        <button
+                          onClick={() => setSelectedClient(client)}
+                          className="text-indigo-400 hover:text-indigo-200 ml-4"
                         >
                           View Details
                         </button>
@@ -634,9 +650,96 @@ export default function AdminClientContent({
           </div>
         </div>
       )}
+
+      {/* Assign Service Modal */}
+      {selectedUserForAssignment && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full">
+            <h2 className="text-2xl font-bold text-indigo-200 mb-6">
+              Assign Service to Client
+            </h2>
+
+            <select
+              value={selectedService}
+              onChange={(e) => setSelectedService(e.target.value)}
+              className="w-full bg-black/50 border border-indigo-500/50 rounded-lg p-4 text-white mb-6"
+            >
+              <option value="">Select Service</option>
+              <option value="branding">Branding & Identity</option>
+              <option value="website">Website Development</option>
+              <option value="marketing">Digital Marketing & SEO</option>
+              <option value="custom-quote">Custom Quote</option>
+            </select>
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setSelectedUserForAssignment(null)}
+                className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setAssigning(true);
+                  try {
+                    const res = await fetch('/api/admin/assign-service', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId: selectedUserForAssignment,
+                        serviceSlug: selectedService,
+                      }),
+                    });
+                    const result = await res.json();
+                    if (res.ok) {
+                      toast.success(result.message || 'Service assigned!');
+                      setSelectedUserForAssignment(null);
+                      setSelectedService('');
+                    } else {
+                      toast.error(result.error || 'Failed to assign');
+                    }
+                  } catch (err) {
+                    toast.error('Error');
+                  } finally {
+                    setAssigning(false);
+                  }
+                }}
+                disabled={assigning || !selectedService}
+                className="px-6 py-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {assigning ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Work Order Modal (basic placeholder - expand as needed) */}
+      {selectedClient && !selectedUserForAssignment && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full">
+            <h2 className="text-2xl font-bold text-indigo-200 mb-6">
+              Create Work Order for {selectedClient.firstName || 'Client'}
+            </h2>
+
+            {/* TODO: Add full form fields - title, description, serviceSlug, dueDate */}
+            {/* Submit to /api/admin/create-work-order with userId: selectedClient.id */}
+
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                onClick={() => setSelectedClient(null)}
+                className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10"
+              >
+                Cancel
+              </button>
+              {/* Add submit button logic */}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
-};
+}
 
 // Helper function for PDF download (simple print window)
 const handleDownloadPDF = (req: any) => {
