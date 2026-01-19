@@ -51,18 +51,22 @@ export default function AdminClientContent({
         });
         const data = await response.json();
 
-        console.log('API Response for clients:', data); // ← Debug: Check what comes back
+        console.log('API Response for clients:', data); // Debug: Check what comes back
 
         if (response.ok) {
-          // Safe access - Clerk returns { users: [...] } or { data: [...] }
-          const fetchedUsers = data.users || data.data || [];
+          // Safe access - Clerk v5+ returns { data: [...] }
+          const fetchedUsers = data.data || data.users || [];
+          console.log('Extracted users array:', fetchedUsers); // Debug: confirm it's an array
           setClients(fetchedUsers);
         } else {
+          console.error('API error response:', data);
           toast.error(data.error || 'Failed to load clients');
+          setClients([]); // fallback empty array
         }
       } catch (err) {
+        console.error('Fetch error:', err);
         toast.error('Network error loading clients');
-        console.error(err);
+        setClients([]); // fallback
       } finally {
         setLoadingClients(false);
       }
