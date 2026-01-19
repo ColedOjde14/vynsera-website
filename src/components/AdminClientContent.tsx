@@ -50,8 +50,13 @@ export default function AdminClientContent({
           headers: { 'Content-Type': 'application/json' },
         });
         const data = await response.json();
+
+        console.log('API Response for clients:', data); // ← Debug: Check what comes back
+
         if (response.ok) {
-          setClients(data.users || []);
+          // Safe access - Clerk returns { users: [...] } or { data: [...] }
+          const fetchedUsers = data.users || data.data || [];
+          setClients(fetchedUsers);
         } else {
           toast.error(data.error || 'Failed to load clients');
         }
@@ -434,7 +439,7 @@ export default function AdminClientContent({
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Client Management</h2>
           {loadingClients ? (
             <p className="text-indigo-300 text-center py-12">Loading clients...</p>
-          ) : Array.isArray(clients) && clients.length === 0 ? (
+          ) : clients.length === 0 ? (
             <p className="text-indigo-300 text-center py-12">No clients yet</p>
           ) : (
             <div className="overflow-x-auto">
@@ -449,7 +454,7 @@ export default function AdminClientContent({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-indigo-500/20">
-                  {Array.isArray(clients) && clients.map((client) => (
+                  {clients.map((client) => (
                     <tr key={client.id} className="hover:bg-black/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
                         {client.firstName || 'N/A'} {client.lastName || ''}
@@ -600,7 +605,7 @@ export default function AdminClientContent({
 
             <div className="space-y-4 text-indigo-300">
               <p><strong>ID:</strong> {selectedClient.id}</p>
-              <p><strong>Full Name:</strong> {selectedClient.firstName} {selectedClient.lastName}</p>
+              <p><strong>Full Name:</strong> {selectedClient.firstName || 'N/A'} {selectedClient.lastName || ''}</p>
               <p><strong>Email:</strong> {selectedClient.emailAddresses?.[0]?.emailAddress || 'N/A'}</p>
               <p><strong>Phone:</strong> {selectedClient.phoneNumbers?.[0]?.phoneNumber || 'N/A'}</p>
               <p><strong>Role:</strong> {selectedClient.publicMetadata?.role || 'Client'}</p>
@@ -623,7 +628,7 @@ export default function AdminClientContent({
       )}
     </main>
   );
-}
+};
 
 // Helper function for PDF download (simple print window)
 const handleDownloadPDF = (req: any) => {
