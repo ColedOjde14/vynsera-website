@@ -2,15 +2,24 @@
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+// Extend the type for publicMetadata to include role
+interface ExtendedSessionClaims {
+  publicMetadata?: {
+    role?: string;
+  };
+}
+
 export async function GET() {
-  const authData = await auth();  // ← Await here - this is the key fix
+  const authData = await auth();
   const { userId, sessionClaims } = authData;
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const role = sessionClaims?.publicMetadata?.role as string | undefined;
+  // Safe access with type assertion + fallback
+  const claims = sessionClaims as ExtendedSessionClaims | null;
+  const role = claims?.publicMetadata?.role as string | undefined;
 
   if (role !== 'admin' && role !== 'support') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
