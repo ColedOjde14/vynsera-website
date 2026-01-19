@@ -9,23 +9,24 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const role = user.publicMetadata.role as string | undefined;
+  // Safe type assertion for publicMetadata.role
+  const role = user.publicMetadata?.role as string | undefined;
+
   if (role !== 'admin' && role !== 'support') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    // v4 syntax: call clerkClient() to get the client
-    const client = await clerkClient();
-    const users = await client.users.getUserList({
-      limit: 100,
+    // Correct v5+ syntax: clerkClient is the object - no () call
+    const { data: users } = await clerkClient.users.getUserList({
+      limit: 100, // increase if you have more users
     });
 
     return NextResponse.json({ users }, { status: 200 });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch clients' },
+      { users: [], error: 'Failed to fetch clients' }, // fallback array to prevent client .map crash
       { status: 500 }
     );
   }

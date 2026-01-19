@@ -51,7 +51,7 @@ export default function AdminClientContent({
         });
         const data = await response.json();
         if (response.ok) {
-          setClients(data.users);
+          setClients(data.users || []);
         } else {
           toast.error(data.error || 'Failed to load clients');
         }
@@ -434,7 +434,7 @@ export default function AdminClientContent({
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Client Management</h2>
           {loadingClients ? (
             <p className="text-indigo-300 text-center py-12">Loading clients...</p>
-          ) : clients.length === 0 ? (
+          ) : Array.isArray(clients) && clients.length === 0 ? (
             <p className="text-indigo-300 text-center py-12">No clients yet</p>
           ) : (
             <div className="overflow-x-auto">
@@ -449,16 +449,16 @@ export default function AdminClientContent({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-indigo-500/20">
-                  {clients.map((client) => (
+                  {Array.isArray(clients) && clients.map((client) => (
                     <tr key={client.id} className="hover:bg-black/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
-                        {client.firstName} {client.lastName}
+                        {client.firstName || 'N/A'} {client.lastName || ''}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
-                        {client.emailAddresses[0]?.emailAddress}
+                        {client.emailAddresses?.[0]?.emailAddress || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
-                        {client.publicMetadata.role || 'Client'}
+                        {client.publicMetadata?.role || 'Client'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
                         {new Date(client.createdAt).toLocaleDateString()}
@@ -601,9 +601,9 @@ export default function AdminClientContent({
             <div className="space-y-4 text-indigo-300">
               <p><strong>ID:</strong> {selectedClient.id}</p>
               <p><strong>Full Name:</strong> {selectedClient.firstName} {selectedClient.lastName}</p>
-              <p><strong>Email:</strong> {selectedClient.emailAddresses[0]?.emailAddress}</p>
-              <p><strong>Phone:</strong> {selectedClient.phoneNumbers[0]?.phoneNumber || 'N/A'}</p>
-              <p><strong>Role:</strong> {selectedClient.publicMetadata.role || 'Client'}</p>
+              <p><strong>Email:</strong> {selectedClient.emailAddresses?.[0]?.emailAddress || 'N/A'}</p>
+              <p><strong>Phone:</strong> {selectedClient.phoneNumbers?.[0]?.phoneNumber || 'N/A'}</p>
+              <p><strong>Role:</strong> {selectedClient.publicMetadata?.role || 'Client'}</p>
               <p><strong>Joined:</strong> {new Date(selectedClient.createdAt).toLocaleString()}</p>
               <p><strong>Last Active:</strong> {new Date(selectedClient.lastSignInAt).toLocaleString()}</p>
               <p><strong>Public Metadata:</strong> <pre className="bg-black/50 p-2 rounded">{JSON.stringify(selectedClient.publicMetadata, null, 2)}</pre></p>
