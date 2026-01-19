@@ -1,5 +1,7 @@
 // src/app/api/contact/route.ts
-import { neon } from '@neondatabase/serverless';
+export const runtime = 'nodejs';
+
+import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -12,12 +14,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const sql = neon(process.env.DATABASE_URL!);
-
-    await sql`
-      INSERT INTO contact_submissions (name, email, message, created_at)
-      VALUES (${name}, ${email}, ${message}, CURRENT_TIMESTAMP)
-    `;
+    await prisma.contactSubmission.create({
+      data: {
+        name,
+        email,
+        message,
+      },
+    });
 
     return NextResponse.json({ success: true, message: 'Message sent!' });
   } catch (error) {
@@ -35,12 +38,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 });
     }
 
-    const sql = neon(process.env.DATABASE_URL!);
-
-    await sql`
-      DELETE FROM contact_submissions
-      WHERE id = ${id}
-    `;
+    await prisma.contactSubmission.delete({
+      where: { id: parseInt(id) },
+    });
 
     return NextResponse.json({ success: true, message: 'Submission deleted!' });
   } catch (error) {

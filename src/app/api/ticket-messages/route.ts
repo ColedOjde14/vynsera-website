@@ -1,8 +1,10 @@
 // src/app/api/ticket-messages/route.ts
-import { neon } from '@neondatabase/serverless';
+export const runtime = 'nodejs';
+
 import { currentUser } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import { put } from '@vercel/blob';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const user = await currentUser();
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      const blob = await put(`tickets/${user.id}/${ticketId}/${Date.now()}-${attachment.name}`, attachment, {
+      const blob = await put(`tickets/${user.id}/${Date.now()}-${attachment.name}`, attachment, {
         access: 'public',
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
@@ -47,32 +49,35 @@ export async function POST(request: Request) {
     }
   }
 
-  const sql = neon(process.env.DATABASE_URL!);
-
   try {
     // Verify ticket exists and user has access
-    const [ticket] = await sql`
-      SELECT id FROM support_tickets
-      WHERE id = ${parsedTicketId}
-      ${!isAdminOrSupport ? sql`AND user_id = ${user.id}` : sql``}
-    `;
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id: parsedTicketId },
+    });
 
     if (!ticket) {
-      return NextResponse.json({ error: 'Ticket not found or unauthorized' }, { status: 403 });
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
-    // Insert new message
-    await sql`
-      INSERT INTO ticket_messages (ticket_id, user_id, message, attachment_url)
-      VALUES (${parsedTicketId}, ${user.id}, ${message}, ${attachmentUrl})
-    `;
+    if (!isAdminOrSupport && ticket.userId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Insert new message with attachmentUrl
+    await prisma.ticketMessage.create({
+      data: {
+        ticketId: parsedTicketId,
+        userId: user.id,
+        message,
+        attachmentUrl, // Now matches the schema field
+      },
+    });
 
     // Update ticket timestamp
-    await sql`
-      UPDATE support_tickets
-      SET updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${parsedTicketId}
-    `;
+    await prisma.supportTicket.update({
+      where: { id: parsedTicketId },
+      data: { updatedAt: new Date() },
+    });
 
     return NextResponse.json({ success: true, message: 'Reply sent!' });
   } catch (error) {

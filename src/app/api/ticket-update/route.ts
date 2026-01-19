@@ -1,6 +1,8 @@
 // src/app/api/ticket-update/route.ts
-import { neon } from '@neondatabase/serverless';
+export const runtime = 'nodejs';
+
 import { currentUser } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -24,36 +26,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing ticket ID' }, { status: 400 });
   }
 
-  const sql = neon(process.env.DATABASE_URL!);
-
   try {
-    let updatedTicket;
-
-    if (status) {
-      [updatedTicket] = await sql`
-        UPDATE support_tickets
-        SET status = ${status}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${ticketId}
-        RETURNING *
-      `;
-    }
-
-    if (priority) {
-      [updatedTicket] = await sql`
-        UPDATE support_tickets
-        SET priority = ${priority}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${ticketId}
-        RETURNING *
-      `;
-    }
-
-    if (!updatedTicket) {
-      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
-    }
-
-    if (!updatedTicket) {
-      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
-    }
+    const updatedTicket = await prisma.supportTicket.update({
+      where: { id: ticketId },
+      data: {
+        ...(status && { status }),
+        ...(priority && { priority }),
+        updatedAt: new Date(),
+      },
+    });
 
     return NextResponse.json({ success: true, ticket: updatedTicket });
   } catch (error) {
@@ -83,13 +64,10 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Missing ticket ID' }, { status: 400 });
   }
 
-  const sql = neon(process.env.DATABASE_URL!);
-
   try {
-    await sql`
-      DELETE FROM support_tickets
-      WHERE id = ${ticketId}
-    `;
+    await prisma.supportTicket.delete({
+      where: { id: ticketId },
+    });
 
     return NextResponse.json({ success: true, message: 'Ticket deleted' });
   } catch (error) {

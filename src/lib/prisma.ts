@@ -13,6 +13,7 @@ declare global {
 neonConfig.webSocketConstructor = ws;
 
 const connectionString = process.env.DATABASE_URL!;
+
 const adapter = new PrismaNeon({ connectionString });
 
 const prisma =

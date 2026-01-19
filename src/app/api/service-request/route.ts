@@ -1,9 +1,14 @@
 // src/app/api/service-request/route.ts
-import { neon } from '@neondatabase/serverless';
-import { NextResponse } from 'next/server';
+export const runtime = 'nodejs';
+
+import { currentUser } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 import { put } from '@vercel/blob';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+  const user = await currentUser();
+
   try {
     const formData = await request.formData();
 
@@ -38,14 +43,22 @@ export async function POST(request: Request) {
       }
     }
 
-    const sql = neon(process.env.DATABASE_URL!);
+    // Save to Prisma
+    await prisma.serviceRequest.create({
+      data: {
+        userId: user?.id || null, // Optional - link to user if logged in
+        serviceSlug,
+        name,
+        email,
+        phone,
+        budget,
+        timeline,
+        details,
+        files,
+        status: 'new',
+      },
+    });
 
-    await sql`
-      INSERT INTO service_requests (service_slug, name, email, phone, budget, timeline, details, files, created_at)
-      VALUES (${serviceSlug}, ${name}, ${email}, ${phone}, ${budget}, ${timeline}, ${details}, ${files}, CURRENT_TIMESTAMP)
-    `;
-
-    // Return JSON success - client will redirect
     return NextResponse.json({ success: true, message: 'Request submitted!' });
   } catch (error) {
     console.error('Service request error:', error);

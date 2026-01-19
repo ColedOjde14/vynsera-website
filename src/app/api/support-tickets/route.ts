@@ -1,8 +1,10 @@
 // src/app/api/support-tickets/route.ts
-import { neon } from '@neondatabase/serverless';
+export const runtime = 'nodejs';
+
 import { currentUser } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import { put } from '@vercel/blob';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const user = await currentUser();
@@ -15,14 +17,15 @@ export async function POST(request: Request) {
 
   const subject = formData.get('subject') as string;
   const description = formData.get('description') as string;
-  const priority = formData.get('priority') as string || 'Medium'; // Default to Medium for clients
-  const attachment = formData.get('attachment') as File | null;
+  const priority = formData.get('priority') as string || 'Medium';
 
   if (!subject || !description) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   let attachmentUrl = null;
+
+  const attachment = formData.get('attachment') as File | null;
 
   if (attachment && attachment.size > 0) {
     if (attachment.size > 5 * 1024 * 1024) {
@@ -41,13 +44,17 @@ export async function POST(request: Request) {
     }
   }
 
-  const sql = neon(process.env.DATABASE_URL!);
-
   try {
-    await sql`
-      INSERT INTO support_tickets (user_id, subject, description, priority, status, attachment_url, created_at)
-      VALUES (${user.id}, ${subject}, ${description}, ${priority}, 'Open', ${attachmentUrl}, CURRENT_TIMESTAMP)
-    `;
+    await prisma.supportTicket.create({
+      data: {
+        userId: user.id,
+        subject,
+        description,
+        priority,
+        status: 'open',
+        attachmentUrl,
+      },
+    });
 
     return NextResponse.json({ success: true, message: 'Ticket created!' });
   } catch (error) {

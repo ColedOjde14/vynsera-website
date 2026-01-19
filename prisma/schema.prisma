@@ -7,7 +7,7 @@ datasource db {
   // No url line - Prisma 7+ handles in code
 }
 
-// Clerk users
+// User (Clerk sync)
 model User {
   id        String   @id // Clerk user ID
   email     String?  @unique
@@ -27,7 +27,7 @@ model User {
   @@map("users")
 }
 
-// Service Request (from your old forms)
+// Old: Service Requests (from forms)
 model ServiceRequest {
   id          Int      @id @default(autoincrement())
   userId      String?
@@ -50,35 +50,37 @@ model ServiceRequest {
   @@map("service_requests")
 }
 
-// Support Tickets (from your portal)
+// Old: Support Tickets (portal)
 model SupportTicket {
-  id          Int      @id @default(autoincrement())
-  userId      String
-  subject     String
-  description String
-  priority    String   @default("medium")
-  status      String   @default("open")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  userId          String
+  subject         String
+  description     String
+  priority        String   @default("medium")
+  status          String   @default("open")
+  attachmentUrl   String?  // <-- Add this line (optional string for the URL)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
-  messages    TicketMessage[]
+  user            User     @relation(fields: [userId], references: [id])
+  messages        TicketMessage[]
 
   @@index([userId])
   @@index([status])
   @@map("support_tickets")
 }
 
-// Ticket Messages (replies to tickets)
+// Old: Ticket Messages (replies)
 model TicketMessage {
-  id          Int      @id @default(autoincrement())
-  ticketId    Int
-  userId      String
-  message     String
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  ticketId      Int
+  userId        String
+  message       String
+  attachmentUrl String?  // <-- ADD THIS LINE (optional string for the attachment URL)
+  createdAt     DateTime @default(now())
 
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
-  user        User         @relation(fields: [userId], references: [id])
+  ticket        SupportTicket @relation(fields: [ticketId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
 
   @@index([ticketId])
   @@index([userId])
@@ -117,4 +119,13 @@ model WorkOrder {
   @@index([userId])
   @@index([status])
   @@map("work_orders")
+}
+model ContactSubmission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_submissions")
 }

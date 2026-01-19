@@ -1,4 +1,3 @@
-// src/app/api/admin/clients/route.ts
 export const runtime = 'nodejs';
 
 import { currentUser, clerkClient } from '@clerk/nextjs/server';
@@ -17,7 +16,6 @@ export async function GET() {
   }
 
   try {
-    // v4 syntax: call clerkClient() to get the client
     const client = await clerkClient();
     const usersList = await client.users.getUserList({
       limit: 100,
