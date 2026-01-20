@@ -245,7 +245,7 @@ export default function Services() {
           </div>
         </section>
 
-        {/* Division Line */}
+        {/* Clear Division Line */}
         <div className="border-t border-indigo-500/30 my-16"></div>
 
         {/* Introductory Services */}
