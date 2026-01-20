@@ -33,7 +33,7 @@ export default function AdminClientContent({
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
   const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
 
-  // Clients tab
+  // Clients tab state
   const [clients, setClients] = useState<any[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
@@ -188,6 +188,16 @@ export default function AdminClientContent({
 
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
+      {/* Return to Homepage Button */}
+      <div className="mb-8 flex justify-start">
+        <Link
+          href="/"
+          className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all duration-300 text-lg font-medium"
+        >
+          Return to Homepage
+        </Link>
+      </div>
+
       {/* Tabs */}
       <div className="flex flex-wrap gap-4 mb-8 border-b border-indigo-500/30 pb-4">
         <button
@@ -228,7 +238,7 @@ export default function AdminClientContent({
         </button>
       </div>
 
-      {/* Overview */}
+      {/* Overview Stats */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
@@ -314,12 +324,12 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Recent Work Orders - TEMPORARILY DISABLED TO FIX CRASH */}
+      {/* Recent Work Orders - REMOVED TO FIX CRASH */}
       {activeTab === 'orders' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Work Orders</h2>
           <p className="text-indigo-300 text-center py-12">
-            Work orders are temporarily disabled while we stabilize the database.
+            Work orders are temporarily disabled while we stabilize the system.
           </p>
         </div>
       )}
