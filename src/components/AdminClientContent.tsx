@@ -1,7 +1,7 @@
 // src/components/AdminClientContent.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserButton } from "@clerk/nextjs";
 import toast from 'react-hot-toast';
 import Link from "next/link";
@@ -33,6 +33,42 @@ export default function AdminClientContent({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
   const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
+
+  // New state for clients tab
+  const [clients, setClients] = useState<any[]>([]);
+  const [loadingClients, setLoadingClients] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+
+  // New tab state
+  const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients'>('overview');
+
+  // Fetch all clients from Clerk API
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await fetch('/api/admin/clients', {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await response.json();
+
+        console.log('API Response for clients:', data);
+
+        if (response.ok) {
+          const fetchedUsers = data.users || data.data || [];
+          setClients(fetchedUsers);
+        } else {
+          toast.error(data.error || 'Failed to load clients');
+        }
+      } catch (err) {
+        toast.error('Network error loading clients');
+        console.error(err);
+      } finally {
+        setLoadingClients(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
@@ -157,211 +193,298 @@ export default function AdminClientContent({
 
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
-      {/* Return to Homepage Button - Top of Dashboard */}
-      <div className="mb-8 flex justify-start">
-        <Link
-          href="/"
-          className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all duration-300 text-lg font-medium"
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-4 mb-8 border-b border-indigo-500/30 pb-4">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'overview' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
         >
-          Return to Homepage
-        </Link>
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('tickets')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'tickets' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Tickets
+        </button>
+        <button
+          onClick={() => setActiveTab('orders')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'orders' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Orders
+        </button>
+        <button
+          onClick={() => setActiveTab('contacts')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'contacts' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Contacts
+        </button>
+        <button
+          onClick={() => setActiveTab('requests')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'requests' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Requests
+        </button>
+        <button
+          onClick={() => setActiveTab('clients')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'clients' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Clients
+        </button>
       </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Total Tickets</p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">
-            {totalTickets}
-          </p>
-        </div>
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Total Tickets</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">
+              {totalTickets}
+            </p>
+          </div>
 
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Tickets</p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
-            {openTickets}
-          </p>
-        </div>
+          <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Tickets</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
+              {openTickets}
+            </p>
+          </div>
 
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Total Work Orders</p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-            {totalOrders}
-          </p>
-        </div>
+          <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Total Work Orders</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+              {totalOrders}
+            </p>
+          </div>
 
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-          <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Pending Orders</p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-            {pendingOrders}
-          </p>
+          <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Pending Orders</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
+              {pendingOrders}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Recent Tickets */}
-      <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
-        <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Tickets</h2>
-        {recentTickets.length === 0 ? (
-          <p className="text-indigo-300 text-center py-12">No recent tickets</p>
-        ) : (
-          <div className="space-y-6">
-            {recentTickets.map((ticket) => (
-              <a
-                key={ticket.id}
-                href={`/portal/support/${ticket.id}`}
-                className="block bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-indigo-200">
-                      {ticket.subject}
-                    </h3>
-                    <p className="text-sm text-indigo-300 mt-1">
-                      Client ID: {ticket.user_id.slice(0, 8)}...
-                    </p>
+      {activeTab === 'tickets' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Tickets</h2>
+          {recentTickets.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No recent tickets</p>
+          ) : (
+            <div className="space-y-6">
+              {recentTickets.map((ticket) => (
+                <a
+                  key={ticket.id}
+                  href={`/portal/support/${ticket.id}`}
+                  className="block bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-indigo-200">
+                        {ticket.subject}
+                      </h3>
+                      <p className="text-sm text-indigo-300 mt-1">
+                        Client ID: {ticket.user_id.slice(0, 8)}...
+                      </p>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                      <span className={`px-4 py-1 rounded-full text-sm font-medium ${
+                        ticket.priority === 'Urgent' ? 'bg-red-600/30 text-red-300' :
+                        ticket.priority === 'High' ? 'bg-orange-600/30 text-orange-300' :
+                        ticket.priority === 'Medium' ? 'bg-yellow-600/30 text-yellow-300' :
+                        'bg-green-600/30 text-green-300'
+                      }`}>
+                        {ticket.priority}
+                      </span>
+                      <span className={`px-4 py-1 rounded-full text-sm font-medium ${
+                        ticket.status === 'Open' ? 'bg-green-600/30 text-green-300' :
+                        ticket.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
+                        'bg-gray-600/30 text-gray-300'
+                      }`}>
+                        {ticket.status}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex gap-4 items-center">
+                  <p className="mt-4 text-indigo-200/80 text-sm">
+                    Created: {new Date(ticket.created_at).toLocaleString()}
+                  </p>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'orders' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Work Orders</h2>
+          {recentOrders.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No recent work orders</p>
+          ) : (
+            <div className="space-y-6">
+              {recentOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-indigo-200">
+                        {order.title}
+                      </h3>
+                      <p className="text-sm text-indigo-300 mt-1">
+                        Client ID: {order.user_id.slice(0, 8)}...
+                      </p>
+                    </div>
+
                     <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-                      ticket.priority === 'Urgent' ? 'bg-red-600/30 text-red-300' :
-                      ticket.priority === 'High' ? 'bg-orange-600/30 text-orange-300' :
-                      ticket.priority === 'Medium' ? 'bg-yellow-600/30 text-yellow-300' :
+                      order.status === 'Pending' ? 'bg-yellow-600/30 text-yellow-300' :
+                      order.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
                       'bg-green-600/30 text-green-300'
                     }`}>
-                      {ticket.priority}
-                    </span>
-                    <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-                      ticket.status === 'Open' ? 'bg-green-600/30 text-green-300' :
-                      ticket.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
-                      'bg-gray-600/30 text-gray-300'
-                    }`}>
-                      {ticket.status}
+                      {order.status}
                     </span>
                   </div>
-                </div>
 
-                <p className="mt-4 text-indigo-200/80 text-sm">
-                  Created: {new Date(ticket.created_at).toLocaleString()}
-                </p>
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recent Work Orders */}
-      <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
-        <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Work Orders</h2>
-        {recentOrders.length === 0 ? (
-          <p className="text-indigo-300 text-center py-12">No recent work orders</p>
-        ) : (
-          <div className="space-y-6">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-indigo-200">
-                      {order.title}
-                    </h3>
-                    <p className="text-sm text-indigo-300 mt-1">
-                      Client ID: {order.user_id.slice(0, 8)}...
-                    </p>
-                  </div>
-
-                  <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-                    order.status === 'Pending' ? 'bg-yellow-600/30 text-yellow-300' :
-                    order.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
-                    'bg-green-600/30 text-green-300'
-                  }`}>
-                    {order.status}
-                  </span>
-                </div>
-
-                <p className="mt-4 text-indigo-200/80 text-sm">
-                  Created: {new Date(order.created_at).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Contact Submissions */}
-      <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
-        <h2 className="text-3xl font-bold text-indigo-200 mb-6">Contact Submissions</h2>
-        {contactSubmissions.length === 0 ? (
-          <p className="text-indigo-300 text-center py-12">No contact messages yet</p>
-        ) : (
-          <div className="space-y-6">
-            {contactSubmissions.map((submission) => (
-              <div
-                key={submission.id}
-                onClick={() => setSelectedSubmission(submission)}
-                className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-indigo-200">
-                      {submission.name}
-                    </h3>
-                    <p className="text-sm text-indigo-300 mt-1">
-                      {submission.email}
-                    </p>
-                  </div>
-                  <p className="text-sm text-indigo-300">
-                    {new Date(submission.created_at).toLocaleString()}
+                  <p className="mt-4 text-indigo-200/80 text-sm">
+                    Created: {new Date(order.created_at).toLocaleString()}
                   </p>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-                <p className="mt-4 text-indigo-200/80 line-clamp-3">
-                  {submission.message}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Service Inquiries/Requests */}
-      <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-indigo-200 mb-6">Service Inquiries/Requests</h2>
-        {serviceRequests.length === 0 ? (
-          <p className="text-indigo-300 text-center py-12">No service requests yet</p>
-        ) : (
-          <div className="space-y-6">
-            {serviceRequests.map((req) => (
-              <div
-                key={req.id}
-                onClick={() => setSelectedServiceRequest(req)}
-                className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-indigo-200">
-                      {req.service_slug.replace(/-/g, ' ').toUpperCase()}
-                    </h3>
-                    <p className="text-sm text-indigo-300 mt-1">
-                      {req.name} • {req.email}
+      {activeTab === 'contacts' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Contact Submissions</h2>
+          {contactSubmissions.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No contact messages yet</p>
+          ) : (
+            <div className="space-y-6">
+              {contactSubmissions.map((submission) => (
+                <div
+                  key={submission.id}
+                  onClick={() => setSelectedSubmission(submission)}
+                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-indigo-200">
+                        {submission.name}
+                      </h3>
+                      <p className="text-sm text-indigo-300 mt-1">
+                        {submission.email}
+                      </p>
+                    </div>
+                    <p className="text-sm text-indigo-300">
+                      {new Date(submission.created_at).toLocaleString()}
                     </p>
                   </div>
-                  <p className="text-sm text-indigo-300">
-                    {new Date(req.created_at).toLocaleString()} • Status: {req.status}
+
+                  <p className="mt-4 text-indigo-200/80 line-clamp-3">
+                    {submission.message}
                   </p>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-                <p className="mt-4 text-indigo-200/80">
-                  <strong>Details:</strong> {req.details}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {activeTab === 'requests' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Service Inquiries/Requests</h2>
+          {serviceRequests.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No service requests yet</p>
+          ) : (
+            <div className="space-y-6">
+              {serviceRequests.map((req) => (
+                <div
+                  key={req.id}
+                  onClick={() => setSelectedServiceRequest(req)}
+                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-indigo-200">
+                        {req.service_slug.replace(/-/g, ' ').toUpperCase()}
+                      </h3>
+                      <p className="text-sm text-indigo-300 mt-1">
+                        {req.name} • {req.email}
+                      </p>
+                    </div>
+                    <p className="text-sm text-indigo-300">
+                      {new Date(req.created_at).toLocaleString()} • Status: {req.status}
+                    </p>
+                  </div>
 
-      {/* Modal for Contact Submission */}
+                  <p className="mt-4 text-indigo-200/80">
+                    <strong>Details:</strong> {req.details}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'clients' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Client Management</h2>
+          {loadingClients ? (
+            <p className="text-indigo-300 text-center py-12">Loading clients...</p>
+          ) : clients.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No clients yet</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-indigo-500/20">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Joined</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/20">
+                  {clients.map((client) => (
+                    <tr key={client.id} className="hover:bg-black/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
+                        {client.firstName || 'N/A'} {client.lastName || ''}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
+                        {client.emailAddresses?.[0]?.emailAddress || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
+                        {client.publicMetadata?.role || 'Client'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-200">
+                        {new Date(client.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => setSelectedClient(client)}
+                          className="text-indigo-400 hover:text-indigo-200"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Existing Modals */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -397,7 +520,6 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Modal for Service Request Details */}
       {selectedServiceRequest && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -466,6 +588,38 @@ export default function AdminClientContent({
                 className={`px-6 py-3 rounded-full bg-red-700 text-white hover:bg-red-600 transition-all ${updatingRequestId === selectedServiceRequest.id ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Delete Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Modal for Client Details */}
+      {selectedClient && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-indigo-200 mb-6">
+              Client Details
+            </h2>
+
+            <div className="space-y-4 text-indigo-300">
+              <p><strong>ID:</strong> {selectedClient.id}</p>
+              <p><strong>Full Name:</strong> {selectedClient.firstName || 'N/A'} {selectedClient.lastName || ''}</p>
+              <p><strong>Email:</strong> {selectedClient.emailAddresses?.[0]?.emailAddress || 'N/A'}</p>
+              <p><strong>Phone:</strong> {selectedClient.phoneNumbers?.[0]?.phoneNumber || 'N/A'}</p>
+              <p><strong>Role:</strong> {selectedClient.publicMetadata?.role || 'Client'}</p>
+              <p><strong>Joined:</strong> {new Date(selectedClient.createdAt).toLocaleString()}</p>
+              <p><strong>Last Active:</strong> {new Date(selectedClient.lastSignInAt).toLocaleString()}</p>
+              <p><strong>Public Metadata:</strong> <pre className="bg-black/50 p-2 rounded">{JSON.stringify(selectedClient.publicMetadata, null, 2)}</pre></p>
+              <p><strong>Private Metadata:</strong> <pre className="bg-black/50 p-2 rounded">{JSON.stringify(selectedClient.privateMetadata, null, 2)}</pre></p>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-4">
+              <button
+                onClick={() => setSelectedClient(null)}
+                className="px-6 py-3 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+              >
+                Close
               </button>
             </div>
           </div>
