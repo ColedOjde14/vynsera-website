@@ -29,7 +29,6 @@ export default function Services() {
       <main className="max-w-7xl mx-auto p-6 sm:p-8">
         {/* Main Services */}
         <section className="mb-20">
-          <h2 className="text-4xl font-bold text-indigo-200 mb-10 text-center">Main Services</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* 1. Business Digital Identity & Branding */}
             <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 hover:border-indigo-400 transition-all">
@@ -118,7 +117,35 @@ export default function Services() {
               </Link>
             </div>
 
-            {/* Intro Packages - Starter Logo */}
+            {/* 4. Custom Software */}
+            <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 hover:border-indigo-400 transition-all">
+              <h2 className="text-3xl font-bold text-indigo-200 mb-4">
+                Custom Software
+              </h2>
+              <p className="text-indigo-300 mb-6">
+                Bespoke software solutions including web apps, SaaS platforms, internal tools, and automation systems.
+              </p>
+              <p className="text-sm text-indigo-400 mb-4">(Market avg: $10,000+)</p>
+              <Link
+                href="/services/custom-software"
+                className="inline-block px-6 py-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all"
+              >
+                Request Service →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Clear Division */}
+        <div className="border-t border-indigo-500/30 my-16"></div>
+
+        {/* Introductory Services */}
+        <section>
+          <h2 className="text-4xl font-bold text-green-300 mb-10 text-center">
+            Introductory Services for Any Budget
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Starter Logo */}
             <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all">
               <h3 className="text-2xl font-bold text-green-300 mb-4">
                 Starter Logo
@@ -143,7 +170,7 @@ export default function Services() {
               </Link>
             </div>
 
-            {/* Intro Packages - Social Kit */}
+            {/* Social Media Starter Kit */}
             <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all">
               <h3 className="text-2xl font-bold text-green-300 mb-4">
                 Social Media Starter Kit
@@ -168,7 +195,7 @@ export default function Services() {
               </Link>
             </div>
 
-            {/* Intro Packages - One-Page Website */}
+            {/* One-Page Landing Site */}
             <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all">
               <h3 className="text-2xl font-bold text-green-300 mb-4">
                 One-Page Landing Site
@@ -193,7 +220,7 @@ export default function Services() {
               </Link>
             </div>
 
-            {/* Intro Packages - Brand Refresh */}
+            {/* Quick Brand Refresh */}
             <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all">
               <h3 className="text-2xl font-bold text-green-300 mb-4">
                 Quick Brand Refresh
@@ -218,7 +245,7 @@ export default function Services() {
               </Link>
             </div>
 
-            {/* Intro Packages - Social Audit */}
+            {/* Basic Social Media Audit & Setup */}
             <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all">
               <h3 className="text-2xl font-bold text-green-300 mb-4">
                 Basic Social Media Audit & Setup
@@ -245,47 +272,21 @@ export default function Services() {
           </div>
         </section>
 
-        {/* Clear Division Line */}
-        <div className="border-t border-indigo-500/30 my-16"></div>
-
-        {/* Introductory Services */}
-        <section>
-          <h2 className="text-4xl font-bold text-indigo-200 mb-10 text-center">Introductory Services</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Introductory Package */}
-            <div className="bg-black/40 backdrop-blur-md border border-green-500/30 rounded-2xl p-8 hover:border-green-400 transition-all hover:shadow-xl hover:shadow-indigo-500/10">
-              <h3 className="text-2xl font-bold text-green-300 mb-4">
-                Introductory Package
-              </h3>
-              <p className="text-indigo-300 mb-6">
-                Affordable starter packages for branding, websites, marketing, and more — perfect for new businesses or small projects.
-              </p>
-              <p className="text-sm text-indigo-400 mb-4">(Market avg: $500–$1,500)</p>
-              <Link
-                href="/services/intro-request"
-                className="inline-block px-6 py-3 rounded-full bg-green-600 text-white hover:bg-green-500 transition-all"
-              >
-                Request Service →
-              </Link>
-            </div>
-
-            {/* Custom Project Callout */}
-            <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 text-center">
-              <h2 className="text-3xl font-bold text-indigo-200 mb-4">
-                Custom Project?
-              </h2>
-              <p className="text-indigo-300 text-lg mb-6">
-                Need something unique? We specialize in custom solutions that fit your exact business needs — from branding refresh to full SaaS platforms.
-              </p>
-              <Link
-                href="/request-custom-quote"
-                className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
-              >
-                Request Custom Quote
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* Custom Project Callout - Moved to Bottom */}
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 text-center mt-16">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-4">
+            Custom Project?
+          </h2>
+          <p className="text-indigo-300 text-lg mb-6">
+            Need something unique? We specialize in custom solutions that fit your exact business needs — from branding refresh to full SaaS platforms.
+          </p>
+          <Link
+            href="/request-custom-quote"
+            className="inline-block px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
+          >
+            Request Custom Quote
+          </Link>
+        </div>
       </main>
     </div>
   );
