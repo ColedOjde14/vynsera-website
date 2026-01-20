@@ -1,4 +1,6 @@
 // src/app/api/contact/route.ts
+export const runtime = 'nodejs';
+
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 
@@ -6,10 +8,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { name, email, message } = body;
+    // Accept either camelCase or whatever the form sends
+    const name = body.name || body.Name || '';
+    const email = body.email || body.Email || '';
+    const message = body.message || body.Message || '';
 
     if (!name || !email || !message) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields (name, email, message)' }, { status: 400 });
     }
 
     const sql = neon(process.env.DATABASE_URL!);
@@ -23,28 +28,5 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Contact submission error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    const body = await request.json();
-    const { id } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 });
-    }
-
-    const sql = neon(process.env.DATABASE_URL!);
-
-    await sql`
-      DELETE FROM contact_submissions
-      WHERE id = ${id}
-    `;
-
-    return NextResponse.json({ success: true, message: 'Submission deleted!' });
-  } catch (error) {
-    console.error('Contact delete error:', error);
-    return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 });
   }
 }
