@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserButton } from "@clerk/nextjs";
 import toast from 'react-hot-toast';
 import Link from "next/link";
 
@@ -34,27 +33,23 @@ export default function AdminClientContent({
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
   const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
 
-  // New state for clients tab
+  // Clients tab
   const [clients, setClients] = useState<any[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
-  // New tab state
+  // Tab state
   const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients'>('overview');
 
-  // Fetch all clients from Clerk API
+  // Fetch clients from Clerk
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch('/api/admin/clients', {
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const response = await fetch('/api/admin/clients');
         const data = await response.json();
 
-        console.log('API Response for clients:', data);
-
         if (response.ok) {
-          const fetchedUsers = data.users || data.data || [];
+          const fetchedUsers = data.users?.data || data.users || data.data || [];
           setClients(fetchedUsers);
         } else {
           toast.error(data.error || 'Failed to load clients');
@@ -233,7 +228,7 @@ export default function AdminClientContent({
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Overview */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
@@ -266,6 +261,7 @@ export default function AdminClientContent({
         </div>
       )}
 
+      {/* Recent Tickets */}
       {activeTab === 'tickets' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Tickets</h2>
@@ -318,47 +314,17 @@ export default function AdminClientContent({
         </div>
       )}
 
+      {/* Recent Work Orders - TEMPORARILY DISABLED TO FIX CRASH */}
       {activeTab === 'orders' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Work Orders</h2>
-          {recentOrders.length === 0 ? (
-            <p className="text-indigo-300 text-center py-12">No recent work orders</p>
-          ) : (
-            <div className="space-y-6">
-              {recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-indigo-200">
-                        {order.title}
-                      </h3>
-                      <p className="text-sm text-indigo-300 mt-1">
-                        Client ID: {order.user_id.slice(0, 8)}...
-                      </p>
-                    </div>
-
-                    <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-                      order.status === 'Pending' ? 'bg-yellow-600/30 text-yellow-300' :
-                      order.status === 'In Progress' ? 'bg-blue-600/30 text-blue-300' :
-                      'bg-green-600/30 text-green-300'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-indigo-200/80 text-sm">
-                    Created: {new Date(order.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="text-indigo-300 text-center py-12">
+            Work orders are temporarily disabled while we stabilize the database.
+          </p>
         </div>
       )}
 
+      {/* Contact Submissions */}
       {activeTab === 'contacts' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Contact Submissions</h2>
@@ -396,6 +362,7 @@ export default function AdminClientContent({
         </div>
       )}
 
+      {/* Service Inquiries/Requests */}
       {activeTab === 'requests' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Service Inquiries/Requests</h2>
@@ -433,6 +400,7 @@ export default function AdminClientContent({
         </div>
       )}
 
+      {/* Clients Tab */}
       {activeTab === 'clients' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Client Management</h2>
@@ -484,7 +452,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Existing Modals */}
+      {/* Modals */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -594,7 +562,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* New Modal for Client Details */}
+      {/* Client Details Modal */}
       {selectedClient && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -629,7 +597,7 @@ export default function AdminClientContent({
   );
 }
 
-// Helper function for PDF download (simple print window)
+// Helper function for PDF download
 const handleDownloadPDF = (req: any) => {
   const printWindow = window.open('', '_blank');
   if (printWindow) {
