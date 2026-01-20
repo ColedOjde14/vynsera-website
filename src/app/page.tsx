@@ -4,10 +4,12 @@
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser();
+  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -25,6 +27,44 @@ export default function Home() {
   const role = user?.publicMetadata?.role as string | undefined;
   const isAdminOrSupport = role === 'admin' || role === 'support';
   const portalUrl = isAdminOrSupport ? '/admin' : '/portal';
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      message: formData.get('message') as string,
+    };
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setFormStatus('success');
+        form.reset();
+        setTimeout(() => setFormStatus('idle'), 4000); // Auto-hide after 4s
+      } else {
+        setFormStatus('error');
+        setTimeout(() => setFormStatus('idle'), 4000);
+      }
+    } catch (err) {
+      setFormStatus('error');
+      setTimeout(() => setFormStatus('idle'), 4000);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white flex flex-col overflow-x-hidden">
@@ -153,14 +193,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Us */}
+      {/* Contact Us Section */}
       <section id="contact" className="py-32 px-6 bg-black/40 backdrop-blur-sm border-t border-indigo-500/10">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl font-light text-center mb-20 bg-gradient-to-r from-indigo-200 to-purple-200 bg-clip-text text-transparent">
             Let's Create Together
           </h2>
 
-          <form action="/api/contact" method="POST" className="space-y-10 bg-black/50 backdrop-blur-md border border-indigo-500/20 rounded-3xl p-16">
+          <form onSubmit={handleSubmit} className="space-y-10 bg-black/50 backdrop-blur-md border border-indigo-500/20 rounded-3xl p-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div>
                 <label className="block text-indigo-300 text-lg mb-4 font-light">Name</label>
@@ -199,12 +239,41 @@ export default function Home() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="px-16 py-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all duration-500 shadow-2xl text-2xl font-bold transform hover:scale-105"
+                disabled={loading}
+                className={`px-16 py-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all duration-500 shadow-2xl text-2xl font-bold transform hover:scale-105 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                Send Message
+                {loading ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>
+
+          {/* Pretty Inline Success Popup */}
+          {formStatus === 'success' && (
+            <div className="mt-10 p-8 bg-green-900/60 border border-green-500/50 rounded-2xl text-green-200 text-center shadow-2xl animate-fade-in-out">
+              <h3 className="text-2xl font-bold mb-4">Thank You!</h3>
+              <p className="text-xl">
+                Your contact submission has been received.
+              </p>
+              <p className="text-lg mt-4">
+                We'll get back to you soon.
+              </p>
+            </div>
+          )}
+
+          {/* Pretty Inline Error Popup */}
+          {formStatus === 'error' && (
+            <div className="mt-10 p-8 bg-red-900/60 border border-red-500/50 rounded-2xl text-red-200 text-center shadow-2xl animate-fade-in-out">
+              <h3 className="text-2xl font-bold mb-4">Oops!</h3>
+              <p className="text-xl">
+                Something went wrong while sending your message.
+              </p>
+              <p className="text-lg mt-4">
+                Please try again or email us directly at support@vynseracorp.com
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
