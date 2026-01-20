@@ -65,32 +65,32 @@ export default function AdminClientContent({
     fetchClients();
   }, []);
 
-  const handleDeleteContact = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
+const handleDeleteContact = async (id: number) => {
+  if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
 
-    setDeletingId(id);
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
+  setDeletingId(id);
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        alert('Contact submission deleted!');
-        window.location.reload();
-      } else {
-        alert(data.error || 'Failed to delete submission.');
-      }
-    } catch (error) {
-      alert('Network error. Try again.');
-      console.error(error);
-    } finally {
-      setDeletingId(null);
+    if (response.ok) {
+      toast.success('Contact submission deleted!');
+      window.location.reload();
+    } else {
+      toast.error(data.error || 'Failed to delete submission');
     }
-  };
+  } catch (error) {
+    toast.error('Network error. Try again.');
+    console.error('Delete contact error:', error);
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   const handleUpdateServiceRequest = async (requestId: number, newStatus: string) => {
     setUpdatingRequestId(requestId);

@@ -6,28 +6,14 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    let name: string | null = null;
-    let email: string | null = null;
-    let message: string | null = null;
+    const body = await request.json();
 
-    const contentType = request.headers.get('content-type') || '';
-
-    if (contentType.includes('application/json')) {
-      // JSON payload
-      const body = await request.json();
-      name = body.name || body.Name || null;
-      email = body.email || body.Email || null;
-      message = body.message || body.Message || null;
-    } else {
-      // FormData / urlencoded payload (your current form)
-      const formData = await request.formData();
-      name = formData.get('name') as string | null;
-      email = formData.get('email') as string | null;
-      message = formData.get('message') as string | null;
-    }
+    const name = body.name || body.Name || '';
+    const email = body.email || body.Email || '';
+    const message = body.message || body.Message || '';
 
     if (!name || !email || !message) {
-      return NextResponse.json({ error: 'Missing required fields (name, email, message)' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const sql = neon(process.env.DATABASE_URL!);
@@ -41,5 +27,33 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Contact submission error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 });
+    }
+
+    const parsedId = parseInt(id, 10);
+    if (isNaN(parsedId)) {
+      return NextResponse.json({ error: 'Invalid submission ID' }, { status: 400 });
+    }
+
+    const sql = neon(process.env.DATABASE_URL!);
+
+    await sql`
+      DELETE FROM contact_submissions
+      WHERE id = ${parsedId}
+    `;
+
+    return NextResponse.json({ success: true, message: 'Submission deleted!' });
+  } catch (error) {
+    console.error('Contact delete error:', error);
+    return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 });
   }
 }
