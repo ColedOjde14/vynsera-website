@@ -6,12 +6,23 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let name: string | null = null;
+    let email: string | null = null;
+    let message: string | null = null;
 
-    // Accept either camelCase or whatever the form sends
-    const name = body.name || body.Name || '';
-    const email = body.email || body.Email || '';
-    const message = body.message || body.Message || '';
+    // Try to parse as JSON (if sent that way)
+    try {
+      const body = await request.json();
+      name = body.name || body.Name || null;
+      email = body.email || body.Email || null;
+      message = body.message || body.Message || null;
+    } catch (jsonErr) {
+      // If JSON parse fails, it's likely FormData
+      const formData = await request.formData();
+      name = formData.get('name') as string | null;
+      email = formData.get('email') as string | null;
+      message = formData.get('message') as string | null;
+    }
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Missing required fields (name, email, message)' }, { status: 400 });
