@@ -1,6 +1,3 @@
-export const metadata = {
-  title: "Services | Vynsera",
-};
 // src/app/page.tsx
 'use client';
 
