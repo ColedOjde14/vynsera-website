@@ -39,12 +39,10 @@ export async function POST(request: Request) {
     const education_history = formData.get('education_history') as string;
     const work_history = formData.get('work_history') as string;
 
-    // Validate required fields
     if (!full_name || !email || !authorized_to_work_us_str || !education_history || !work_history) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Convert radio string values to booleans
     const authorized_to_work_us = authorized_to_work_us_str === 'true';
     const requires_sponsorship = requires_sponsorship_str === 'true';
 
@@ -74,5 +72,38 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Application submission error:', error);
     return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const user = await currentUser();
+
+  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  try {
+    const body = await request.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing application ID' }, { status: 400 });
+    }
+
+    const sql = neon(process.env.DATABASE_URL!);
+
+    const result = await sql`
+      DELETE FROM applications WHERE id = ${id}
+      RETURNING id
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Application deleted' });
+  } catch (error) {
+    console.error('Delete application error:', error);
+    return NextResponse.json({ error: 'Failed to delete application' }, { status: 500 });
   }
 }
