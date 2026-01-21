@@ -1,24 +1,17 @@
-// src/app/careers/apply/page.tsx
+// src/app/careers/apply/[jobId]/page.tsx
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 
-export default async function ApplyJob() {
-  const headersList = headers();
-  const searchParams = new URLSearchParams((await headersList).get('x-search-params') || '');
-  const jobIdStr = searchParams.get('jobId');
+export const dynamic = 'force-dynamic';
 
-  if (!jobIdStr) {
-    return notFound(); // No jobId in URL
-  }
-
-  const jobId = parseInt(jobIdStr, 10);
-  if (isNaN(jobId)) notFound();
+export default async function ApplyJob({ params }: { params: { jobid: string } }) {
+  const jobid = parseInt(params.jobid, 10);
+  if (isNaN(jobid)) notFound();
 
   const sql = neon(process.env.DATABASE_URL!);
 
   const [job] = await sql`
-    SELECT * FROM jobs WHERE id = ${jobId} AND status = 'open'
+    SELECT * FROM jobs WHERE id = ${jobid} AND status = 'open'
   `;
 
   if (!job) notFound();
