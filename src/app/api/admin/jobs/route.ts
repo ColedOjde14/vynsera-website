@@ -50,20 +50,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // Clean and split textarea input into array
+  // Clean and split textarea input into array (strip extra quotes/JSON if present)
   const cleanArray = (input: string | undefined): string[] | null => {
     if (!input || typeof input !== 'string') return null;
 
-    // If input is JSON-stringified array, parse it first
     let cleaned = input.trim();
+
+    // Strip outer JSON.stringify quotes if present
     if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-      cleaned = cleaned.slice(1, -1); // strip outer quotes
+      cleaned = cleaned.slice(1, -1);
     }
+
+    // If it's a JSON array string, parse it
     if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
       try {
         const parsed = JSON.parse(cleaned);
         if (Array.isArray(parsed)) {
-          return parsed.map(s => String(s).trim()).filter(s => s.length > 0);
+          return parsed.map(String).map(s => s.trim()).filter(s => s.length > 0);
         }
       } catch {}
     }
