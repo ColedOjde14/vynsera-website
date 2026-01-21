@@ -1,5 +1,5 @@
 // src/app/careers/page.tsx
-import Link from 'next/link';
+import { neon } from '@neondatabase/serverless';
 
 export default async function Careers() {
   const sql = neon(process.env.DATABASE_URL!);
@@ -59,7 +59,7 @@ export default async function Careers() {
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Responsibilities</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {job.responsibilities.map((item: string, i: number) => (
+                      {job.responsibilities.map((item, i) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
@@ -70,7 +70,7 @@ export default async function Careers() {
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Requirements</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {job.requirements.map((item: string, i: number) => (
+                      {job.requirements.map((item, i) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
@@ -103,7 +103,7 @@ export default async function Careers() {
             Let's Talk Custom
           </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
