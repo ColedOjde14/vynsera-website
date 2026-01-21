@@ -193,7 +193,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Us Section */}
+      {/* Contact Us */}
       <section id="contact" className="py-32 px-6 bg-black/40 backdrop-blur-sm border-t border-indigo-500/10">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl font-light text-center mb-20 bg-gradient-to-r from-indigo-200 to-purple-200 bg-clip-text text-transparent">
@@ -315,6 +315,9 @@ export default function Home() {
             </Link>
             <Link href="/acceptable-use" className="hover:text-indigo-200 transition-colors">
               Acceptable Use
+            </Link>
+            <Link href="/careers" className="hover:text-indigo-200 transition-colors">
+              Careers
             </Link>
           </div>
           <p className="mt-12 text-indigo-400 text-sm">
