@@ -24,16 +24,10 @@ export default async function Careers() {
 
         {jobs.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-2xl text-indigo-300">No open positions right now.</p>
-            <p className="text-lg text-indigo-400 mt-4">
-              Check back soon — or send us your resume anyway!
+            <p className="text-2xl text-indigo-300 mb-6">No open positions right now.</p>
+            <p className="text-lg text-indigo-400">
+              Email your resume to <a href="mailto:hr@vynseracorp.com" className="text-indigo-300 hover:text-indigo-100 underline">hr@vynseracorp.com</a> to be considered for future opportunities.
             </p>
-            <Link
-              href="/request-custom-quote"
-              className="mt-8 inline-block px-10 py-4 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all"
-            >
-              Get in Touch
-            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -88,22 +82,6 @@ export default async function Careers() {
             ))}
           </div>
         )}
-
-        {/* Custom Project Callout */}
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-12 text-center mt-20">
-          <h2 className="text-4xl font-bold text-indigo-200 mb-6">
-            Don't See a Fit?
-          </h2>
-          <p className="text-xl text-indigo-300 mb-8 max-w-3xl mx-auto">
-            We love custom challenges. If you're passionate and have a unique project in mind, reach out — we build things that don't exist yet.
-          </p>
-          <Link
-            href="/request-custom-quote"
-            className="inline-block px-12 py-5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-2xl text-xl font-bold"
-          >
-            Let's Talk Custom
-          </Link>
-        </div>
       </div>
     </div>
   );
