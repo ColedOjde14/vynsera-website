@@ -1,6 +1,6 @@
 // src/app/careers/page.tsx
 import { neon } from '@neondatabase/serverless';
-import Link from 'next/link'; // ← This line fixes the error
+import Link from 'next/link';
 
 export default async function Careers() {
   const sql = neon(process.env.DATABASE_URL!);
@@ -60,7 +60,7 @@ export default async function Careers() {
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Responsibilities</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {job.responsibilities.map((item, i) => (
+                      {(job.responsibilities as string[]).map((item: string, i: number) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
@@ -71,7 +71,7 @@ export default async function Careers() {
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Requirements</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {job.requirements.map((item, i) => (
+                      {(job.requirements as string[]).map((item: string, i: number) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
