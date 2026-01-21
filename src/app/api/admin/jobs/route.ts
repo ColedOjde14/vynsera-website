@@ -50,17 +50,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // Convert textarea strings to real arrays (split by newline or comma)
-  const splitToArray = (input: string | undefined): string[] | null => {
+  // Cleanly split textarea input into array of strings
+  const cleanArray = (input: string | undefined): string[] | null => {
     if (!input || typeof input !== 'string') return null;
     return input
-      .split(/[\n,]+/)
+      .split(/[\n,]+/)               // split on newline or comma
       .map(s => s.trim())
-      .filter(s => s.length > 0);
+      .filter(s => s.length > 0);    // remove empty lines
   };
 
-  const respArray = splitToArray(responsibilities);
-  const reqArray = splitToArray(requirements);
+  const respArray = cleanArray(responsibilities);
+  const reqArray = cleanArray(requirements);
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -82,7 +82,6 @@ export async function POST(request: Request) {
       )
     `;
 
-    // Force refresh of the careers page so new jobs appear immediately
     revalidatePath('/careers');
 
     return NextResponse.json({ success: true, message: 'Job posted!' });
@@ -113,7 +112,6 @@ export async function DELETE(request: Request) {
       DELETE FROM jobs WHERE id = ${id}
     `;
 
-    // Also revalidate careers page when deleting a job
     revalidatePath('/careers');
 
     return NextResponse.json({ success: true, message: 'Job deleted' });
