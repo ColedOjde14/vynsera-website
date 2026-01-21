@@ -9,12 +9,6 @@ export default function VynseraApplication() {
           Vynsera Application
         </h1>
 
-        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 mb-12">
-          <p className="text-xl text-indigo-300 mb-6 text-center">
-            Thank you for your interest in joining Vynsera. Please complete the form below.
-          </p>
-        </div>
-
         <form
           action="/api/job-applications"
           method="POST"
@@ -26,7 +20,7 @@ export default function VynseraApplication() {
               <label className="block text-indigo-300 text-lg mb-3">Full Name *</label>
               <input
                 type="text"
-                name="name"
+                name="full_name"
                 required
                 className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
               />
@@ -54,80 +48,86 @@ export default function VynseraApplication() {
           </div>
 
           {/* Work Authorization */}
-          <div>
-            <label className="block text-indigo-300 text-lg mb-3">
-              Are you legally authorized to work in the United States? *
-            </label>
-            <div className="flex gap-8">
-              <label className="flex items-center text-indigo-300">
-                <input
-                  type="radio"
-                  name="workAuthorization"
-                  value="yes"
-                  required
-                  className="mr-3 accent-indigo-500"
-                />
-                Yes
+          <div className="space-y-6">
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">
+                Are you legally authorized to work in the United States? *
               </label>
-              <label className="flex items-center text-indigo-300">
-                <input
-                  type="radio"
-                  name="workAuthorization"
-                  value="no"
-                  className="mr-3 accent-indigo-500"
-                />
-                No
-              </label>
+              <div className="flex gap-8">
+                <label className="flex items-center text-indigo-300">
+                  <input
+                    type="radio"
+                    name="authorized_to_work_us"
+                    value="true"
+                    required
+                    className="mr-3 accent-indigo-500"
+                  />
+                  Yes
+                </label>
+                <label className="flex items-center text-indigo-300">
+                  <input
+                    type="radio"
+                    name="authorized_to_work_us"
+                    value="false"
+                    className="mr-3 accent-indigo-500"
+                  />
+                  No
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-indigo-300 text-lg mb-3">
-              Will you now or in the future require sponsorship for employment visa status (e.g., H-1B)? *
-            </label>
-            <div className="flex gap-8">
-              <label className="flex items-center text-indigo-300">
-                <input
-                  type="radio"
-                  name="sponsorship"
-                  value="no"
-                  required
-                  className="mr-3 accent-indigo-500"
-                />
-                No
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">
+                Will you now or in the future require sponsorship for employment visa status (e.g., H-1B)? *
               </label>
-              <label className="flex items-center text-indigo-300">
-                <input
-                  type="radio"
-                  name="sponsorship"
-                  value="yes"
-                  className="mr-3 accent-indigo-500"
-                />
-                Yes
-              </label>
+              <div className="flex gap-8">
+                <label className="flex items-center text-indigo-300">
+                  <input
+                    type="radio"
+                    name="requires_sponsorship"
+                    value="false"
+                    required
+                    className="mr-3 accent-indigo-500"
+                  />
+                  No
+                </label>
+                <label className="flex items-center text-indigo-300">
+                  <input
+                    type="radio"
+                    name="requires_sponsorship"
+                    value="true"
+                    className="mr-3 accent-indigo-500"
+                  />
+                  Yes
+                </label>
+              </div>
             </div>
           </div>
 
           {/* Education History */}
           <div>
-            <label className="block text-indigo-300 text-lg mb-3">Education History *</label>
+            <label className="block text-indigo-300 text-lg mb-3">
+              Education History * <span className="text-sm">(degrees, institutions, years, major, GPA/honors if relevant)</span>
+            </label>
             <textarea
-              name="education"
+              name="education_history"
               required
               rows={6}
-              placeholder="List your degrees, institutions, graduation years, GPA (if relevant), major/minor, and any honors or relevant coursework. One entry per line or paragraph."
+              placeholder="Example:\nBachelor of Science in Computer Science, Syracuse University, 2020-2024\nGPA: 3.8, Dean's List 2022-2024\nRelevant coursework: Data Structures, Algorithms, Web Development"
               className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
             />
           </div>
 
           {/* Work History */}
           <div>
-            <label className="block text-indigo-300 text-lg mb-3">Work History *</label>
+            <label className="block text-indigo-300 text-lg mb-3">
+              Work History * <span className="text-sm">(previous roles, companies, dates, key responsibilities/achievements)</span>
+            </label>
             <textarea
-              name="workHistory"
+              name="work_history"
               required
               rows={8}
-              placeholder="List your previous positions in reverse chronological order (most recent first). Include company name, job title, dates of employment, key responsibilities, and achievements. One entry per line or paragraph."
+              placeholder="Example:\nSoftware Engineer Intern, TechCorp, May 2023 - Aug 2023\n- Developed full-stack features using React and Node.js\n- Improved application performance by 40%\n\nCustomer Support Specialist, Local Business, 2020 - 2022\n- Handled 50+ customer inquiries daily\n- Reduced response time by 30%"
               className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
             />
           </div>

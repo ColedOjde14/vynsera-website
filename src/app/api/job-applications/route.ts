@@ -3,7 +3,6 @@ export const runtime = 'nodejs';
 
 import { currentUser } from '@clerk/nextjs/server';
 import { neon } from '@neondatabase/serverless';
-import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -17,10 +16,9 @@ export async function GET() {
 
   try {
     const applications = await sql`
-      SELECT ja.*, j.title as job_title
-      FROM job_applications ja
-      JOIN jobs j ON ja.job_id = j.id
-      ORDER BY ja.created_at DESC
+      SELECT *
+      FROM applications
+      ORDER BY created_at DESC
     `;
     return NextResponse.json({ applications });
   } catch (error) {
@@ -31,51 +29,45 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
+    const body = await request.json();
 
-    const jobId = formData.get('jobId') as string;
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const phone = formData.get('phone') as string || null;
-    const coverLetter = formData.get('coverLetter') as string || null;
-    const resume = formData.get('resume') as File | null;
+    const {
+      full_name,
+      email,
+      phone,
+      authorized_to_work_us,
+      requires_sponsorship,
+      education_history,
+      work_history,
+    } = body;
 
-    if (!jobId || !name || !email || !resume) {
+    if (!full_name || !email || !authorized_to_work_us === undefined || !education_history || !work_history) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const parsedJobId = parseInt(jobId, 10);
-    if (isNaN(parsedJobId)) {
-      return NextResponse.json({ error: 'Invalid job ID' }, { status: 400 });
-    }
-
-    // Upload resume to Vercel Blob
-    let resumeUrl: string | null = null;
-    if (resume && resume.size > 0) {
-      if (resume.size > 5 * 1024 * 1024) {
-        return NextResponse.json({ error: 'Resume too large (max 5MB)' }, { status: 400 });
-      }
-
-      try {
-        const blob = await put(`resumes/${Date.now()}-${resume.name}`, resume, {
-          access: 'public',
-          token: process.env.BLOB_READ_WRITE_TOKEN,
-        });
-        resumeUrl = blob.url;
-      } catch (uploadError) {
-        console.error('Resume upload failed:', uploadError);
-        return NextResponse.json({ error: 'Failed to upload resume' }, { status: 500 });
-      }
-    }
+    // Convert booleans to actual boolean values (from form string "true"/"false")
+    const authorized = authorized_to_work_us === 'true' || authorized_to_work_us === true;
+    const sponsorship = requires_sponsorship === 'true' || requires_sponsorship === true;
 
     const sql = neon(process.env.DATABASE_URL!);
 
     await sql`
-      INSERT INTO job_applications (
-        job_id, name, email, phone, resume_url, cover_letter
+      INSERT INTO applications (
+        full_name,
+        email,
+        phone,
+        authorized_to_work_us,
+        requires_sponsorship,
+        education_history,
+        work_history
       ) VALUES (
-        ${parsedJobId}, ${name}, ${email}, ${phone},
-        ${resumeUrl}, ${coverLetter}
+        ${full_name},
+        ${email},
+        ${phone || null},
+        ${authorized},
+        ${sponsorship},
+        ${education_history},
+        ${work_history}
       )
     `;
 
@@ -83,5 +75,33 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Job application error:', error);
     return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const user = await currentUser();
+
+  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { id } = body;
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing application ID' }, { status: 400 });
+  }
+
+  const sql = neon(process.env.DATABASE_URL!);
+
+  try {
+    await sql`
+      DELETE FROM applications WHERE id = ${id}
+    `;
+
+    return NextResponse.json({ success: true, message: 'Application deleted' });
+  } catch (error) {
+    console.error('Application delete error:', error);
+    return NextResponse.json({ error: 'Failed to delete application' }, { status: 500 });
   }
 }
