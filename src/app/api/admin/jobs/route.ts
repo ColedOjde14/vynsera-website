@@ -49,6 +49,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
+  // Split comma or newline-separated strings into arrays
+  const respArray = responsibilities
+    ? responsibilities.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0)
+    : null;
+
+  const reqArray = requirements
+    ? requirements.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0)
+    : null;
+
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
@@ -59,7 +68,8 @@ export async function POST(request: Request) {
       ) VALUES (
         ${title}, ${department || null}, ${location || 'Remote'},
         ${type || 'Full-time'}, ${description},
-        ${responsibilities || []}, ${requirements || []},
+        ${respArray ? sql`ARRAY[${respArray}]` : null},
+        ${reqArray ? sql`ARRAY[${reqArray}]` : null},
         ${salary_range || null}, 'open'
       )
     `;
