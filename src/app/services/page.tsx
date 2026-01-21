@@ -260,7 +260,7 @@ export default function Services() {
 
         {/* Budget Starters */}
         <section className="mb-32">
-          <h2 className="text-6xl font-black text-center mb-16 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]">
+          <h2 className="text-5xl sm:text-6xl font-black text-center mb-16 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]">
             Budget-Friendly Starters
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -477,11 +477,11 @@ export default function Services() {
         </section>
 
         {/* Custom Callout */}
-        <section className="text-center py-24 bg-gradient-to-br from-black/70 via-indigo-950/60 to-purple-950/50 border border-indigo-500/40 rounded-3xl backdrop-blur-xl">
-          <h2 className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 animate-gradient-x bg-[length:200%_200%]">
+        <section className="text-center py-28 bg-gradient-to-br from-black/70 via-indigo-950/60 to-purple-950/50 border border-indigo-500/40 rounded-3xl backdrop-blur-xl">
+          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 animate-gradient-x bg-[length:200%_200%] leading-tight px-4">
             Need Something Epic?
           </h2>
-          <p className="text-2xl text-indigo-200 max-w-4xl mx-auto mb-12 leading-relaxed">
+          <p className="text-xl sm:text-2xl text-indigo-200 max-w-4xl mx-auto mb-12 leading-relaxed px-4">
             From full SaaS platforms to unique branding or automation tools — we build exactly what your vision demands.
           </p>
           <Link
