@@ -2,7 +2,7 @@
 import { neon } from '@neondatabase/serverless';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic'; // ← This line forces fresh data on every request
+export const dynamic = 'force-dynamic';
 
 export default async function Careers() {
   const sql = neon(process.env.DATABASE_URL!);
@@ -26,8 +26,8 @@ export default async function Careers() {
 
         {jobs.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-2xl text-indigo-300">No open positions right now.</p>
-            <p className="text-lg text-indigo-400 mt-4">
+            <p className="text-2xl text-indigo-300 mb-6">No open positions right now.</p>
+            <p className="text-lg text-indigo-400">
               Email your resume to <a href="mailto:hr@vynseracorp.com" className="text-indigo-300 hover:text-indigo-100 underline">hr@vynseracorp.com</a> to be considered for future opportunities.
             </p>
           </div>
@@ -75,8 +75,7 @@ export default async function Careers() {
                 )}
 
                 <Link
-                  href={`/careers/apply/${job.id}`}
-                  prefetch={false}
+                  href={`/careers/apply?jobId=${job.id}`}
                   className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
                 >
                   Apply Now
@@ -85,7 +84,6 @@ export default async function Careers() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   );

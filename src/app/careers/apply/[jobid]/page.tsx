@@ -1,17 +1,24 @@
-// src/app/careers/apply/[jobid]/page.tsx
+// src/app/careers/apply/page.tsx
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 
-export const dynamic = 'force-dynamic';
+export default async function ApplyJob() {
+  const headersList = headers();
+  const searchParams = new URLSearchParams((await headersList).get('x-search-params') || '');
+  const jobIdStr = searchParams.get('jobId');
 
-export default async function ApplyJob({ params }: { params: { jobid: string } }) {
-  const jobid = parseInt(params.jobid, 10);
-  if (isNaN(jobid)) notFound();
+  if (!jobIdStr) {
+    return notFound(); // No jobId in URL
+  }
+
+  const jobId = parseInt(jobIdStr, 10);
+  if (isNaN(jobId)) notFound();
 
   const sql = neon(process.env.DATABASE_URL!);
 
   const [job] = await sql`
-    SELECT * FROM jobs WHERE id = ${jobid} AND status = 'open'
+    SELECT * FROM jobs WHERE id = ${jobId} AND status = 'open'
   `;
 
   if (!job) notFound();
@@ -68,7 +75,7 @@ export default async function ApplyJob({ params }: { params: { jobid: string } }
           encType="multipart/form-data"
           className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10"
         >
-          <input type="hidden" name="jobid" value={job.id} />
+          <input type="hidden" name="jobId" value={job.id} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
