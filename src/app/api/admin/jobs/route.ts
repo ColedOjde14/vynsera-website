@@ -4,6 +4,7 @@ export const runtime = 'nodejs';
 import { currentUser } from '@clerk/nextjs/server';
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache'; // ← Added this import
 
 export async function GET() {
   const user = await currentUser();
@@ -74,6 +75,9 @@ export async function POST(request: Request) {
       )
     `;
 
+    // Force refresh of the careers page so new jobs appear immediately
+    revalidatePath('/careers');
+
     return NextResponse.json({ success: true, message: 'Job posted!' });
   } catch (error) {
     console.error('Job creation error:', error);
@@ -101,6 +105,9 @@ export async function DELETE(request: Request) {
     await sql`
       DELETE FROM jobs WHERE id = ${id}
     `;
+
+    // Also revalidate careers page when deleting a job
+    revalidatePath('/careers');
 
     return NextResponse.json({ success: true, message: 'Job deleted' });
   } catch (error) {
