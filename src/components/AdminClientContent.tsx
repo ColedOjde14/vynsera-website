@@ -306,13 +306,13 @@ export default function AdminClientContent({
       printWindow.document.write(`
         <html>
           <head>
-            <title>Vynsera Application - ${app.full_name}</title>
+            <title>Vynsera Application - ${app.first_name} ${app.last_name}</title>
             <style>
-              body { font-family: Arial, sans-serif; padding: 30px; line-height: 1.6; max-width: 900px; margin: auto; }
+              body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; max-width: 900px; margin: auto; }
               h1 { color: #4f46e5; text-align: center; margin-bottom: 30px; }
-              h2 { color: #6366f1; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+              h2 { color: #6366f1; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-top: 30px; }
               .field { margin-bottom: 20px; }
-              .label { font-weight: bold; color: #6366f1; display: inline-block; width: 220px; }
+              .label { font-weight: bold; color: #6366f1; display: inline-block; width: 240px; }
               .value { margin-left: 10px; }
               hr { border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0; }
               .section { margin-bottom: 40px; }
@@ -324,9 +324,9 @@ export default function AdminClientContent({
 
             <div class="section">
               <h2>Personal Information</h2>
-              <div class="field"><span class="label">Full Name:</span> <span class="value">${app.full_name}</span></div>
+              <div class="field"><span class="label">Name:</span> <span class="value">${app.first_name} ${app.last_name}</span></div>
               <div class="field"><span class="label">Email:</span> <span class="value">${app.email}</span></div>
-              <div class="field"><span class="label">Phone:</span> <span class="value">${app.phone || 'Not provided'}</span></div>
+              <div class="field"><span class="label">Phone:</span> <span class="value">${app.phone}</span></div>
             </div>
 
             <div class="section">
@@ -336,13 +336,28 @@ export default function AdminClientContent({
             </div>
 
             <div class="section">
-              <h2>Education History</h2>
-              <p class="value whitespace-pre-wrap">${app.education_history.replace(/\n/g, '<br>') || 'Not provided'}</p>
+              <h2>Position Applying For</h2>
+              <p class="value">${app.position_applying_for}</p>
             </div>
 
             <div class="section">
-              <h2>Work History</h2>
-              <p class="value whitespace-pre-wrap">${app.work_history.replace(/\n/g, '<br>') || 'Not provided'}</p>
+              <h2>Why Vynsera?</h2>
+              <p class="value whitespace-pre-wrap">${app.why_interested.replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <div class="section">
+              <h2>Salary Expectations</h2>
+              <p class="value">${app.salary_expectations || 'Not provided'}</p>
+            </div>
+
+            <div class="section">
+              <h2>Education</h2>
+              <p class="value whitespace-pre-wrap">${app.education.replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <div class="section">
+              <h2>Work Experience</h2>
+              <p class="value whitespace-pre-wrap">${app.work_experience.replace(/\n/g, '<br>')}</p>
             </div>
 
             <hr>
@@ -803,9 +818,14 @@ export default function AdminClientContent({
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-2xl font-bold text-indigo-200">{app.full_name}</h3>
+                      <h3 className="text-2xl font-bold text-indigo-200">
+                        {app.first_name} {app.last_name}
+                      </h3>
                       <p className="text-indigo-400 mt-2">
-                        {app.email} • {app.phone || 'No phone provided'}
+                        {app.email} • {app.phone}
+                      </p>
+                      <p className="text-indigo-400 mt-1">
+                        Position: {app.position_applying_for}
                       </p>
                     </div>
                     <div className="flex gap-4">
@@ -837,22 +857,42 @@ export default function AdminClientContent({
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-semibold text-indigo-200 mb-2">Submitted</h4>
+                      <h4 className="text-lg font-semibold text-indigo-200 mb-2">Salary Expectations</h4>
                       <p className="text-indigo-300">
-                        {new Date(app.created_at).toLocaleString()}
+                        {app.salary_expectations || 'Not provided'}
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="text-lg font-semibold text-indigo-200 mb-2">Education History</h4>
-                    <p className="text-indigo-300 whitespace-pre-wrap">{app.education_history || 'Not provided'}</p>
+                    <h4 className="text-lg font-semibold text-indigo-200 mb-2">Why Vynsera?</h4>
+                    <p className="text-indigo-300 whitespace-pre-wrap">{app.why_interested}</p>
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="text-lg font-semibold text-indigo-200 mb-2">Work History</h4>
-                    <p className="text-indigo-300 whitespace-pre-wrap">{app.work_history || 'Not provided'}</p>
+                    <h4 className="text-lg font-semibold text-indigo-200 mb-2">Education</h4>
+                    <p className="text-indigo-300 whitespace-pre-wrap">{app.education || 'Not provided'}</p>
                   </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-indigo-200 mb-2">Work Experience</h4>
+                    <p className="text-indigo-300 whitespace-pre-wrap">{app.work_experience || 'Not provided'}</p>
+                  </div>
+
+                  {app.disability_status && (
+                    <p className="text-sm text-indigo-400 mt-2">
+                      Disability Status: {app.disability_status}
+                    </p>
+                  )}
+                  {app.veteran_status && (
+                    <p className="text-sm text-indigo-400 mt-2">
+                      Veteran Status: {app.veteran_status}
+                    </p>
+                  )}
+
+                  <p className="text-sm text-indigo-400 mt-6">
+                    Submitted: {new Date(app.created_at).toLocaleString()}
+                  </p>
                 </div>
               ))}
             </div>

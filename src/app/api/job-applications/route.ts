@@ -31,15 +31,22 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
 
-    const full_name = formData.get('full_name') as string;
+    const first_name = formData.get('first_name') as string;
+    const last_name = formData.get('last_name') as string;
     const email = formData.get('email') as string;
-    const phone = formData.get('phone') as string || null;
+    const phone = formData.get('phone') as string;
     const authorized_to_work_us_str = formData.get('authorized_to_work_us') as string;
     const requires_sponsorship_str = formData.get('requires_sponsorship') as string;
-    const education_history = formData.get('education_history') as string;
-    const work_history = formData.get('work_history') as string;
+    const work_experience = formData.get('work_experience') as string;
+    const education = formData.get('education') as string;
+    const position_applying_for = formData.get('position_applying_for') as string;
+    const why_interested = formData.get('why_interested') as string;
+    const salary_expectations = formData.get('salary_expectations') as string || null;
+    const disability_status = formData.get('disability_status') as string || null;
+    const veteran_status = formData.get('veteran_status') as string || null;
 
-    if (!full_name || !email || !authorized_to_work_us_str || !education_history || !work_history) {
+    // Required fields check
+    if (!first_name || !last_name || !email || !phone || !authorized_to_work_us_str || !work_experience || !education || !position_applying_for || !why_interested) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -50,21 +57,33 @@ export async function POST(request: Request) {
 
     await sql`
       INSERT INTO applications (
-        full_name,
+        first_name,
+        last_name,
         email,
         phone,
         authorized_to_work_us,
         requires_sponsorship,
-        education_history,
-        work_history
+        work_experience,
+        education,
+        position_applying_for,
+        why_interested,
+        salary_expectations,
+        disability_status,
+        veteran_status
       ) VALUES (
-        ${full_name},
+        ${first_name},
+        ${last_name},
         ${email},
         ${phone},
         ${authorized_to_work_us},
         ${requires_sponsorship},
-        ${education_history},
-        ${work_history}
+        ${work_experience},
+        ${education},
+        ${position_applying_for},
+        ${why_interested},
+        ${salary_expectations},
+        ${disability_status},
+        ${veteran_status}
       )
     `;
 

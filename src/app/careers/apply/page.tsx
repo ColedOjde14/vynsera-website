@@ -16,7 +16,7 @@ export default function VynseraApplication() {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch('/api/job-applications', {
+      const response = await fetch('/api/applications', {
         method: 'POST',
         body: formData,
       });
@@ -26,7 +26,7 @@ export default function VynseraApplication() {
       if (response.ok) {
         setFormStatus('success');
         form.reset();
-        setTimeout(() => setFormStatus('idle'), 8000); // Hide message after 8s
+        setTimeout(() => setFormStatus('idle'), 10000); // 10s
       } else {
         setFormStatus('error');
         setTimeout(() => setFormStatus('idle'), 8000);
@@ -49,9 +49,11 @@ export default function VynseraApplication() {
 
         {formStatus === 'success' ? (
           <div className="text-center py-20 bg-green-900/30 border border-green-500/40 rounded-2xl p-12">
-            <h2 className="text-4xl font-bold text-green-300 mb-6">Application Received!</h2>
-            <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
-              Your application has been received. hr@vynseracorp.com will reach out if your experience/skills match our openings.
+            <h2 className="text-4xl font-bold text-green-300 mb-6">Application Received</h2>
+            <p className="text-xl text-indigo-200 max-w-3xl mx-auto">
+              Thank you for applying. Your application has been received.
+              <br /><br />
+              hr@vynseracorp.com will reach out if your experience and skills match our current or future openings.
             </p>
             <div className="mt-12">
               <Link
@@ -62,20 +64,38 @@ export default function VynseraApplication() {
               </Link>
             </div>
           </div>
+        ) : formStatus === 'error' ? (
+          <div className="text-center py-12 bg-red-900/30 border border-red-500/40 rounded-2xl p-10">
+            <h2 className="text-3xl font-bold text-red-300 mb-4">Submission Failed</h2>
+            <p className="text-lg text-indigo-200">
+              Something went wrong. Please try again or email your application directly to hr@vynseracorp.com.
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 space-y-10">
-            {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-indigo-300 text-lg mb-3">Full Name *</label>
+                <label className="block text-indigo-300 text-lg mb-3">First Name *</label>
                 <input
                   type="text"
-                  name="full_name"
+                  name="first_name"
                   required
                   className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
                 />
               </div>
 
+              <div>
+                <label className="block text-indigo-300 text-lg mb-3">Last Name *</label>
+                <input
+                  type="text"
+                  name="last_name"
+                  required
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-indigo-300 text-lg mb-3">Email Address *</label>
                 <input
@@ -85,16 +105,16 @@ export default function VynseraApplication() {
                   className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-indigo-300 text-lg mb-3">Phone Number *</label>
-              <input
-                type="tel"
-                name="phone"
-                required
-                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
-              />
+              <div>
+                <label className="block text-indigo-300 text-lg mb-3">Phone Number *</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  required
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
             </div>
 
             {/* Work Authorization */}
@@ -105,22 +125,11 @@ export default function VynseraApplication() {
                 </label>
                 <div className="flex gap-8">
                   <label className="flex items-center text-indigo-300">
-                    <input
-                      type="radio"
-                      name="authorized_to_work_us"
-                      value="true"
-                      required
-                      className="mr-3 accent-indigo-500"
-                    />
+                    <input type="radio" name="authorized_to_work_us" value="true" required className="mr-3 accent-indigo-500" />
                     Yes
                   </label>
                   <label className="flex items-center text-indigo-300">
-                    <input
-                      type="radio"
-                      name="authorized_to_work_us"
-                      value="false"
-                      className="mr-3 accent-indigo-500"
-                    />
+                    <input type="radio" name="authorized_to_work_us" value="false" className="mr-3 accent-indigo-500" />
                     No
                   </label>
                 </div>
@@ -132,58 +141,107 @@ export default function VynseraApplication() {
                 </label>
                 <div className="flex gap-8">
                   <label className="flex items-center text-indigo-300">
-                    <input
-                      type="radio"
-                      name="requires_sponsorship"
-                      value="false"
-                      required
-                      className="mr-3 accent-indigo-500"
-                    />
+                    <input type="radio" name="requires_sponsorship" value="false" required className="mr-3 accent-indigo-500" />
                     No
                   </label>
                   <label className="flex items-center text-indigo-300">
-                    <input
-                      type="radio"
-                      name="requires_sponsorship"
-                      value="true"
-                      className="mr-3 accent-indigo-500"
-                    />
+                    <input type="radio" name="requires_sponsorship" value="true" className="mr-3 accent-indigo-500" />
                     Yes
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* Education History */}
+            {/* Work Experience */}
             <div>
-              <label className="block text-indigo-300 text-lg mb-3">
-                Education History * <span className="text-sm">(degrees, institutions, years, major, GPA/honors if relevant)</span>
-              </label>
+              <label className="block text-indigo-300 text-lg mb-3">Work Experience * <span className="text-sm">(list roles, companies, dates, responsibilities, achievements)</span></label>
               <textarea
-                name="education_history"
+                name="work_experience"
                 required
-                rows={6}
-                placeholder="Example:\nBachelor of Science in Computer Science, Syracuse University, 2020-2024\nGPA: 3.8, Dean's List 2022-2024\nRelevant coursework: Data Structures, Algorithms, Web Development"
+                rows={8}
+                placeholder="Example (reverse chronological order):\nSoftware Engineer, TechCorp, 2022–Present\n- Led development of scalable web applications\n- Improved system performance by 45%\n\nIntern, StartupX, 2021\n- Built frontend features using React"
                 className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
               />
             </div>
 
-            {/* Work History */}
+            {/* Education */}
             <div>
-              <label className="block text-indigo-300 text-lg mb-3">
-                Work History * <span className="text-sm">(previous roles, companies, dates, key responsibilities/achievements)</span>
-              </label>
+              <label className="block text-indigo-300 text-lg mb-3">Education * <span className="text-sm">(degrees, institutions, dates, major, GPA/honors if relevant)</span></label>
               <textarea
-                name="work_history"
+                name="education"
                 required
-                rows={8}
-                placeholder="Example:\nSoftware Engineer Intern, TechCorp, May 2023 - Aug 2023\n- Developed full-stack features using React and Node.js\n- Improved application performance by 40%\n\nCustomer Support Specialist, Local Business, 2020 - 2022\n- Handled 50+ customer inquiries daily\n- Reduced response time by 30%"
+                rows={6}
+                placeholder="Example:\nBachelor of Science in Computer Science, Syracuse University, 2018–2022\nGPA: 3.9/4.0, Magna Cum Laude\nRelevant coursework: Algorithms, Systems Design, Machine Learning"
                 className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
               />
+            </div>
+
+            {/* Position & Interest */}
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">What position are you applying for? *</label>
+              <input
+                type="text"
+                name="position_applying_for"
+                required
+                placeholder="e.g. Software Engineer, Marketing Specialist, General Application"
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">Why are you interested in Vynsera? *</label>
+              <textarea
+                name="why_interested"
+                required
+                rows={5}
+                placeholder="Tell us why you want to join Vynsera and what excites you about our work."
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">Salary Expectations (optional)</label>
+              <input
+                type="text"
+                name="salary_expectations"
+                placeholder="e.g. $120,000–$150,000 or Open to discussion"
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            {/* EEOC Optional Questions */}
+            <div className="space-y-6 pt-6 border-t border-indigo-500/20">
+              <p className="text-indigo-400 text-sm italic">
+                Vynsera is an equal opportunity employer. The following questions are optional and used only for government reporting purposes. Your responses will not affect your application.
+              </p>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-3">Do you have a disability? (optional)</label>
+                <select
+                  name="disability_status"
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="">Prefer not to answer</option>
+                  <option value="yes">Yes, I have a disability</option>
+                  <option value="no">No, I do not have a disability</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-3">Veteran status (optional)</label>
+                <select
+                  name="veteran_status"
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="">Prefer not to answer</option>
+                  <option value="protected_veteran">Protected veteran</option>
+                  <option value="not_protected">Not a protected veteran</option>
+                </select>
+              </div>
             </div>
 
             {/* Submit */}
-            <div className="flex justify-center pt-8">
+            <div className="flex justify-center pt-12">
               <button
                 type="submit"
                 disabled={loading}
