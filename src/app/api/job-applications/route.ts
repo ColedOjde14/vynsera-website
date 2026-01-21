@@ -45,8 +45,18 @@ export async function POST(request: Request) {
     const disability_status = formData.get('disability_status') as string || null;
     const veteran_status = formData.get('veteran_status') as string || null;
 
-    // Required fields check
-    if (!first_name || !last_name || !email || !phone || !authorized_to_work_us_str || !work_experience || !education || !position_applying_for || !why_interested) {
+    // Required fields validation
+    if (
+      !first_name ||
+      !last_name ||
+      !email ||
+      !phone ||
+      !authorized_to_work_us_str ||
+      !work_experience ||
+      !education ||
+      !position_applying_for ||
+      !why_interested
+    ) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
