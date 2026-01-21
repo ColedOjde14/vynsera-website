@@ -5,7 +5,7 @@ import { headers } from 'next/headers';
 
 export default async function ApplyJob() {
   const headersList = headers();
-  const searchParams = new URLSearchParams((await headersList).get('x-search-params') || '');
+  const searchParams = new URLSearchParams(headersList.get('x-search-params') || '');
   const jobIdStr = searchParams.get('jobId');
 
   if (!jobIdStr) {
