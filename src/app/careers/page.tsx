@@ -4,22 +4,21 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-// Helper to safely parse PostgreSQL array strings (e.g. {"Test"} or {"Task 1","Task 2"})
+// Helper to safely parse PostgreSQL array strings like {"Test","Task 2"} or {"Test"}
 const parsePgArray = (value: any): string[] => {
   if (!value) return [];
-  if (Array.isArray(value)) return value; // already a real array
+  if (Array.isArray(value)) return value; // already parsed array
 
   const str = String(value).trim();
   if (str.startsWith('{') && str.endsWith('}')) {
-    // Remove outer {} and split by comma, strip quotes
     return str
-      .slice(1, -1)                    // remove { and }
-      .split(',')                      // split by comma
-      .map(item => item.trim().replace(/^"|"$/g, ''))  // trim & remove quotes
-      .filter(item => item.length > 0); // remove empty
+      .slice(1, -1)                      // remove outer braces
+      .split(',')                        // split by comma
+      .map(item => item.trim().replace(/^"|"$/g, '')) // trim and remove quotes
+      .filter(item => item.length > 0);  // remove empty entries
   }
 
-  // Fallback: single item or malformed
+  // Fallback for single value or malformed
   return [str];
 };
 
