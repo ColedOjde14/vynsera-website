@@ -29,25 +29,24 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const {
-      full_name,
-      email,
-      phone,
-      authorized_to_work_us,
-      requires_sponsorship,
-      education_history,
-      work_history,
-    } = body;
+    const full_name = formData.get('full_name') as string;
+    const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string || null;
+    const authorized_to_work_us_str = formData.get('authorized_to_work_us') as string;
+    const requires_sponsorship_str = formData.get('requires_sponsorship') as string;
+    const education_history = formData.get('education_history') as string;
+    const work_history = formData.get('work_history') as string;
 
-    if (!full_name || !email || !authorized_to_work_us === undefined || !education_history || !work_history) {
+    // Validate required fields
+    if (!full_name || !email || !authorized_to_work_us_str || !education_history || !work_history) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Convert booleans to actual boolean values (from form string "true"/"false")
-    const authorized = authorized_to_work_us === 'true' || authorized_to_work_us === true;
-    const sponsorship = requires_sponsorship === 'true' || requires_sponsorship === true;
+    // Convert radio string values to booleans
+    const authorized_to_work_us = authorized_to_work_us_str === 'true';
+    const requires_sponsorship = requires_sponsorship_str === 'true';
 
     const sql = neon(process.env.DATABASE_URL!);
 
@@ -63,9 +62,9 @@ export async function POST(request: Request) {
       ) VALUES (
         ${full_name},
         ${email},
-        ${phone || null},
-        ${authorized},
-        ${sponsorship},
+        ${phone},
+        ${authorized_to_work_us},
+        ${requires_sponsorship},
         ${education_history},
         ${work_history}
       )
@@ -73,35 +72,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Application submitted!' });
   } catch (error) {
-    console.error('Job application error:', error);
+    console.error('Application submission error:', error);
     return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: Request) {
-  const user = await currentUser();
-
-  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
-
-  const body = await request.json();
-  const { id } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'Missing application ID' }, { status: 400 });
-  }
-
-  const sql = neon(process.env.DATABASE_URL!);
-
-  try {
-    await sql`
-      DELETE FROM applications WHERE id = ${id}
-    `;
-
-    return NextResponse.json({ success: true, message: 'Application deleted' });
-  } catch (error) {
-    console.error('Application delete error:', error);
-    return NextResponse.json({ error: 'Failed to delete application' }, { status: 500 });
   }
 }
