@@ -4,6 +4,25 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
+// Helper to safely parse PostgreSQL array strings (e.g. {"Test"} or {"Task 1","Task 2"})
+const parsePgArray = (value: any): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value; // already a real array
+
+  const str = String(value).trim();
+  if (str.startsWith('{') && str.endsWith('}')) {
+    // Remove outer {} and split by comma, strip quotes
+    return str
+      .slice(1, -1)                    // remove { and }
+      .split(',')                      // split by comma
+      .map(item => item.trim().replace(/^"|"$/g, ''))  // trim & remove quotes
+      .filter(item => item.length > 0); // remove empty
+  }
+
+  // Fallback: single item or malformed
+  return [str];
+};
+
 export default async function Careers() {
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -52,22 +71,22 @@ export default async function Careers() {
 
                 <p className="text-indigo-300 mb-6">{job.description}</p>
 
-                {job.responsibilities?.length > 0 && (
+                {parsePgArray(job.responsibilities).length > 0 && (
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Responsibilities</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {(job.responsibilities as string[]).map((item: string, i: number) => (
+                      {parsePgArray(job.responsibilities).map((item: string, i: number) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {job.requirements?.length > 0 && (
+                {parsePgArray(job.requirements).length > 0 && (
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Requirements</h3>
                     <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                      {(job.requirements as string[]).map((item: string, i: number) => (
+                      {parsePgArray(job.requirements).map((item: string, i: number) => (
                         <li key={i}>{item}</li>
                       ))}
                     </ul>
