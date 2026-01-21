@@ -4,20 +4,32 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-// Helper to parse PostgreSQL array strings like {"test","test"} into ["test", "test"]
+// Robust parser for PostgreSQL arrays (handles double-escaped JSON strings inside arrays)
 const parsePgArray = (value: any): string[] => {
   if (!value) return [];
-  if (Array.isArray(value)) return value;
+  if (Array.isArray(value)) return value; // already a real array
 
-  const str = String(value).trim();
+  let str = String(value).trim();
+
+  // Handle double-escaped cases like {"{\"Test\",\"Test\"}"}
   if (str.startsWith('{') && str.endsWith('}')) {
-    return str
-      .slice(1, -1)
-      .split(',')
-      .map(item => item.trim().replace(/^"|"$/g, ''))
-      .filter(item => item.length > 0);
+    // Remove outer braces
+    str = str.slice(1, -1);
+    // Split by comma, but account for escaped inner quotes
+    const items = str.split(/(?<!\\),/).map(item => {
+      item = item.trim();
+      // Remove outer quotes if present
+      if (item.startsWith('"') && item.endsWith('"')) {
+        item = item.slice(1, -1);
+      }
+      // Unescape any escaped quotes inside
+      item = item.replace(/\\"/g, '"');
+      return item;
+    });
+    return items.filter(item => item.length > 0);
   }
 
+  // Fallback for single value
   return [str];
 };
 
@@ -53,7 +65,7 @@ export default async function Careers() {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 hover:border-indigo-400 transition-all hover:shadow-xl hover:shadow-indigo-500/10"
+                className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 hover:border-indigo-400 transition-all hover:shadow-xl hover:shadow-indigo-500/10 overflow-hidden"
               >
                 <h2 className="text-3xl font-bold text-indigo-200 mb-4">{job.title}</h2>
                 <div className="flex flex-wrap gap-4 mb-6 text-sm text-indigo-400">
@@ -67,14 +79,14 @@ export default async function Careers() {
                   )}
                 </div>
 
-                <p className="text-indigo-300 mb-6">{job.description}</p>
+                <p className="text-indigo-300 mb-6 whitespace-pre-wrap break-words max-h-32 overflow-y-auto">{job.description}</p>
 
                 {parsePgArray(job.responsibilities).length > 0 && (
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Responsibilities</h3>
-                    <ul className="list-disc list-inside text-indigo-300 space-y-2">
+                    <ul className="list-disc list-inside text-indigo-300 space-y-2 max-h-48 overflow-y-auto">
                       {parsePgArray(job.responsibilities).map((item: string, i: number) => (
-                        <li key={i}>{item}</li>
+                        <li key={i} className="whitespace-pre-wrap break-words">{item}</li>
                       ))}
                     </ul>
                   </div>
@@ -83,9 +95,9 @@ export default async function Careers() {
                 {parsePgArray(job.requirements).length > 0 && (
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold text-indigo-200 mb-3">Requirements</h3>
-                    <ul className="list-disc list-inside text-indigo-300 space-y-2">
+                    <ul className="list-disc list-inside text-indigo-300 space-y-2 max-h-48 overflow-y-auto">
                       {parsePgArray(job.requirements).map((item: string, i: number) => (
-                        <li key={i}>{item}</li>
+                        <li key={i} className="whitespace-pre-wrap break-words">{item}</li>
                       ))}
                     </ul>
                   </div>
