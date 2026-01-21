@@ -1,6 +1,7 @@
 // src/app/careers/apply/[jobId]/page.tsx
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
+export const dynamic = 'force-dynamic';
 
 export default async function ApplyJob({ params }: { params: { jobId: string } }) {
   const jobId = parseInt(params.jobId, 10);
