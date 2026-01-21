@@ -3,8 +3,8 @@ import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
-export default async function ApplyJob({ params }: { params: { jobId: string } }) {
-  const jobId = parseInt(params.jobId, 10);
+export default async function ApplyJob({ params }: { params: { jobid: string } }) {
+  const jobId = parseInt(params.jobid, 10);
   if (isNaN(jobId)) notFound();
 
   const sql = neon(process.env.DATABASE_URL!);
