@@ -1,19 +1,22 @@
 // src/app/careers/apply/page.tsx
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 
-export default async function ApplyJob() {
-  const headersList = headers();
-  const searchParams = new URLSearchParams(headersList.get('x-search-params') || '');
-  const jobIdStr = searchParams.get('jobId');
+export default async function ApplyJob({
+  searchParams,
+}: {
+  searchParams: { jobId?: string };
+}) {
+  const jobIdStr = searchParams.jobId;
 
   if (!jobIdStr) {
     return notFound(); // No jobId in URL
   }
 
-  const jobId = parseInt(jobIdStr, 10);
-  if (isNaN(jobId)) notFound();
+  const jobId = Number(jobIdStr);
+  if (isNaN(jobId)) {
+    return notFound();
+  }
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -21,7 +24,9 @@ export default async function ApplyJob() {
     SELECT * FROM jobs WHERE id = ${jobId} AND status = 'open'
   `;
 
-  if (!job) notFound();
+  if (!job) {
+    return notFound();
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white p-6">
