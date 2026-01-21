@@ -50,13 +50,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // Cleanly split textarea input into array of strings
+  // Clean split: turn textarea into real array of strings
   const cleanArray = (input: string | undefined): string[] | null => {
     if (!input || typeof input !== 'string') return null;
+    // Split on newline or comma, trim, filter empty
     return input
-      .split(/[\n,]+/)               // split on newline or comma
+      .split(/[\n,]+/)
       .map(s => s.trim())
-      .filter(s => s.length > 0);    // remove empty lines
+      .filter(s => s.length > 0);
   };
 
   const respArray = cleanArray(responsibilities);
