@@ -33,13 +33,34 @@ export default function AdminClientContent({
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
   const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
 
-  // Clients tab state
+  // Clients tab
   const [clients, setClients] = useState<any[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
+  // Jobs tab
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [newJob, setNewJob] = useState({
+    title: '',
+    department: '',
+    location: 'Remote',
+    type: 'Full-time',
+    description: '',
+    responsibilities: '',
+    requirements: '',
+    salary_range: '',
+  });
+  const [postingJob, setPostingJob] = useState(false);
+
+  // Applications tab
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(true);
+
   // Tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications'
+  >('overview');
 
   // Fetch clients from Clerk
   useEffect(() => {
@@ -65,32 +86,78 @@ export default function AdminClientContent({
     fetchClients();
   }, []);
 
-const handleDeleteContact = async (id: number) => {
-  if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
+  // Fetch jobs
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('/api/admin/jobs');
+        const data = await response.json();
 
-  setDeletingId(id);
-  try {
-    const response = await fetch('/api/contact', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+        if (response.ok) {
+          setJobs(data.jobs || []);
+        } else {
+          toast.error(data.error || 'Failed to load jobs');
+        }
+      } catch (err) {
+        toast.error('Network error loading jobs');
+        console.error(err);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
 
-    const data = await response.json();
+    fetchJobs();
+  }, []);
 
-    if (response.ok) {
-      toast.success('Contact submission deleted!');
-      window.location.reload();
-    } else {
-      toast.error(data.error || 'Failed to delete submission');
+  // Fetch applications
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch('/api/job-applications');
+        const data = await response.json();
+
+        if (response.ok) {
+          setApplications(data.applications || []);
+        } else {
+          toast.error(data.error || 'Failed to load applications');
+        }
+      } catch (err) {
+        toast.error('Network error loading applications');
+        console.error(err);
+      } finally {
+        setLoadingApplications(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const handleDeleteContact = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
+
+    setDeletingId(id);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Contact submission deleted!');
+        window.location.reload();
+      } else {
+        toast.error(data.error || 'Failed to delete submission');
+      }
+    } catch (error) {
+      toast.error('Network error. Try again.');
+      console.error('Delete contact error:', error);
+    } finally {
+      setDeletingId(null);
     }
-  } catch (error) {
-    toast.error('Network error. Try again.');
-    console.error('Delete contact error:', error);
-  } finally {
-    setDeletingId(null);
-  }
-};
+  };
 
   const handleUpdateServiceRequest = async (requestId: number, newStatus: string) => {
     setUpdatingRequestId(requestId);
@@ -186,6 +253,70 @@ const handleDeleteContact = async (id: number) => {
     }
   };
 
+  const handleCreateJob = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPostingJob(true);
+
+    try {
+      const response = await fetch('/api/admin/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newJob),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Job posted successfully!');
+        setNewJob({
+          title: '',
+          department: '',
+          location: 'Remote',
+          type: 'Full-time',
+          description: '',
+          responsibilities: '',
+          requirements: '',
+          salary_range: '',
+        });
+        // Refresh jobs list
+        const res = await fetch('/api/admin/jobs');
+        const updated = await res.json();
+        setJobs(updated.jobs || []);
+      } else {
+        toast.error(data.error || 'Failed to post job');
+      }
+    } catch (error) {
+      toast.error('Network error');
+      console.error(error);
+    } finally {
+      setPostingJob(false);
+    }
+  };
+
+  const handleDeleteJob = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this job posting?')) return;
+
+    try {
+      const response = await fetch('/api/admin/jobs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Job deleted!');
+        setJobs(jobs.filter((job) => job.id !== id));
+      } else {
+        toast.error(data.error || 'Failed to delete job');
+      }
+    } catch (error) {
+      toast.error('Network error');
+      console.error(error);
+    }
+  };
+
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
       {/* Return to Homepage Button */}
@@ -235,6 +366,18 @@ const handleDeleteContact = async (id: number) => {
           className={`px-6 py-3 rounded-full transition-all ${activeTab === 'clients' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
         >
           Clients
+        </button>
+        <button
+          onClick={() => setActiveTab('jobs')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'jobs' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Jobs
+        </button>
+        <button
+          onClick={() => setActiveTab('applications')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'applications' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Applications
         </button>
       </div>
 
@@ -324,7 +467,7 @@ const handleDeleteContact = async (id: number) => {
         </div>
       )}
 
-      {/* Recent Work Orders - REMOVED TO FIX CRASH */}
+      {/* Orders Tab - Disabled */}
       {activeTab === 'orders' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Recent Work Orders</h2>
@@ -334,7 +477,7 @@ const handleDeleteContact = async (id: number) => {
         </div>
       )}
 
-      {/* Contact Submissions */}
+      {/* Contacts */}
       {activeTab === 'contacts' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Contact Submissions</h2>
@@ -372,7 +515,7 @@ const handleDeleteContact = async (id: number) => {
         </div>
       )}
 
-      {/* Service Inquiries/Requests */}
+      {/* Requests */}
       {activeTab === 'requests' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Service Inquiries/Requests</h2>
@@ -457,6 +600,197 @@ const handleDeleteContact = async (id: number) => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Jobs Tab */}
+      {activeTab === 'jobs' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Post New Job</h2>
+
+          <form onSubmit={handleCreateJob} className="space-y-6">
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Job Title *</label>
+              <input
+                type="text"
+                value={newJob.title}
+                onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
+                required
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Department</label>
+              <input
+                type="text"
+                value={newJob.department}
+                onChange={(e) => setNewJob({ ...newJob, department: e.target.value })}
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Location</label>
+              <input
+                type="text"
+                value={newJob.location}
+                onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Job Type</label>
+              <select
+                value={newJob.type}
+                onChange={(e) => setNewJob({ ...newJob, type: e.target.value })}
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+              >
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Description *</label>
+              <textarea
+                value={newJob.description}
+                onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
+                required
+                rows={6}
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Responsibilities (one per line)</label>
+              <textarea
+                value={newJob.responsibilities}
+                onChange={(e) => setNewJob({ ...newJob, responsibilities: e.target.value })}
+                rows={4}
+                placeholder="Bullet point each responsibility..."
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Requirements (one per line)</label>
+              <textarea
+                value={newJob.requirements}
+                onChange={(e) => setNewJob({ ...newJob, requirements: e.target.value })}
+                rows={4}
+                placeholder="Bullet point each requirement..."
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-indigo-300 text-lg mb-2">Salary Range (optional)</label>
+              <input
+                type="text"
+                value={newJob.salary_range}
+                onChange={(e) => setNewJob({ ...newJob, salary_range: e.target.value })}
+                placeholder="e.g. $80,000 - $120,000"
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={postingJob}
+                className={`px-10 py-4 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all ${postingJob ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {postingJob ? 'Posting...' : 'Post Job'}
+              </button>
+            </div>
+          </form>
+
+          <h2 className="text-3xl font-bold text-indigo-200 mt-16 mb-8">Current Open Jobs</h2>
+          {loadingJobs ? (
+            <p className="text-indigo-300 text-center py-12">Loading jobs...</p>
+          ) : jobs.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No open jobs posted yet.</p>
+          ) : (
+            <div className="space-y-8">
+              {jobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-2xl font-bold text-indigo-200">{job.title}</h3>
+                      <p className="text-indigo-400 mt-2">
+                        {job.type} • {job.location} • {job.department || 'General'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteJob(job.id)}
+                      className="px-6 py-2 rounded-full bg-red-600/70 text-white hover:bg-red-500/70 transition-all text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+
+                  <p className="text-indigo-300 mt-6">{job.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Applications Tab */}
+      {activeTab === 'applications' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Job Applications</h2>
+          {loadingApplications ? (
+            <p className="text-indigo-300 text-center py-12">Loading applications...</p>
+          ) : applications.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No applications yet.</p>
+          ) : (
+            <div className="space-y-8">
+              {applications.map((app) => (
+                <div
+                  key={app.id}
+                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-2xl font-bold text-indigo-200">{app.job_title}</h3>
+                      <p className="text-indigo-400 mt-2">
+                        {app.name} • {app.email}
+                      </p>
+                      {app.phone && <p className="text-indigo-400">Phone: {app.phone}</p>}
+                    </div>
+                    <a
+                      href={app.resume_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-all text-sm"
+                    >
+                      View Resume
+                    </a>
+                  </div>
+
+                  {app.cover_letter && (
+                    <div className="mt-6">
+                      <h4 className="text-lg font-semibold text-indigo-200 mb-2">Cover Letter</h4>
+                      <p className="text-indigo-300 whitespace-pre-wrap">{app.cover_letter}</p>
+                    </div>
+                  )}
+
+                  <p className="text-sm text-indigo-400 mt-6">
+                    Applied: {new Date(app.created_at).toLocaleString()}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
         </div>
