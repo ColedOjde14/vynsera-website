@@ -1,5 +1,6 @@
 // src/app/careers/page.tsx
 import { neon } from '@neondatabase/serverless';
+import Link from 'next/link'; // ← This line fixes the error
 
 export default async function Careers() {
   const sql = neon(process.env.DATABASE_URL!);
