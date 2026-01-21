@@ -26,17 +26,21 @@ export default async function ApplyJob({ params }: { params: { jobId: string } }
           <div className="flex flex-wrap gap-4 mb-8 text-sm text-indigo-400">
             <span className="px-4 py-1 rounded-full bg-indigo-500/20">{job.type || 'Full-time'}</span>
             <span className="px-4 py-1 rounded-full bg-purple-500/20">{job.location || 'Remote'}</span>
-            {job.department && <span className="px-4 py-1 rounded-full bg-green-500/20">{job.department}</span>}
-            {job.salary_range && <span className="px-4 py-1 rounded-full bg-yellow-500/20">{job.salary_range}</span>}
+            {job.department && (
+              <span className="px-4 py-1 rounded-full bg-green-500/20">{job.department}</span>
+            )}
+            {job.salary_range && (
+              <span className="px-4 py-1 rounded-full bg-yellow-500/20">{job.salary_range}</span>
+            )}
           </div>
 
           <p className="text-indigo-300 mb-8">{job.description}</p>
 
           {job.responsibilities?.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-indigo-200 mb-4">Responsibilities</h3>
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-indigo-200 mb-3">Responsibilities</h3>
               <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                {job.responsibilities.map((item: string, i: number) => (
+                {(job.responsibilities as string[]).map((item: string, i: number) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
@@ -44,10 +48,10 @@ export default async function ApplyJob({ params }: { params: { jobId: string } }
           )}
 
           {job.requirements?.length > 0 && (
-            <div className="mb-12">
-              <h3 className="text-xl font-semibold text-indigo-200 mb-4">Requirements</h3>
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-indigo-200 mb-3">Requirements</h3>
               <ul className="list-disc list-inside text-indigo-300 space-y-2">
-                {job.requirements.map((item: string, i: number) => (
+                {(job.requirements as string[]).map((item: string, i: number) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
