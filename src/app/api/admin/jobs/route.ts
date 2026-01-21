@@ -4,7 +4,7 @@ export const runtime = 'nodejs';
 import { currentUser } from '@clerk/nextjs/server';
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache'; // ← Added this import
+import { revalidatePath } from 'next/cache';
 
 export async function GET() {
   const user = await currentUser();
@@ -50,14 +50,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // Split comma or newline-separated strings into arrays
-  const respArray = responsibilities
-    ? responsibilities.split(/[\n,]+/).map((s: string) => s.trim()).filter((s: string) => s.length > 0)
-    : null;
+  // Convert textarea strings to real arrays (split by newline or comma)
+  const splitToArray = (input: string | undefined): string[] | null => {
+    if (!input || typeof input !== 'string') return null;
+    return input
+      .split(/[\n,]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  };
 
-  const reqArray = requirements
-    ? requirements.split(/[\n,]+/).map((s: string) => s.trim()).filter((s: string) => s.length > 0)
-    : null;
+  const respArray = splitToArray(responsibilities);
+  const reqArray = splitToArray(requirements);
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -67,11 +70,15 @@ export async function POST(request: Request) {
         title, department, location, type, description,
         responsibilities, requirements, salary_range, status
       ) VALUES (
-        ${title}, ${department || null}, ${location || 'Remote'},
-        ${type || 'Full-time'}, ${description},
-        ${respArray ? sql`ARRAY[${respArray}]` : null},
-        ${reqArray ? sql`ARRAY[${reqArray}]` : null},
-        ${salary_range || null}, 'open'
+        ${title},
+        ${department || null},
+        ${location || 'Remote'},
+        ${type || 'Full-time'},
+        ${description},
+        ${respArray ? sql`ARRAY[${respArray}]::text[]` : null},
+        ${reqArray ? sql`ARRAY[${reqArray}]::text[]` : null},
+        ${salary_range || null},
+        'open'
       )
     `;
 
