@@ -1,45 +1,101 @@
 // src/app/careers/apply/page.tsx
-import { neon } from '@neondatabase/serverless';
-import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
-export default async function ApplyJob({
-  searchParams,
-}: {
-  searchParams: { jobId?: string };
-}) {
-  const jobIdStr = searchParams.jobId;
+export default function Apply() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          General Application
+        </h1>
 
-  console.log('Raw jobId from query param:', jobIdStr); // ← Debug 1
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 mb-12">
+          <p className="text-xl text-indigo-300 mb-6">
+            We are always looking for talented people to join the Vynsera team. 
+            Even if no positions are currently open, feel free to submit your information and resume.
+          </p>
+          <p className="text-lg text-indigo-400">
+            We'll keep your application on file for future opportunities.
+          </p>
+        </div>
 
-  if (!jobIdStr) {
-    console.log('No jobId in URL');
-    return notFound();
-  }
+        {/* Full Application Form */}
+        <form
+          action="/api/job-applications"
+          method="POST"
+          encType="multipart/form-data"
+          className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10"
+        >
+          {/* Hidden field for general application (no jobId) */}
+          <input type="hidden" name="jobId" value="" />
 
-  const jobId = Number(jobIdStr);
-  console.log('Parsed jobId:', jobId); // ← Debug 2
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">Full Name *</label>
+              <input
+                type="text"
+                name="name"
+                required
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
 
-  if (isNaN(jobId)) {
-    console.log('Invalid jobId:', jobIdStr);
-    return notFound();
-  }
+            <div>
+              <label className="block text-indigo-300 text-lg mb-3">Email *</label>
+              <input
+                type="email"
+                name="email"
+                required
+                className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+          </div>
 
-  const sql = neon(process.env.DATABASE_URL!);
+          <div className="mb-8">
+            <label className="block text-indigo-300 text-lg mb-3">Phone (optional)</label>
+            <input
+              type="tel"
+              name="phone"
+              className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+            />
+          </div>
 
-  console.log('Running query for job ID:', jobId); // ← Debug 3
+          <div className="mb-8">
+            <label className="block text-indigo-300 text-lg mb-3">Resume (PDF, max 5MB) *</label>
+            <input
+              type="file"
+              name="resume"
+              accept=".pdf"
+              required
+              className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+            />
+          </div>
 
-  const jobs = await sql`
-    SELECT * FROM jobs WHERE id = ${jobId} AND status = 'open'
-  `;
+          <div className="mb-10">
+            <label className="block text-indigo-300 text-lg mb-3">Cover Letter / Why Vynsera? (optional)</label>
+            <textarea
+              name="coverLetter"
+              rows={6}
+              className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+            />
+          </div>
 
-  console.log('Query returned rows:', jobs); // ← Debug 4
+          <button
+            type="submit"
+            className="w-full px-10 py-5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-xl font-medium"
+          >
+            Submit Application
+          </button>
+        </form>
 
-  const job = jobs[0];
-
-  if (!job) {
-    console.log('No open job found for ID:', jobId);
-    return notFound();
-  }
-
-  // ... rest of your original return JSX ...
+        <div className="text-center mt-12">
+          <p className="text-indigo-400">
+            <Link href="/careers" className="hover:text-indigo-200">
+              ← Back to Careers
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

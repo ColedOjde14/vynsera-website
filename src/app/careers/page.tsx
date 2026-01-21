@@ -75,7 +75,7 @@ export default async function Careers() {
                 )}
 
                 <Link
-                  href={`/careers/apply?jobId=${job.id}`}
+                  href="/careers/apply"
                   className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
                 >
                   Apply Now
