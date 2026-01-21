@@ -16,17 +16,15 @@ export default function VynseraApplication() {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch('/api/applications', {
+      const response = await fetch('/api/job-applications', {
         method: 'POST',
         body: formData,
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         setFormStatus('success');
         form.reset();
-        setTimeout(() => setFormStatus('idle'), 10000); // 10s
+        setTimeout(() => setFormStatus('idle'), 10000);
       } else {
         setFormStatus('error');
         setTimeout(() => setFormStatus('idle'), 8000);
@@ -73,6 +71,7 @@ export default function VynseraApplication() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-10 space-y-10">
+            {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-indigo-300 text-lg mb-3">First Name *</label>
