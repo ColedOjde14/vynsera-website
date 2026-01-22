@@ -25,8 +25,7 @@ export default async function ClientServices() {
       cs.is_custom,
       cs.custom_name,
       cs.custom_description,
-      s.name AS predefined_name,
-      s.description AS predefined_description
+      s.name AS predefined_name
     FROM client_services cs
     LEFT JOIN services s ON cs.service_id = s.id
     WHERE cs.client_id = ${clientId}
@@ -67,7 +66,7 @@ export default async function ClientServices() {
                 </h3>
 
                 <p className="text-indigo-300 mb-6">
-                  {service.is_custom ? service.custom_description : service.predefined_description}
+                  {service.is_custom ? service.custom_description : ''}
                 </p>
 
                 <div className="space-y-3 text-sm text-indigo-400">
