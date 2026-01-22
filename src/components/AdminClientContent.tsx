@@ -422,20 +422,13 @@ export default function AdminClientContent({
     }
   };
 
-  const handleUpdateService = async (id: number) => {
-    if (!editingService) return;
-
+  // Fixed: now accepts two arguments (id + updates object)
+  const handleUpdateService = async (id: number, updates: any) => {
     try {
       const response = await fetch('/api/admin/client-services', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id,
-          status: editingService.status,
-          start_date: editingService.start_date,
-          expiration_date: editingService.expiration_date,
-          notes: editingService.notes,
-        }),
+        body: JSON.stringify({ id, ...updates }),
       });
 
       const data = await response.json();
@@ -687,7 +680,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Orders Tab - Shows Pending Client Services */}
+      {/* Orders Tab - Pending Client Services */}
       {activeTab === 'orders' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Pending Client Services</h2>
@@ -1117,7 +1110,7 @@ export default function AdminClientContent({
       {/* Active Services Tab */}
       {activeTab === 'services' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Active Services</h2>
+          <h2 className="text-3xl font-bold text-indigo-200 mb-8">Active Services</h2>
 
           <button
             onClick={() => setShowAssignForm(true)}
@@ -1126,7 +1119,7 @@ export default function AdminClientContent({
             + Assign New Service
           </button>
 
-          {/* Assign Form (hidden until button clicked) */}
+          {/* Assign Form (shown when button clicked) */}
           {showAssignForm && (
             <div className="mb-12 bg-black/50 border border-indigo-500/30 rounded-xl p-8">
               <div className="flex justify-between items-center mb-6">
@@ -1430,7 +1423,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Modals (existing) */}
+      {/* Existing modals */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
