@@ -114,7 +114,10 @@ export default function ServiceCardsClient({ services }: ServiceCardsClientProps
                         selectedService?.status === 'inactive' ? 'text-gray-400' :
                         'text-yellow-400'
                       }`}>
-                        {selectedService?.status.charAt(0).toUpperCase() + selectedService?.status.slice(1)}
+                        {/* Fixed: safe access + fallback */}
+                        {selectedService?.status 
+                          ? selectedService.status.charAt(0).toUpperCase() + selectedService.status.slice(1)
+                          : 'Unknown'}
                       </p>
                     </div>
 
