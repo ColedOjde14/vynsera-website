@@ -80,104 +80,44 @@ export default function AdminClientContent({
     'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications' | 'services'
   >('overview');
 
-  // Fetch clients from Clerk
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await fetch('/api/admin/clients');
-        const data = await response.json();
-
-        if (response.ok) {
-          const fetchedUsers = data.users?.data || data.users || data.data || [];
-          setClients(fetchedUsers);
-        } else {
-          toast.error(data.error || 'Failed to load clients');
-        }
-      } catch (err) {
-        toast.error('Network error loading clients');
-        console.error(err);
-      } finally {
-        setLoadingClients(false);
+  // Reusable fetch function with debug log
+  const fetchServicesData = async () => {
+    setLoadingServices(true);
+    setServicesError(null);
+    try {
+      const response = await fetch('/api/admin/client-services');
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${response.status}`);
       }
-    };
+      const data = await response.json();
+      console.log('[DEBUG] Fetched from API:', {
+        services: data.services,
+        clientServices: data.clientServices,
+        rawData: data
+      }); // ← open browser console (F12) to see this
+      setServices(Array.isArray(data.services) ? data.services : []);
+      setClientServices(Array.isArray(data.clientServices) ? data.clientServices : []);
+      setServicesError(null);
+    } catch (err: any) {
+      console.error('[DEBUG] Fetch services failed:', err);
+      toast.error(err.message || 'Failed to load services');
+      setServicesError('Failed to load services. Please refresh the page.');
+      setClientServices([]);
+    } finally {
+      setLoadingServices(false);
+    }
+  };
 
-    fetchClients();
+  // Initial fetch
+  useEffect(() => {
+    fetchServicesData();
   }, []);
 
-  // Fetch jobs
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch('/api/admin/jobs');
-        const data = await response.json();
-
-        if (response.ok) {
-          setJobs(data.jobs || []);
-        } else {
-          toast.error(data.error || 'Failed to load jobs');
-        }
-      } catch (err) {
-        toast.error('Network error loading jobs');
-        console.error(err);
-      } finally {
-        setLoadingJobs(false);
-      }
-    };
-
-    fetchJobs();
-  }, []);
-
-  // Fetch applications
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const response = await fetch('/api/job-applications');
-        const data = await response.json();
-
-        if (response.ok) {
-          setApplications(data.applications || []);
-        } else {
-          toast.error(data.error || 'Failed to load applications');
-        }
-      } catch (err) {
-        toast.error('Network error loading applications');
-        console.error(err);
-      } finally {
-        setLoadingApplications(false);
-      }
-    };
-
-    fetchApplications();
-  }, []);
-
-  // Fetch services and client services
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/admin/client-services');
-        if (!response.ok) {
-          const err = await response.json();
-          toast.error(err.error || 'Failed to load services');
-          setClientServices([]);
-          setServicesError('Failed to load services. Please refresh.');
-          return;
-        }
-        const data = await response.json();
-        setServices(Array.isArray(data.services) ? data.services : []);
-        setClientServices(Array.isArray(data.clientServices) ? data.clientServices : []);
-        setServicesError(null);
-      } catch (err) {
-        toast.error('Network error loading services');
-        console.error(err);
-        setServicesError('Network error loading services. Please refresh.');
-        setClientServices([]);
-      } finally {
-        setLoadingServices(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  // Refresh after any change
+  const refreshServices = () => {
+    fetchServicesData();
+  };
 
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
@@ -280,7 +220,6 @@ export default function AdminClientContent({
           requirements: '',
           salary_range: '',
         });
-        // Refresh jobs list
         const res = await fetch('/api/admin/jobs');
         const updated = await res.json();
         setJobs(updated.jobs || []);
@@ -378,11 +317,7 @@ export default function AdminClientContent({
 
       if (response.ok) {
         toast.success('Service assigned successfully!');
-        // Refresh list
-        const res = await fetch('/api/admin/client-services');
-        const updated = await res.json();
-        setClientServices(updated.clientServices || []);
-        // Reset form
+        refreshServices(); // Auto-refresh after success
         setSelectedClientForService(null);
         setSelectedService(null);
         setCustomServiceName('');
@@ -416,7 +351,7 @@ export default function AdminClientContent({
 
       if (response.ok) {
         toast.success('Service assignment removed!');
-        setClientServices(clientServices.filter(cs => cs.id !== id));
+        refreshServices(); // Auto-refresh
       } else {
         toast.error(data.error || 'Failed to remove assignment');
       }
@@ -440,10 +375,7 @@ export default function AdminClientContent({
 
       if (response.ok) {
         toast.success('Service updated!');
-        // Refresh list
-        const res = await fetch('/api/admin/client-services');
-        const updated = await res.json();
-        setClientServices(updated.clientServices || []);
+        refreshServices(); // Auto-refresh
         setEditingService(null);
       } else {
         toast.error(data.error || 'Failed to update service');
@@ -527,12 +459,12 @@ export default function AdminClientContent({
   };
 
   // Safe counters
-  const activeServicesCount = Array.isArray(clientServices) 
-    ? clientServices.filter(cs => cs?.status === 'active').length 
+  const activeServicesCount = Array.isArray(clientServices)
+    ? clientServices.filter(cs => cs && cs.status === 'active').length
     : 0;
 
-  const pendingServicesCount = Array.isArray(clientServices) 
-    ? clientServices.filter(cs => cs?.status === 'pending').length 
+  const pendingServicesCount = Array.isArray(clientServices)
+    ? clientServices.filter(cs => cs && cs.status === 'pending').length
     : 0;
 
   return (
@@ -605,7 +537,7 @@ export default function AdminClientContent({
         </button>
       </div>
 
-      {/* Overview Stats - Updated Counters */}
+      {/* Overview Stats */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
@@ -699,54 +631,56 @@ export default function AdminClientContent({
             <p className="text-indigo-300 text-center py-12">Loading pending services...</p>
           ) : servicesError ? (
             <p className="text-red-400 text-center py-12">{servicesError}</p>
-          ) : (clientServices?.filter?.(cs => cs?.status === 'pending')?.length || 0) === 0 ? (
+          ) : (Array.isArray(clientServices) && clientServices.filter(cs => cs?.status === 'pending').length === 0) ? (
             <p className="text-indigo-300 text-center py-12">No pending client services.</p>
           ) : (
             <div className="space-y-6">
-              {(clientServices?.filter?.(cs => cs?.status === 'pending') || []).map((cs) => (
-                <div
-                  key={cs.id}
-                  onClick={() => setEditingService(cs)}
-                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-xl font-bold text-indigo-200">
-                        {cs.is_custom ? cs.custom_name : cs.service_name}
-                      </h4>
-                      <p className="text-indigo-400 mt-1 text-sm">
-                        Client ID: {cs.client_id.slice(0, 8)}...
-                      </p>
-                      <p className="text-indigo-300 mt-4">
-                        {cs.is_custom ? cs.custom_description : ''}
-                      </p>
+              {Array.isArray(clientServices) && clientServices
+                .filter(cs => cs?.status === 'pending')
+                .map((cs) => (
+                  <div
+                    key={cs.id}
+                    onClick={() => setEditingService(cs)}
+                    className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-xl font-bold text-indigo-200">
+                          {cs.is_custom ? cs.custom_name : cs.service_name}
+                        </h4>
+                        <p className="text-indigo-400 mt-1 text-sm">
+                          Client ID: {cs.client_id.slice(0, 8)}...
+                        </p>
+                        <p className="text-indigo-300 mt-4">
+                          {cs.is_custom ? cs.custom_description : ''}
+                        </p>
+                      </div>
+                      <div className="flex gap-4">
+                        <span className="px-6 py-2 rounded-full text-sm font-medium bg-yellow-600/30 text-yellow-300">
+                          Pending
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex gap-4">
-                      <span className="px-6 py-2 rounded-full text-sm font-medium bg-yellow-600/30 text-yellow-300">
-                        Pending
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
-                    <div>
-                      <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
+                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
+                      <div>
+                        <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
+                      </div>
+                      <div>
+                        <p><strong>Expiration Date:</strong> {cs.expiration_date ? new Date(cs.expiration_date).toLocaleDateString() : 'Ongoing'}</p>
+                      </div>
+                      <div>
+                        <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p><strong>Expiration Date:</strong> {cs.expiration_date ? new Date(cs.expiration_date).toLocaleDateString() : 'Ongoing'}</p>
-                    </div>
-                    <div>
-                      <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
-                    </div>
-                  </div>
 
-                  {cs.notes && (
-                    <p className="mt-6 text-indigo-400">
-                      <strong>Notes:</strong> {cs.notes}
-                    </p>
-                  )}
-                </div>
-              ))}
+                    {cs.notes && (
+                      <p className="mt-6 text-indigo-400">
+                        <strong>Notes:</strong> {cs.notes}
+                      </p>
+                    )}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -1266,70 +1200,72 @@ export default function AdminClientContent({
             <p className="text-indigo-300 text-center py-12">Loading active services...</p>
           ) : servicesError ? (
             <p className="text-red-400 text-center py-12">{servicesError}</p>
-          ) : (clientServices?.filter?.(cs => cs?.status !== 'pending')?.length || 0) === 0 ? (
+          ) : (Array.isArray(clientServices) && clientServices.filter(cs => cs?.status !== 'pending').length === 0) ? (
             <p className="text-indigo-300 text-center py-12">No active/inactive/completed/cancelled services yet.</p>
           ) : (
             <div className="space-y-8">
-              {(clientServices?.filter?.(cs => cs?.status !== 'pending') || []).map((cs) => (
-                <div
-                  key={cs.id}
-                  onClick={() => setEditingService(cs)}
-                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-xl font-bold text-indigo-200">
-                        {cs.is_custom ? cs.custom_name : cs.service_name}
-                      </h4>
-                      <p className="text-indigo-400 mt-1 text-sm">
-                        Client ID: {cs.client_id.slice(0, 8)}...
-                      </p>
-                      <p className="text-indigo-300 mt-4">
-                        {cs.is_custom ? cs.custom_description : ''}
-                      </p>
+              {Array.isArray(clientServices) && clientServices
+                .filter(cs => cs?.status !== 'pending')
+                .map((cs) => (
+                  <div
+                    key={cs.id}
+                    onClick={() => setEditingService(cs)}
+                    className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-xl font-bold text-indigo-200">
+                          {cs.is_custom ? cs.custom_name : cs.service_name}
+                        </h4>
+                        <p className="text-indigo-400 mt-1 text-sm">
+                          Client ID: {cs.client_id.slice(0, 8)}...
+                        </p>
+                        <p className="text-indigo-300 mt-4">
+                          {cs.is_custom ? cs.custom_description : ''}
+                        </p>
+                      </div>
+                      <div className="flex gap-4">
+                        <span className={`px-6 py-2 rounded-full text-sm font-medium ${
+                          cs.status === 'active' ? 'bg-green-600/30 text-green-300' :
+                          cs.status === 'completed' ? 'bg-blue-600/30 text-blue-300' :
+                          cs.status === 'inactive' ? 'bg-gray-600/30 text-gray-300' :
+                          cs.status === 'cancelled' ? 'bg-red-600/30 text-red-300' :
+                          'bg-yellow-600/30 text-yellow-300'
+                        }`}>
+                          {cs.status.charAt(0).toUpperCase() + cs.status.slice(1)}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClientService(cs.id);
+                          }}
+                          disabled={deletingClientServiceId === cs.id}
+                          className={`px-6 py-2 rounded-full bg-red-600 text-white hover:bg-red-500 transition-all text-sm ${deletingClientServiceId === cs.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {deletingClientServiceId === cs.id ? 'Removing...' : 'Remove'}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-4">
-                      <span className={`px-6 py-2 rounded-full text-sm font-medium ${
-                        cs.status === 'active' ? 'bg-green-600/30 text-green-300' :
-                        cs.status === 'completed' ? 'bg-blue-600/30 text-blue-300' :
-                        cs.status === 'inactive' ? 'bg-gray-600/30 text-gray-300' :
-                        cs.status === 'cancelled' ? 'bg-red-600/30 text-red-300' :
-                        'bg-yellow-600/30 text-yellow-300'
-                      }`}>
-                        {cs.status.charAt(0).toUpperCase() + cs.status.slice(1)}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteClientService(cs.id);
-                        }}
-                        disabled={deletingClientServiceId === cs.id}
-                        className={`px-6 py-2 rounded-full bg-red-600 text-white hover:bg-red-500 transition-all text-sm ${deletingClientServiceId === cs.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {deletingClientServiceId === cs.id ? 'Removing...' : 'Remove'}
-                      </button>
-                    </div>
-                  </div>
 
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
-                    <div>
-                      <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
+                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
+                      <div>
+                        <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
+                      </div>
+                      <div>
+                        <p><strong>Expiration Date:</strong> {cs.expiration_date ? new Date(cs.expiration_date).toLocaleDateString() : 'Ongoing'}</p>
+                      </div>
+                      <div>
+                        <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p><strong>Expiration Date:</strong> {cs.expiration_date ? new Date(cs.expiration_date).toLocaleDateString() : 'Ongoing'}</p>
-                    </div>
-                    <div>
-                      <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
-                    </div>
-                  </div>
 
-                  {cs.notes && (
-                    <p className="mt-6 text-indigo-400">
-                      <strong>Notes:</strong> {cs.notes}
-                    </p>
-                  )}
-                </div>
-              ))}
+                    {cs.notes && (
+                      <p className="mt-6 text-indigo-400">
+                        <strong>Notes:</strong> {cs.notes}
+                      </p>
+                    )}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -1438,7 +1374,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Existing modals */}
+      {/* Existing modals remain unchanged */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
