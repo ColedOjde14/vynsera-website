@@ -8,6 +8,8 @@ import Link from 'next/link';
 interface ClientPortalProps {
   displayName: string;
   userId: string;
+  activeServicesCount: number;
+  openWorkOrdersCount: number;
 }
 
 const gradientMap: Record<string, string> = {
@@ -20,6 +22,8 @@ const gradientMap: Record<string, string> = {
 export default function ClientPortalContent({
   displayName,
   userId,
+  activeServicesCount,
+  openWorkOrdersCount,
 }: ClientPortalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [subject, setSubject] = useState('');
@@ -73,16 +77,16 @@ export default function ClientPortalContent({
         </Link>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Now using real counts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { title: 'Active Services', value: '0', color: 'indigo' },
-          { title: 'Open Work Orders', value: '0', color: 'purple' },
+          { title: 'Active Services', value: activeServicesCount.toString(), color: 'green' },
+          { title: 'Open Work Orders', value: openWorkOrdersCount.toString(), color: 'purple' },
           { title: 'Pending Invoices', value: '$0.00', color: 'pink' },
           {
             title: 'My Tickets',
             value: 'View',
-            color: 'green',
+            color: 'indigo',
             link: '/portal/support',
           },
         ].map((stat) => {
@@ -127,15 +131,16 @@ export default function ClientPortalContent({
           </p>
         </button>
 
+        {/* Updated: "View All Work Orders" → "My Services" */}
         <Link
-          href="/portal/orders"
+          href="/portal/services"
           className="bg-gradient-to-r from-purple-900/40 to-purple-900/30 border border-white/20 rounded-2xl p-8 text-left hover:border-white/80 hover:shadow-2xl hover:shadow-white/30 transition-all transform hover:scale-105"
         >
           <h3 className="text-xl font-semibold text-indigo-200 mb-3">
-            View All Work Orders
+            My Services
           </h3>
           <p className="text-indigo-300">
-            Track and review your orders.
+            View and manage your assigned services.
           </p>
         </Link>
 
@@ -152,7 +157,7 @@ export default function ClientPortalContent({
         </Link>
       </div>
 
-      {/* Support Ticket Modal */}
+      {/* Support Ticket Modal (unchanged) */}
       <Transition show={isModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setIsModalOpen}>
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
