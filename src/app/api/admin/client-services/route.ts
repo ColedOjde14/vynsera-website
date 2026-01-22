@@ -1,27 +1,27 @@
+// src/app/api/admin/client-services/route.ts
 export const runtime = 'nodejs';
 
 import { currentUser } from '@clerk/nextjs/server';
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 
-const sql = neon(process.env.DATABASE_URL!);
-
-/* ───────────────────────── GET ───────────────────────── */
 export async function GET(request: Request) {
   const user = await currentUser();
+
   if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
-    return NextResponse.json({ services: [], clientServices: [] }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get('filter') || 'all';
 
+  const sql = neon(process.env.DATABASE_URL!);
+
   try {
     const clientServices = await sql`
-      SELECT
+      SELECT 
         cs.id,
         cs.client_id,
-        c.name AS client_name,
         cs.service_id,
         cs.status,
         cs.start_date,
@@ -33,7 +33,6 @@ export async function GET(request: Request) {
         cs.assigned_at,
         COALESCE(s.name, cs.custom_name) AS service_name
       FROM client_services cs
-      JOIN clients c ON cs.client_id = c.id
       LEFT JOIN services s ON cs.service_id = s.id
       ${filter !== 'all' ? sql`WHERE cs.status = ${filter}` : sql``}
       ORDER BY cs.assigned_at DESC
@@ -49,33 +48,52 @@ export async function GET(request: Request) {
       services: services ?? [],
       clientServices: clientServices ?? [],
     });
-  } catch (err) {
-    console.error('GET client-services failed:', err);
-    return NextResponse.json({ services: [], clientServices: [] }, { status: 500 });
+  } catch (error) {
+    console.error('Error fetching client services:', error);
+    return NextResponse.json({
+      error: 'Failed to load data',
+      services: [],
+      clientServices: [],
+    }, { status: 500 });
   }
 }
 
-/* ───────────────────────── POST ───────────────────────── */
 export async function POST(request: Request) {
   const user = await currentUser();
+
   if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
+  const body = await request.json();
   const {
     client_id,
     service_id,
-    is_custom,
+    is_custom = false,
     custom_name,
     custom_description,
     start_date,
     expiration_date,
     status = 'pending',
-    notes,
-  } = await request.json();
+    notes = ''
+  } = body;
+
+  if (!client_id) {
+    return NextResponse.json({ error: 'Missing client_id' }, { status: 400 });
+  }
+
+  if (!is_custom && !service_id) {
+    return NextResponse.json({ error: 'Missing service_id for predefined service' }, { status: 400 });
+  }
+
+  if (is_custom && (!custom_name?.trim() || !custom_description?.trim())) {
+    return NextResponse.json({ error: 'Custom name and description required' }, { status: 400 });
+  }
+
+  const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    const [assignment] = await sql`
+    await sql`
       INSERT INTO client_services (
         client_id,
         service_id,
@@ -90,58 +108,40 @@ export async function POST(request: Request) {
         ${client_id},
         ${is_custom ? null : service_id},
         ${is_custom},
-        ${is_custom ? custom_name : null},
-        ${is_custom ? custom_description : null},
+        ${is_custom ? custom_name.trim() : null},
+        ${is_custom ? custom_description.trim() : null},
         ${start_date || null},
         ${expiration_date || null},
         ${status},
-        ${notes || null}
+        ${notes.trim() || null}
       )
-      RETURNING id
     `;
 
-    /* AUTO-CREATE WORK ORDER FOR PENDING */
-    if (status === 'pending') {
-      await sql`
-        INSERT INTO work_orders (
-          client_id,
-          client_service_id,
-          status,
-          created_at
-        ) VALUES (
-          ${client_id},
-          ${assignment.id},
-          'pending',
-          NOW()
-        )
-      `;
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error('POST client-services failed:', err);
+    return NextResponse.json({
+      success: true,
+      message: 'Service assigned successfully'
+    });
+  } catch (error) {
+    console.error('Assign service error:', error);
     return NextResponse.json({ error: 'Failed to assign service' }, { status: 500 });
   }
 }
 
-/* ───────────────────────── PATCH (EDIT) ───────────────────────── */
 export async function PATCH(request: Request) {
   const user = await currentUser();
+
   if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  const {
-    id,
-    status,
-    start_date,
-    expiration_date,
-    notes,
-  } = await request.json();
+  const body = await request.json();
+  const { id, status, start_date, expiration_date, notes } = body;
 
   if (!id) {
-    return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   }
+
+  const sql = neon(process.env.DATABASE_URL!);
 
   try {
     await sql`
@@ -150,42 +150,45 @@ export async function PATCH(request: Request) {
         status = COALESCE(${status}, status),
         start_date = COALESCE(${start_date}, start_date),
         expiration_date = COALESCE(${expiration_date}, expiration_date),
-        notes = COALESCE(${notes}, notes)
+        notes = COALESCE(${notes}, notes),
+        updated_at = NOW()
       WHERE id = ${id}
     `;
 
-    /* KEEP WORK ORDER IN SYNC */
-    if (status) {
-      await sql`
-        UPDATE work_orders
-        SET status = ${status}
-        WHERE client_service_id = ${id}
-      `;
-    }
-
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error('PATCH client-services failed:', err);
-    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+  } catch (error) {
+    console.error('Update service error:', error);
+    return NextResponse.json({ error: 'Failed to update service' }, { status: 500 });
   }
 }
 
-/* ───────────────────────── DELETE ───────────────────────── */
 export async function DELETE(request: Request) {
   const user = await currentUser();
+
   if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
   const { id } = await request.json();
-  if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing assignment ID' }, { status: 400 });
+  }
+
+  const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    await sql`DELETE FROM work_orders WHERE client_service_id = ${id}`;
-    await sql`DELETE FROM client_services WHERE id = ${id}`;
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error('DELETE client-services failed:', err);
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+    await sql`
+      DELETE FROM client_services
+      WHERE id = ${id}
+    `;
+
+    return NextResponse.json({
+      success: true,
+      message: 'Service assignment deleted'
+    });
+  } catch (error) {
+    console.error('Delete service assignment error:', error);
+    return NextResponse.json({ error: 'Failed to delete assignment' }, { status: 500 });
   }
 }
