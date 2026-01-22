@@ -1,6 +1,5 @@
 // src/components/AdminClientContent.tsx
 'use client';
-
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Link from "next/link";
@@ -33,12 +32,10 @@ export default function AdminClientContent({
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
   const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
 
-  // Clients tab state
   const [clients, setClients] = useState<any[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
-  // Jobs tab state
   const [jobs, setJobs] = useState<any[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [newJob, setNewJob] = useState({
@@ -53,12 +50,10 @@ export default function AdminClientContent({
   });
   const [postingJob, setPostingJob] = useState(false);
 
-  // Applications tab state
   const [applications, setApplications] = useState<any[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(true);
   const [deletingApplicationId, setDeletingApplicationId] = useState<number | null>(null);
 
-  // Client Services tab state
   const [services, setServices] = useState<any[]>([]);
   const [clientServices, setClientServices] = useState<any[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
@@ -75,12 +70,10 @@ export default function AdminClientContent({
   const [editingService, setEditingService] = useState<any | null>(null);
   const [showAssignForm, setShowAssignForm] = useState(false);
 
-  // Tab state
   const [activeTab, setActiveTab] = useState<
     'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications' | 'services'
   >('overview');
 
-  // Fetch clients from Clerk
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -102,7 +95,6 @@ export default function AdminClientContent({
     fetchClients();
   }, []);
 
-  // Fetch jobs
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -123,7 +115,6 @@ export default function AdminClientContent({
     fetchJobs();
   }, []);
 
-  // Fetch applications
   useEffect(() => {
     const fetchApplications = async () => {
       try {
@@ -144,7 +135,6 @@ export default function AdminClientContent({
     fetchApplications();
   }, []);
 
-  // Fetch services and client services + auto-refresh helper
   const fetchServicesData = async () => {
     setLoadingServices(true);
     setServicesError(null);
@@ -336,19 +326,15 @@ export default function AdminClientContent({
       toast.error('Please select a client');
       return;
     }
-
     if (!customServiceName.trim()) {
       toast.error('Service name is required');
       return;
     }
-
     if (!customServiceDescription.trim()) {
       toast.error('Service description / details are required');
       return;
     }
-
     const isCustom = selectedService === null;
-
     try {
       const response = await fetch('/api/admin/client-services', {
         method: 'POST',
@@ -358,7 +344,7 @@ export default function AdminClientContent({
           service_id: isCustom ? null : selectedService,
           is_custom: isCustom,
           custom_name: customServiceName.trim(),
-          custom_description: customServiceDescription.trim(), // Always send what admin typed
+          custom_description: customServiceDescription.trim(),
           start_date: startDate || null,
           expiration_date: expirationDate || null,
           status: serviceStatus,
@@ -504,7 +490,6 @@ export default function AdminClientContent({
     }
   };
 
-  // Safe counters
   const activeServicesCount = Array.isArray(clientServices)
     ? clientServices.filter(cs => cs?.status === 'active').length
     : 0;
@@ -592,21 +577,18 @@ export default function AdminClientContent({
               {totalTickets}
             </p>
           </div>
-
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
             <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Tickets</p>
             <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
               {openTickets}
             </p>
           </div>
-
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
             <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Active Services</p>
             <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
               {activeServicesCount}
             </p>
           </div>
-
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
             <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Work Orders</p>
             <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
@@ -639,7 +621,6 @@ export default function AdminClientContent({
                         Client ID: {ticket.user_id.slice(0, 8)}...
                       </p>
                     </div>
-
                     <div className="flex gap-4 items-center">
                       <span className={`px-4 py-1 rounded-full text-sm font-medium ${
                         ticket.priority === 'Urgent' ? 'bg-red-600/30 text-red-300' :
@@ -658,7 +639,6 @@ export default function AdminClientContent({
                       </span>
                     </div>
                   </div>
-
                   <p className="mt-4 text-indigo-200/80 text-sm">
                     Created: {new Date(ticket.created_at).toLocaleString()}
                   </p>
@@ -697,8 +677,9 @@ export default function AdminClientContent({
                         <p className="text-indigo-400 mt-1 text-sm">
                           Client ID: {cs.client_id.slice(0, 8)}...
                         </p>
+                        {/* FIX: always show custom_description if present */}
                         <p className="text-indigo-300 mt-4">
-                          {cs.is_custom ? cs.custom_description : ''}
+                          {cs.custom_description || 'No description provided'}
                         </p>
                       </div>
                       <div className="flex gap-4">
@@ -707,7 +688,6 @@ export default function AdminClientContent({
                         </span>
                       </div>
                     </div>
-
                     <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
                       <div>
                         <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
@@ -719,7 +699,6 @@ export default function AdminClientContent({
                         <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
                       </div>
                     </div>
-
                     {cs.notes && (
                       <p className="mt-6 text-indigo-400">
                         <strong>Notes:</strong> {cs.notes}
@@ -759,7 +738,6 @@ export default function AdminClientContent({
                       {new Date(submission.created_at).toLocaleString()}
                     </p>
                   </div>
-
                   <p className="mt-4 text-indigo-200/80 line-clamp-3">
                     {submission.message}
                   </p>
@@ -797,7 +775,6 @@ export default function AdminClientContent({
                       {new Date(req.created_at).toLocaleString()} • Status: {req.status}
                     </p>
                   </div>
-
                   <p className="mt-4 text-indigo-200/80">
                     <strong>Details:</strong> {req.details}
                   </p>
@@ -1275,8 +1252,9 @@ export default function AdminClientContent({
                         <p className="text-indigo-400 mt-1 text-sm">
                           Client ID: {cs.client_id.slice(0, 8)}...
                         </p>
+                        {/* FIX: always show custom_description if present */}
                         <p className="text-indigo-300 mt-4">
-                          {cs.is_custom ? cs.custom_description : ''}
+                          {cs.custom_description || 'No description provided'}
                         </p>
                       </div>
                       <div className="flex gap-4">
@@ -1344,8 +1322,9 @@ export default function AdminClientContent({
 
               <div>
                 <label className="block text-indigo-300 text-lg mb-2">Description</label>
+                {/* FIX: always show custom_description if present */}
                 <p className="text-indigo-300 whitespace-pre-wrap">
-                  {editingService.is_custom ? editingService.custom_description : ''}
+                  {editingService.custom_description || 'No description provided'}
                 </p>
               </div>
 
@@ -1409,6 +1388,7 @@ export default function AdminClientContent({
                   start_date: editingService.start_date,
                   expiration_date: editingService.expiration_date,
                   notes: editingService.notes,
+                  custom_description: editingService.custom_description // allow editing description
                 })}
                 className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
               >

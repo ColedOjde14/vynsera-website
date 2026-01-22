@@ -7,7 +7,6 @@ import { neon } from '@neondatabase/serverless';
 import Link from 'next/link';
 import ServiceCardsClient from '@/components/ServiceCardsClient';
 
-// Define the shape of each service (matches SQL SELECT exactly)
 interface Service {
   id: number;
   status: string;
@@ -48,7 +47,6 @@ export default async function ClientServices() {
     ORDER BY cs.assigned_at DESC
   `;
 
-  // Safe type assertion: Neon returns plain objects, but columns match Service exactly
   const assignedServices = assignedServicesRaw as Service[];
 
   return (

@@ -36,8 +36,9 @@ export default function ServiceCardsClient({ services }: ServiceCardsClientProps
               {service.is_custom ? service.custom_name : service.predefined_name}
             </h3>
 
+            {/* FIX: always show custom_description if present */}
             <p className="text-indigo-300 mb-6 line-clamp-3">
-              {service.is_custom ? service.custom_description : ''}
+              {service.custom_description || 'No details provided'}
             </p>
 
             <div className="space-y-3 text-sm text-indigo-400">
@@ -99,8 +100,9 @@ export default function ServiceCardsClient({ services }: ServiceCardsClientProps
                 <div className="space-y-6 text-indigo-300">
                   <div>
                     <h4 className="text-xl font-semibold text-indigo-100 mb-2">Description</h4>
+                    {/* FIX: always show custom_description */}
                     <p className="whitespace-pre-wrap">
-                      {selectedService?.is_custom ? selectedService.custom_description : 'No description provided for this service.'}
+                      {selectedService?.custom_description || 'No details provided'}
                     </p>
                   </div>
 
@@ -114,7 +116,6 @@ export default function ServiceCardsClient({ services }: ServiceCardsClientProps
                         selectedService?.status === 'inactive' ? 'text-gray-400' :
                         'text-yellow-400'
                       }`}>
-                        {/* Fixed: safe access + fallback */}
                         {selectedService?.status 
                           ? selectedService.status.charAt(0).toUpperCase() + selectedService.status.slice(1)
                           : 'Unknown'}
