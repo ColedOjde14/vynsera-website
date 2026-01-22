@@ -5,37 +5,64 @@ import { currentUser } from '@clerk/nextjs/server';
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   const user = await currentUser();
 
-  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
+  if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const { searchParams } = new URL(request.url);
+  const filter = searchParams.get('filter') || 'all';
 
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    const [services, clientServices] = await Promise.all([
-      sql`SELECT id, name FROM services ORDER BY name`,
-      sql`
-        SELECT 
-          cs.id,
-          cs.client_id,
-          cs.service_id,
-          cs.status,
-          cs.start_date,
-          cs.expiration_date,
-          cs.is_custom,
-          cs.custom_name,
-          cs.custom_description,
-          cs.notes,
-          cs.assigned_at,
-          s.name AS service_name
-        FROM client_services cs
-        LEFT JOIN services s ON cs.service_id = s.id
-        ORDER BY cs.assigned_at DESC
-      `
-    ]);
+    const clientServices =
+      filter === 'all'
+        ? await sql`
+            SELECT 
+              cs.id,
+              cs.client_id,
+              cs.service_id,
+              cs.status,
+              cs.start_date,
+              cs.expiration_date,
+              cs.is_custom,
+              cs.custom_name,
+              cs.custom_description,
+              cs.notes,
+              cs.assigned_at,
+              s.name AS service_name
+            FROM client_services cs
+            LEFT JOIN services s ON cs.service_id = s.id
+            ORDER BY cs.assigned_at DESC
+          `
+        : await sql`
+            SELECT 
+              cs.id,
+              cs.client_id,
+              cs.service_id,
+              cs.status,
+              cs.start_date,
+              cs.expiration_date,
+              cs.is_custom,
+              cs.custom_name,
+              cs.custom_description,
+              cs.notes,
+              cs.assigned_at,
+              s.name AS service_name
+            FROM client_services cs
+            LEFT JOIN services s ON cs.service_id = s.id
+            WHERE cs.status = ${filter}
+            ORDER BY cs.assigned_at DESC
+          `;
+
+    const services = await sql`
+      SELECT id, name
+      FROM services
+      ORDER BY name
+    `;
 
     return NextResponse.json({ services, clientServices });
   } catch (error) {
@@ -47,11 +74,10 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await currentUser();
 
-  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
+  if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  const body = await request.json();
   const {
     client_id,
     service_id,
@@ -62,18 +88,24 @@ export async function POST(request: Request) {
     expiration_date,
     status = 'pending',
     notes = ''
-  } = body;
+  } = await request.json();
 
   if (!client_id) {
     return NextResponse.json({ error: 'Missing client_id' }, { status: 400 });
   }
 
   if (!is_custom && !service_id) {
-    return NextResponse.json({ error: 'Missing service_id for predefined service' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing service_id for predefined service' },
+      { status: 400 }
+    );
   }
 
   if (is_custom && (!custom_name?.trim() || !custom_description?.trim())) {
-    return NextResponse.json({ error: 'Custom name and description required' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Custom name and description required' },
+      { status: 400 }
+    );
   }
 
   const sql = neon(process.env.DATABASE_URL!);
@@ -103,7 +135,10 @@ export async function POST(request: Request) {
       )
     `;
 
-    return NextResponse.json({ success: true, message: 'Service assigned successfully' });
+    return NextResponse.json({
+      success: true,
+      message: 'Service assigned successfully'
+    });
   } catch (error) {
     console.error('Assign service error:', error);
     return NextResponse.json({ error: 'Failed to assign service' }, { status: 500 });
@@ -113,12 +148,11 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const user = await currentUser();
 
-  if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'support')) {
+  if (!user || !['admin', 'support'].includes(user.publicMetadata.role as string)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { id } = body;
+  const { id } = await request.json();
 
   if (!id) {
     return NextResponse.json({ error: 'Missing assignment ID' }, { status: 400 });
@@ -128,10 +162,14 @@ export async function DELETE(request: Request) {
 
   try {
     await sql`
-      DELETE FROM client_services WHERE id = ${id}
+      DELETE FROM client_services
+      WHERE id = ${id}
     `;
 
-    return NextResponse.json({ success: true, message: 'Service assignment deleted' });
+    return NextResponse.json({
+      success: true,
+      message: 'Service assignment deleted'
+    });
   } catch (error) {
     console.error('Delete service assignment error:', error);
     return NextResponse.json({ error: 'Failed to delete assignment' }, { status: 500 });
