@@ -422,7 +422,7 @@ export default function AdminClientContent({
     }
   };
 
-  const handleUpdateService = async (id: number, p0: { status: any; start_date: any; expiration_date: any; notes: any; }) => {
+  const handleUpdateService = async (id: number) => {
     if (!editingService) return;
 
     try {
