@@ -80,7 +80,71 @@ export default function AdminClientContent({
     'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications' | 'services'
   >('overview');
 
-  // Reusable fetch function with debug log
+  // Fetch clients from Clerk
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await fetch('/api/admin/clients');
+        const data = await response.json();
+        if (response.ok) {
+          const fetchedUsers = data.users?.data || data.users || data.data || [];
+          setClients(fetchedUsers);
+        } else {
+          toast.error(data.error || 'Failed to load clients');
+        }
+      } catch (err) {
+        toast.error('Network error loading clients');
+        console.error(err);
+      } finally {
+        setLoadingClients(false);
+      }
+    };
+    fetchClients();
+  }, []);
+
+  // Fetch jobs
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('/api/admin/jobs');
+        const data = await response.json();
+        if (response.ok) {
+          setJobs(data.jobs || []);
+        } else {
+          toast.error(data.error || 'Failed to load jobs');
+        }
+      } catch (err) {
+        toast.error('Network error loading jobs');
+        console.error(err);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  // Fetch applications
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch('/api/job-applications');
+        const data = await response.json();
+        if (response.ok) {
+          setApplications(data.applications || []);
+        } else {
+          toast.error(data.error || 'Failed to load applications');
+        }
+      } catch (err) {
+        toast.error('Network error loading applications');
+        console.error(err);
+      } finally {
+        setLoadingApplications(false);
+      }
+    };
+    fetchApplications();
+  }, []);
+
+  // Fetch services and client services + auto-refresh helper
   const fetchServicesData = async () => {
     setLoadingServices(true);
     setServicesError(null);
@@ -91,37 +155,36 @@ export default function AdminClientContent({
         throw new Error(err.error || `HTTP ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DEBUG] Fetched from API:', {
-        services: data.services,
-        clientServices: data.clientServices,
-        rawData: data
-      }); // ← open browser console (F12) to see this
+      console.log('[DEBUG SERVICES FETCH]', {
+        servicesCount: data.services?.length,
+        clientServicesCount: data.clientServices?.length,
+        firstPending: data.clientServices?.find((cs: { status: string; }) => cs.status === 'pending')?.id,
+        firstActive: data.clientServices?.find((cs: { status: string; }) => cs.status === 'active')?.id
+      }); // ← open F12 console after page load to see this
       setServices(Array.isArray(data.services) ? data.services : []);
       setClientServices(Array.isArray(data.clientServices) ? data.clientServices : []);
       setServicesError(null);
     } catch (err: any) {
-      console.error('[DEBUG] Fetch services failed:', err);
+      console.error('[DEBUG SERVICES ERROR]', err);
       toast.error(err.message || 'Failed to load services');
-      setServicesError('Failed to load services. Please refresh the page.');
+      setServicesError('Failed to load services. Please refresh.');
       setClientServices([]);
     } finally {
       setLoadingServices(false);
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchServicesData();
   }, []);
 
-  // Refresh after any change
+  // Call this after any mutation to refresh data
   const refreshServices = () => {
     fetchServicesData();
   };
 
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this contact submission? This cannot be undone.')) return;
-
     setDeletingId(id);
     try {
       const response = await fetch('/api/contact', {
@@ -129,9 +192,7 @@ export default function AdminClientContent({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Contact submission deleted!');
         window.location.reload();
@@ -154,9 +215,7 @@ export default function AdminClientContent({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, status: newStatus }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Status updated!');
         window.location.reload();
@@ -173,16 +232,13 @@ export default function AdminClientContent({
 
   const handleDeleteServiceRequest = async (requestId: number) => {
     if (!confirm('Are you sure you want to delete this service request? This cannot be undone.')) return;
-
     try {
       const response = await fetch('/api/service-request-update', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Request deleted!');
         window.location.reload();
@@ -198,16 +254,13 @@ export default function AdminClientContent({
   const handleCreateJob = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPostingJob(true);
-
     try {
       const response = await fetch('/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newJob),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Job posted successfully!');
         setNewJob({
@@ -236,16 +289,13 @@ export default function AdminClientContent({
 
   const handleDeleteJob = async (id: number) => {
     if (!confirm('Are you sure you want to delete this job posting?')) return;
-
     try {
       const response = await fetch('/api/admin/jobs', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Job deleted!');
         setJobs(jobs.filter((job) => job.id !== id));
@@ -260,7 +310,6 @@ export default function AdminClientContent({
 
   const handleDeleteApplication = async (id: number) => {
     if (!confirm('Are you sure you want to delete this application? This cannot be undone.')) return;
-
     setDeletingApplicationId(id);
     try {
       const response = await fetch('/api/job-applications', {
@@ -268,9 +317,7 @@ export default function AdminClientContent({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Application deleted!');
         setApplications(applications.filter(app => app.id !== id));
@@ -290,12 +337,10 @@ export default function AdminClientContent({
       toast.error('Please select a client');
       return;
     }
-
     if (!selectedService && (!customServiceName.trim() || !customServiceDescription.trim())) {
       toast.error('Please select a predefined service or fill out custom service details');
       return;
     }
-
     try {
       const response = await fetch('/api/admin/client-services', {
         method: 'POST',
@@ -312,12 +357,10 @@ export default function AdminClientContent({
           notes: serviceNotes.trim(),
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Service assigned successfully!');
-        refreshServices(); // Auto-refresh after success
+        refreshServices(); // ← auto-refresh after success
         setSelectedClientForService(null);
         setSelectedService(null);
         setCustomServiceName('');
@@ -338,7 +381,6 @@ export default function AdminClientContent({
 
   const handleDeleteClientService = async (id: number) => {
     if (!confirm('Are you sure you want to remove this service assignment?')) return;
-
     setDeletingClientServiceId(id);
     try {
       const response = await fetch('/api/admin/client-services', {
@@ -346,12 +388,10 @@ export default function AdminClientContent({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Service assignment removed!');
-        refreshServices(); // Auto-refresh
+        refreshServices(); // ← auto-refresh
       } else {
         toast.error(data.error || 'Failed to remove assignment');
       }
@@ -370,12 +410,10 @@ export default function AdminClientContent({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...updates }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Service updated!');
-        refreshServices(); // Auto-refresh
+        refreshServices(); // ← auto-refresh
         setEditingService(null);
       } else {
         toast.error(data.error || 'Failed to update service');
@@ -460,11 +498,11 @@ export default function AdminClientContent({
 
   // Safe counters
   const activeServicesCount = Array.isArray(clientServices)
-    ? clientServices.filter(cs => cs && cs.status === 'active').length
+    ? clientServices.filter(cs => cs?.status === 'active').length
     : 0;
 
   const pendingServicesCount = Array.isArray(clientServices)
-    ? clientServices.filter(cs => cs && cs.status === 'pending').length
+    ? clientServices.filter(cs => cs?.status === 'pending').length
     : 0;
 
   return (
@@ -1374,7 +1412,7 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Existing modals remain unchanged */}
+      {/* Existing modals */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
