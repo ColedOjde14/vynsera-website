@@ -48,11 +48,12 @@ export async function GET(request: Request) {
       services: services ?? [],
       clientServices: clientServices ?? [],
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('GET client-services error:', error);
+    const errMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
       error: 'Failed to load data',
-      details: error.message,
+      details: errMessage,
       services: [],
       clientServices: [],
     }, { status: 500 });
@@ -80,9 +81,7 @@ export async function POST(request: Request) {
   } = body;
 
   if (!client_id) return NextResponse.json({ error: 'Missing client_id' }, { status: 400 });
-
   if (!is_custom && !service_id) return NextResponse.json({ error: 'Missing service_id' }, { status: 400 });
-
   if (is_custom && (!custom_name?.trim() || !custom_description?.trim())) {
     return NextResponse.json({ error: 'Custom name and description required' }, { status: 400 });
   }
@@ -90,7 +89,7 @@ export async function POST(request: Request) {
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
-    // Optional: check for duplicate predefined (prevents 23505 error)
+    // Optional duplicate check for predefined services
     if (!is_custom && service_id) {
       const [existing] = await sql`
         SELECT id FROM client_services
@@ -128,13 +127,12 @@ export async function POST(request: Request) {
     `;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('POST assign error:', error);
+    const errMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
       error: 'Failed to assign service',
-      details: error.message,
-      code: error.code,
-      constraint: error.constraint
+      details: errMessage,
     }, { status: 500 });
   }
 }
@@ -167,11 +165,12 @@ export async function PATCH(request: Request) {
     `;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('PATCH update error:', error);
+    const errMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
       error: 'Failed to update service',
-      details: error.message
+      details: errMessage,
     }, { status: 500 });
   }
 }
@@ -196,8 +195,12 @@ export async function DELETE(request: Request) {
     `;
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+    const errMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({
+      error: 'Failed to delete',
+      details: errMessage,
+    }, { status: 500 });
   }
 }
