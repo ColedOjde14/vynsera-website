@@ -160,7 +160,7 @@ export default function AdminClientContent({
         clientServicesCount: data.clientServices?.length,
         firstPending: data.clientServices?.find((cs: { status: string; }) => cs.status === 'pending')?.id,
         firstActive: data.clientServices?.find((cs: { status: string; }) => cs.status === 'active')?.id
-      }); // ← open F12 console after page load to see this
+      });
       setServices(Array.isArray(data.services) ? data.services : []);
       setClientServices(Array.isArray(data.clientServices) ? data.clientServices : []);
       setServicesError(null);
@@ -178,7 +178,6 @@ export default function AdminClientContent({
     fetchServicesData();
   }, []);
 
-  // Call this after any mutation to refresh data
   const refreshServices = () => {
     fetchServicesData();
   };
@@ -337,20 +336,29 @@ export default function AdminClientContent({
       toast.error('Please select a client');
       return;
     }
-    if (!selectedService && (!customServiceName.trim() || !customServiceDescription.trim())) {
-      toast.error('Please select a predefined service or fill out custom service details');
+
+    if (!customServiceName.trim()) {
+      toast.error('Service name is required');
       return;
     }
+
+    if (!customServiceDescription.trim()) {
+      toast.error('Service description / details are required');
+      return;
+    }
+
+    const isCustom = selectedService === null;
+
     try {
       const response = await fetch('/api/admin/client-services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: selectedClientForService,
-          service_id: selectedService || null,
-          is_custom: !selectedService,
-          custom_name: selectedService ? null : customServiceName.trim(),
-          custom_description: selectedService ? null : customServiceDescription.trim(),
+          service_id: isCustom ? null : selectedService,
+          is_custom: isCustom,
+          custom_name: customServiceName.trim(),
+          custom_description: customServiceDescription.trim(), // Always send what admin typed
           start_date: startDate || null,
           expiration_date: expirationDate || null,
           status: serviceStatus,
@@ -360,7 +368,7 @@ export default function AdminClientContent({
       const data = await response.json();
       if (response.ok) {
         toast.success('Service assigned successfully!');
-        refreshServices(); // ← auto-refresh after success
+        refreshServices();
         setSelectedClientForService(null);
         setSelectedService(null);
         setCustomServiceName('');
@@ -391,7 +399,7 @@ export default function AdminClientContent({
       const data = await response.json();
       if (response.ok) {
         toast.success('Service assignment removed!');
-        refreshServices(); // ← auto-refresh
+        refreshServices();
       } else {
         toast.error(data.error || 'Failed to remove assignment');
       }
@@ -413,7 +421,7 @@ export default function AdminClientContent({
       const data = await response.json();
       if (response.ok) {
         toast.success('Service updated!');
-        refreshServices(); // ← auto-refresh
+        refreshServices();
         setEditingService(null);
       } else {
         toast.error(data.error || 'Failed to update service');
@@ -1104,7 +1112,6 @@ export default function AdminClientContent({
             + Assign New Service
           </button>
 
-          {/* Assign Form */}
           {showAssignForm && (
             <div className="mb-12 bg-black/50 border border-indigo-500/30 rounded-xl p-8">
               <div className="flex justify-between items-center mb-6">
@@ -1116,6 +1123,7 @@ export default function AdminClientContent({
                   Close
                 </button>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-indigo-300 text-lg mb-2">Client</label>
@@ -1134,10 +1142,17 @@ export default function AdminClientContent({
                 </div>
 
                 <div>
-                  <label className="block text-indigo-300 text-lg mb-2">Predefined Service</label>
+                  <label className="block text-indigo-300 text-lg mb-2">Service Type (Predefined)</label>
                   <select
                     value={selectedService || ''}
-                    onChange={(e) => setSelectedService(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => {
+                      const val = e.target.value ? Number(e.target.value) : null;
+                      setSelectedService(val);
+                      if (val !== null) {
+                        const selected = services.find(s => s.id === val);
+                        setCustomServiceName(selected?.name || '');
+                      }
+                    }}
                     className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
                   >
                     <option value="">— or enter custom below —</option>
@@ -1150,21 +1165,23 @@ export default function AdminClientContent({
                 </div>
 
                 <div>
-                  <label className="block text-indigo-300 text-lg mb-2">Custom Service Name</label>
+                  <label className="block text-indigo-300 text-lg mb-2">Service Name</label>
                   <input
                     type="text"
                     value={customServiceName}
                     onChange={(e) => setCustomServiceName(e.target.value)}
+                    placeholder="Service name / label"
                     className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
                   />
                 </div>
 
                 <div className="col-span-3">
-                  <label className="block text-indigo-300 text-lg mb-2">Custom Service Description / Details</label>
+                  <label className="block text-indigo-300 text-lg mb-2">Service Description / Details</label>
                   <textarea
                     value={customServiceDescription}
                     onChange={(e) => setCustomServiceDescription(e.target.value)}
-                    rows={4}
+                    rows={6}
+                    placeholder="Enter full details, scope, notes, etc. This will always be stored and shown."
                     className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
                   />
                 </div>
@@ -1224,7 +1241,7 @@ export default function AdminClientContent({
                 </button>
                 <button
                   onClick={handleAssignService}
-                  disabled={!selectedClientForService || (!selectedService && (!customServiceName.trim() || !customServiceDescription.trim()))}
+                  disabled={!selectedClientForService || !customServiceName.trim() || !customServiceDescription.trim()}
                   className={`px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   Assign Service
