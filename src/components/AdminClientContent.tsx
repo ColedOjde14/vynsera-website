@@ -58,9 +58,23 @@ export default function AdminClientContent({
   const [loadingApplications, setLoadingApplications] = useState(true);
   const [deletingApplicationId, setDeletingApplicationId] = useState<number | null>(null);
 
-  // Tab state
+  // New: Client Services tab state
+  const [services, setServices] = useState<any[]>([]);
+  const [clientServices, setClientServices] = useState<any[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [selectedClientForService, setSelectedClientForService] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const [customServiceName, setCustomServiceName] = useState('');
+  const [customServiceDescription, setCustomServiceDescription] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [expirationDate, setExpirationDate] = useState('');
+  const [serviceStatus, setServiceStatus] = useState('pending');
+  const [serviceNotes, setServiceNotes] = useState('');
+  const [deletingClientServiceId, setDeletingClientServiceId] = useState<number | null>(null);
+
+  // Tab state (added 'services')
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications'
+    'overview' | 'tickets' | 'orders' | 'contacts' | 'requests' | 'clients' | 'jobs' | 'applications' | 'services'
   >('overview');
 
   // Fetch clients from Clerk
@@ -131,6 +145,30 @@ export default function AdminClientContent({
     };
 
     fetchApplications();
+  }, []);
+
+  // Fetch services and client services
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/admin/client-services');
+        const data = await response.json();
+
+        if (response.ok) {
+          setServices(data.services || []);
+          setClientServices(data.clientServices || []);
+        } else {
+          toast.error(data.error || 'Failed to load services');
+        }
+      } catch (err) {
+        toast.error('Network error loading services');
+        console.error(err);
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleDeleteContact = async (id: number) => {
@@ -300,6 +338,87 @@ export default function AdminClientContent({
     }
   };
 
+  const handleAssignService = async () => {
+    if (!selectedClientForService) {
+      toast.error('Please select a client');
+      return;
+    }
+
+    if (!selectedService && (!customServiceName || !customServiceDescription)) {
+      toast.error('Please select a predefined service or enter custom service details');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/client-services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: selectedClientForService,
+          service_id: selectedService || null,
+          is_custom: !selectedService,
+          custom_name: selectedService ? null : customServiceName,
+          custom_description: selectedService ? null : customServiceDescription,
+          start_date: startDate || null,
+          expiration_date: expirationDate || null,
+          status: serviceStatus,
+          notes: serviceNotes,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Service assigned successfully!');
+        // Refresh list
+        const res = await fetch('/api/admin/client-services');
+        const updated = await res.json();
+        setClientServices(updated.clientServices || []);
+        // Reset form
+        setSelectedClientForService(null);
+        setSelectedService(null);
+        setCustomServiceName('');
+        setCustomServiceDescription('');
+        setStartDate('');
+        setExpirationDate('');
+        setServiceStatus('pending');
+        setServiceNotes('');
+      } else {
+        toast.error(data.error || 'Failed to assign service');
+      }
+    } catch (error) {
+      toast.error('Network error');
+      console.error(error);
+    }
+  };
+
+  const handleDeleteClientService = async (id: number) => {
+    if (!confirm('Are you sure you want to remove this service assignment?')) return;
+
+    setDeletingClientServiceId(id);
+    try {
+      const response = await fetch('/api/admin/client-services', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Service assignment removed!');
+        setClientServices(clientServices.filter(cs => cs.id !== id));
+      } else {
+        toast.error(data.error || 'Failed to remove assignment');
+      }
+    } catch (error) {
+      toast.error('Network error');
+      console.error(error);
+    } finally {
+      setDeletingClientServiceId(null);
+    }
+  };
+
   const handleDownloadApplicationPDF = (app: any) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -433,6 +552,12 @@ export default function AdminClientContent({
           className={`px-6 py-3 rounded-full transition-all ${activeTab === 'applications' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
         >
           Applications
+        </button>
+        <button
+          onClick={() => setActiveTab('services')}
+          className={`px-6 py-3 rounded-full transition-all ${activeTab === 'services' ? 'bg-indigo-600 text-white' : 'bg-black/40 text-indigo-300 hover:bg-indigo-500/20'}`}
+        >
+          Client Services
         </button>
       </div>
 
@@ -893,6 +1018,196 @@ export default function AdminClientContent({
                   <p className="text-sm text-indigo-400 mt-6">
                     Submitted: {new Date(app.created_at).toLocaleString()}
                   </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* New: Client Services Tab */}
+      {activeTab === 'services' && (
+        <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-indigo-200 mb-8">Client Services Management</h2>
+
+          {/* Assign Service Form */}
+          <div className="mb-12 bg-black/50 border border-indigo-500/30 rounded-xl p-8">
+            <h3 className="text-2xl font-bold text-indigo-200 mb-6">Assign Service to Client</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Client</label>
+                <select
+                  value={selectedClientForService || ''}
+                  onChange={(e) => setSelectedClientForService(e.target.value || null)}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="">Select Client</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.firstName || 'N/A'} {client.lastName || ''} ({client.emailAddresses?.[0]?.emailAddress || 'no email'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Predefined Service</label>
+                <select
+                  value={selectedService || ''}
+                  onChange={(e) => setSelectedService(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="">— or enter custom below —</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Custom Service Name</label>
+                <input
+                  type="text"
+                  value={customServiceName}
+                  onChange={(e) => setCustomServiceName(e.target.value)}
+                  placeholder="e.g. Custom CRM Build"
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div className="col-span-3">
+                <label className="block text-indigo-300 text-lg mb-2">Custom Description / Details</label>
+                <textarea
+                  value={customServiceDescription}
+                  onChange={(e) => setCustomServiceDescription(e.target.value)}
+                  rows={4}
+                  placeholder="Describe the custom service or project..."
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Expiration Date (optional)</label>
+                <input
+                  type="date"
+                  value={expirationDate}
+                  onChange={(e) => setExpirationDate(e.target.value)}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Status</label>
+                <select
+                  value={serviceStatus}
+                  onChange={(e) => setServiceStatus(e.target.value)}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div className="col-span-3">
+                <label className="block text-indigo-300 text-lg mb-2">Notes (optional)</label>
+                <textarea
+                  value={serviceNotes}
+                  onChange={(e) => setServiceNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Any special instructions, scope, or details..."
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={handleAssignService}
+                disabled={!selectedClientForService || (!selectedService && (!customServiceName || !customServiceDescription))}
+                className={`px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                Assign Service
+              </button>
+            </div>
+          </div>
+
+          {/* Current Assignments */}
+          <h3 className="text-2xl font-bold text-indigo-200 mb-8 mt-16">Current Service Assignments</h3>
+          {loadingServices ? (
+            <p className="text-indigo-300 text-center py-12">Loading assignments...</p>
+          ) : clientServices.length === 0 ? (
+            <p className="text-indigo-300 text-center py-12">No services assigned to clients yet.</p>
+          ) : (
+            <div className="space-y-8">
+              {clientServices.map((cs) => (
+                <div
+                  key={cs.id}
+                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="text-xl font-bold text-indigo-200">
+                        {cs.is_custom ? cs.custom_name : cs.service_name}
+                      </h4>
+                      <p className="text-indigo-400 mt-1 text-sm">
+                        Client ID: {cs.client_id.slice(0, 8)}...
+                      </p>
+                      <p className="text-indigo-300 mt-4">
+                        {cs.is_custom ? cs.custom_description : cs.service_description}
+                      </p>
+                    </div>
+                    <div className="flex gap-4">
+                      <span className={`px-6 py-2 rounded-full text-sm font-medium ${
+                        cs.status === 'active' ? 'bg-green-600/30 text-green-300' :
+                        cs.status === 'completed' ? 'bg-blue-600/30 text-blue-300' :
+                        cs.status === 'inactive' ? 'bg-gray-600/30 text-gray-300' :
+                        cs.status === 'cancelled' ? 'bg-red-600/30 text-red-300' :
+                        'bg-yellow-600/30 text-yellow-300'
+                      }`}>
+                        {cs.status.charAt(0).toUpperCase() + cs.status.slice(1)}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteClientService(cs.id)}
+                        disabled={deletingClientServiceId === cs.id}
+                        className={`px-6 py-2 rounded-full bg-red-600 text-white hover:bg-red-500 transition-all text-sm ${deletingClientServiceId === cs.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {deletingClientServiceId === cs.id ? 'Removing...' : 'Remove'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-indigo-300">
+                    <div>
+                      <p><strong>Start Date:</strong> {cs.start_date ? new Date(cs.start_date).toLocaleDateString() : 'Not set'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Expiration Date:</strong> {cs.expiration_date ? new Date(cs.expiration_date).toLocaleDateString() : 'Ongoing / No expiration'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Assigned:</strong> {new Date(cs.assigned_at).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {cs.notes && (
+                    <p className="mt-6 text-indigo-400">
+                      <strong>Admin Notes:</strong> {cs.notes}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
