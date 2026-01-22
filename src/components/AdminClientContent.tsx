@@ -62,6 +62,7 @@ export default function AdminClientContent({
   const [services, setServices] = useState<any[]>([]);
   const [clientServices, setClientServices] = useState<any[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [servicesError, setServicesError] = useState<string | null>(null);
   const [selectedClientForService, setSelectedClientForService] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<number | null>(null);
   const [customServiceName, setCustomServiceName] = useState('');
@@ -154,17 +155,22 @@ export default function AdminClientContent({
     const fetchData = async () => {
       try {
         const response = await fetch('/api/admin/client-services');
-        const data = await response.json();
-
-        if (response.ok) {
-          setServices(data.services || []);
-          setClientServices(data.clientServices || []);
-        } else {
-          toast.error(data.error || 'Failed to load services');
+        if (!response.ok) {
+          const err = await response.json();
+          toast.error(err.error || 'Failed to load services');
+          setClientServices([]);
+          setServicesError('Failed to load services. Please refresh.');
+          return;
         }
+        const data = await response.json();
+        setServices(Array.isArray(data.services) ? data.services : []);
+        setClientServices(Array.isArray(data.clientServices) ? data.clientServices : []);
+        setServicesError(null);
       } catch (err) {
         toast.error('Network error loading services');
         console.error(err);
+        setServicesError('Network error loading services. Please refresh.');
+        setClientServices([]);
       } finally {
         setLoadingServices(false);
       }
@@ -422,7 +428,6 @@ export default function AdminClientContent({
     }
   };
 
-  // Fixed: now accepts two arguments (id + updates object)
   const handleUpdateService = async (id: number, updates: any) => {
     try {
       const response = await fetch('/api/admin/client-services', {
@@ -521,8 +526,14 @@ export default function AdminClientContent({
     }
   };
 
-  const activeServicesCount = clientServices.filter(cs => cs.status === 'active').length;
-  const pendingServicesCount = clientServices.filter(cs => cs.status === 'pending').length;
+  // Safe counters
+  const activeServicesCount = Array.isArray(clientServices) 
+    ? clientServices.filter(cs => cs?.status === 'active').length 
+    : 0;
+
+  const pendingServicesCount = Array.isArray(clientServices) 
+    ? clientServices.filter(cs => cs?.status === 'pending').length 
+    : 0;
 
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
@@ -686,11 +697,13 @@ export default function AdminClientContent({
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Pending Client Services</h2>
           {loadingServices ? (
             <p className="text-indigo-300 text-center py-12">Loading pending services...</p>
-          ) : clientServices.filter(cs => cs.status === 'pending').length === 0 ? (
+          ) : servicesError ? (
+            <p className="text-red-400 text-center py-12">{servicesError}</p>
+          ) : (clientServices?.filter?.(cs => cs?.status === 'pending')?.length || 0) === 0 ? (
             <p className="text-indigo-300 text-center py-12">No pending client services.</p>
           ) : (
             <div className="space-y-6">
-              {clientServices.filter(cs => cs.status === 'pending').map((cs) => (
+              {(clientServices?.filter?.(cs => cs?.status === 'pending') || []).map((cs) => (
                 <div
                   key={cs.id}
                   onClick={() => setEditingService(cs)}
@@ -1119,7 +1132,7 @@ export default function AdminClientContent({
             + Assign New Service
           </button>
 
-          {/* Assign Form (shown when button clicked) */}
+          {/* Assign Form */}
           {showAssignForm && (
             <div className="mb-12 bg-black/50 border border-indigo-500/30 rounded-xl p-8">
               <div className="flex justify-between items-center mb-6">
@@ -1251,11 +1264,13 @@ export default function AdminClientContent({
           {/* Active Services List */}
           {loadingServices ? (
             <p className="text-indigo-300 text-center py-12">Loading active services...</p>
-          ) : clientServices.filter(cs => cs.status !== 'pending').length === 0 ? (
+          ) : servicesError ? (
+            <p className="text-red-400 text-center py-12">{servicesError}</p>
+          ) : (clientServices?.filter?.(cs => cs?.status !== 'pending')?.length || 0) === 0 ? (
             <p className="text-indigo-300 text-center py-12">No active/inactive/completed/cancelled services yet.</p>
           ) : (
             <div className="space-y-8">
-              {clientServices.filter(cs => cs.status !== 'pending').map((cs) => (
+              {(clientServices?.filter?.(cs => cs?.status !== 'pending') || []).map((cs) => (
                 <div
                   key={cs.id}
                   onClick={() => setEditingService(cs)}
