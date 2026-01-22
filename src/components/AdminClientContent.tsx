@@ -72,6 +72,7 @@ export default function AdminClientContent({
   const [serviceNotes, setServiceNotes] = useState('');
   const [deletingClientServiceId, setDeletingClientServiceId] = useState<number | null>(null);
   const [editingService, setEditingService] = useState<any | null>(null);
+  const [showAssignForm, setShowAssignForm] = useState(false);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<
@@ -384,6 +385,7 @@ export default function AdminClientContent({
         setExpirationDate('');
         setServiceStatus('pending');
         setServiceNotes('');
+        setShowAssignForm(false);
       } else {
         toast.error(data.error || 'Failed to assign service');
       }
@@ -420,12 +422,20 @@ export default function AdminClientContent({
     }
   };
 
-  const handleUpdateService = async (id: number, updates: any) => {
+  const handleUpdateService = async (id: number, p0: { status: any; start_date: any; expiration_date: any; notes: any; }) => {
+    if (!editingService) return;
+
     try {
       const response = await fetch('/api/admin/client-services', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...updates }),
+        body: JSON.stringify({
+          id,
+          status: editingService.status,
+          start_date: editingService.start_date,
+          expiration_date: editingService.expiration_date,
+          notes: editingService.notes,
+        }),
       });
 
       const data = await response.json();
@@ -436,6 +446,7 @@ export default function AdminClientContent({
         const res = await fetch('/api/admin/client-services');
         const updated = await res.json();
         setClientServices(updated.clientServices || []);
+        setEditingService(null);
       } else {
         toast.error(data.error || 'Failed to update service');
       }
@@ -517,6 +528,9 @@ export default function AdminClientContent({
     }
   };
 
+  const activeServicesCount = clientServices.filter(cs => cs.status === 'active').length;
+  const pendingServicesCount = clientServices.filter(cs => cs.status === 'pending').length;
+
   return (
     <main className="max-w-7xl mx-auto p-6 sm:p-8">
       {/* Return to Homepage Button */}
@@ -587,7 +601,7 @@ export default function AdminClientContent({
         </button>
       </div>
 
-      {/* Overview Stats */}
+      {/* Overview Stats - Updated Counters */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
@@ -605,16 +619,16 @@ export default function AdminClientContent({
           </div>
 
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Total Work Orders</p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-              {totalOrders}
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Active Services</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
+              {activeServicesCount}
             </p>
           </div>
 
           <div className="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
-            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Pending Orders</p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-              {pendingOrders}
+            <p className="text-indigo-300 text-sm uppercase tracking-wider mb-2">Open Work Orders</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
+              {pendingServicesCount}
             </p>
           </div>
         </div>
@@ -673,20 +687,21 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Orders Tab - Now shows Pending Client Services */}
+      {/* Orders Tab - Shows Pending Client Services */}
       {activeTab === 'orders' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8 mb-12">
           <h2 className="text-3xl font-bold text-indigo-200 mb-6">Pending Client Services</h2>
           {loadingServices ? (
             <p className="text-indigo-300 text-center py-12">Loading pending services...</p>
           ) : clientServices.filter(cs => cs.status === 'pending').length === 0 ? (
-            <p className="text-indigo-300 text-center py-12">No pending services at the moment.</p>
+            <p className="text-indigo-300 text-center py-12">No pending client services.</p>
           ) : (
             <div className="space-y-6">
               {clientServices.filter(cs => cs.status === 'pending').map((cs) => (
                 <div
                   key={cs.id}
-                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
+                  onClick={() => setEditingService(cs)}
+                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -1102,19 +1117,156 @@ export default function AdminClientContent({
       {/* Active Services Tab */}
       {activeTab === 'services' && (
         <div className="bg-black/40 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-indigo-200 mb-8">Active Services</h2>
+          <h2 className="text-3xl font-bold text-indigo-200 mb-6">Active Services</h2>
+
+          <button
+            onClick={() => setShowAssignForm(true)}
+            className="mb-8 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
+          >
+            + Assign New Service
+          </button>
+
+          {/* Assign Form (hidden until button clicked) */}
+          {showAssignForm && (
+            <div className="mb-12 bg-black/50 border border-indigo-500/30 rounded-xl p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-indigo-200">Assign New Service</h3>
+                <button
+                  onClick={() => setShowAssignForm(false)}
+                  className="text-indigo-300 hover:text-indigo-100"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Client</label>
+                  <select
+                    value={selectedClientForService || ''}
+                    onChange={(e) => setSelectedClientForService(e.target.value || null)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                  >
+                    <option value="">Select Client</option>
+                    {clients.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.firstName || 'N/A'} {client.lastName || ''} ({client.emailAddresses?.[0]?.emailAddress || 'no email'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Predefined Service</label>
+                  <select
+                    value={selectedService || ''}
+                    onChange={(e) => setSelectedService(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                  >
+                    <option value="">— or enter custom below —</option>
+                    {services.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Custom Service Name</label>
+                  <input
+                    type="text"
+                    value={customServiceName}
+                    onChange={(e) => setCustomServiceName(e.target.value)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div className="col-span-3">
+                  <label className="block text-indigo-300 text-lg mb-2">Custom Service Description / Details</label>
+                  <textarea
+                    value={customServiceDescription}
+                    onChange={(e) => setCustomServiceDescription(e.target.value)}
+                    rows={4}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Start Date</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Expiration Date (optional)</label>
+                  <input
+                    type="date"
+                    value={expirationDate}
+                    onChange={(e) => setExpirationDate(e.target.value)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-indigo-300 text-lg mb-2">Status</label>
+                  <select
+                    value={serviceStatus}
+                    onChange={(e) => setServiceStatus(e.target.value)}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div className="col-span-3">
+                  <label className="block text-indigo-300 text-lg mb-2">Notes (optional)</label>
+                  <textarea
+                    value={serviceNotes}
+                    onChange={(e) => setServiceNotes(e.target.value)}
+                    rows={3}
+                    className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowAssignForm(false)}
+                  className="px-8 py-4 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAssignService}
+                  disabled={!selectedClientForService || (!selectedService && (!customServiceName.trim() || !customServiceDescription.trim()))}
+                  className={`px-10 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  Assign Service
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Active Services List */}
           {loadingServices ? (
             <p className="text-indigo-300 text-center py-12">Loading active services...</p>
           ) : clientServices.filter(cs => cs.status !== 'pending').length === 0 ? (
-            <p className="text-indigo-300 text-center py-12">No active, inactive, completed, or cancelled services yet.</p>
+            <p className="text-indigo-300 text-center py-12">No active/inactive/completed/cancelled services yet.</p>
           ) : (
             <div className="space-y-8">
               {clientServices.filter(cs => cs.status !== 'pending').map((cs) => (
                 <div
                   key={cs.id}
-                  className="bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
+                  onClick={() => setEditingService(cs)}
+                  className="cursor-pointer bg-black/30 backdrop-blur-md border border-indigo-500/20 rounded-xl p-8 hover:border-indigo-400 transition-all"
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -1128,7 +1280,7 @@ export default function AdminClientContent({
                         {cs.is_custom ? cs.custom_description : ''}
                       </p>
                     </div>
-                    <div className="flex gap-4 items-center">
+                    <div className="flex gap-4">
                       <span className={`px-6 py-2 rounded-full text-sm font-medium ${
                         cs.status === 'active' ? 'bg-green-600/30 text-green-300' :
                         cs.status === 'completed' ? 'bg-blue-600/30 text-blue-300' :
@@ -1139,7 +1291,10 @@ export default function AdminClientContent({
                         {cs.status.charAt(0).toUpperCase() + cs.status.slice(1)}
                       </span>
                       <button
-                        onClick={() => handleDeleteClientService(cs.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClientService(cs.id);
+                        }}
                         disabled={deletingClientServiceId === cs.id}
                         className={`px-6 py-2 rounded-full bg-red-600 text-white hover:bg-red-500 transition-all text-sm ${deletingClientServiceId === cs.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
@@ -1172,7 +1327,110 @@ export default function AdminClientContent({
         </div>
       )}
 
-      {/* Modals */}
+      {/* Edit Service Modal */}
+      {editingService && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-indigo-200 mb-6">
+              Edit Service Assignment
+            </h2>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Service Name</label>
+                <p className="text-indigo-200 text-xl">
+                  {editingService.is_custom ? editingService.custom_name : editingService.service_name}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Description</label>
+                <p className="text-indigo-300 whitespace-pre-wrap">
+                  {editingService.is_custom ? editingService.custom_description : ''}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Status</label>
+                <select
+                  value={editingService.status}
+                  onChange={(e) => setEditingService({ ...editingService, status: e.target.value })}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Start Date</label>
+                <input
+                  type="date"
+                  value={editingService.start_date || ''}
+                  onChange={(e) => setEditingService({ ...editingService, start_date: e.target.value })}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Expiration Date (optional)</label>
+                <input
+                  type="date"
+                  value={editingService.expiration_date || ''}
+                  onChange={(e) => setEditingService({ ...editingService, expiration_date: e.target.value })}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-indigo-300 text-lg mb-2">Notes</label>
+                <textarea
+                  value={editingService.notes || ''}
+                  onChange={(e) => setEditingService({ ...editingService, notes: e.target.value })}
+                  rows={4}
+                  className="w-full p-4 rounded-lg bg-black/70 border border-indigo-500/30 text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-4">
+              <button
+                onClick={() => setEditingService(null)}
+                className="px-8 py-4 rounded-full border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-all"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => handleUpdateService(editingService.id, {
+                  status: editingService.status,
+                  start_date: editingService.start_date,
+                  expiration_date: editingService.expiration_date,
+                  notes: editingService.notes,
+                })}
+                className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg text-lg font-medium"
+              >
+                Save Changes
+              </button>
+
+              <button
+                onClick={() => {
+                  handleDeleteClientService(editingService.id);
+                  setEditingService(null);
+                }}
+                className="px-8 py-4 rounded-full bg-red-600 text-white hover:bg-red-500 transition-all text-lg font-medium"
+              >
+                Delete Assignment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modals (existing) */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
