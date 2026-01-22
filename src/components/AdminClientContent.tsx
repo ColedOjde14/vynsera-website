@@ -338,7 +338,6 @@ export default function AdminClientContent({
     }
   };
 
-  // Handler for assigning service (predefined or custom)
   const handleAssignService = async () => {
     if (!selectedClientForService) {
       toast.error('Please select a client');
@@ -371,7 +370,7 @@ export default function AdminClientContent({
 
       if (response.ok) {
         toast.success('Service assigned successfully!');
-        // Refresh the list
+        // Refresh list
         const res = await fetch('/api/admin/client-services');
         const updated = await res.json();
         setClientServices(updated.clientServices || []);
@@ -393,7 +392,6 @@ export default function AdminClientContent({
     }
   };
 
-  // Handler for removing an assigned service
   const handleDeleteClientService = async (id: number) => {
     if (!confirm('Are you sure you want to remove this service assignment?')) return;
 

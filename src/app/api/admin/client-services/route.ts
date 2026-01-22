@@ -16,7 +16,7 @@ export async function GET() {
 
   try {
     const [services, clientServices] = await Promise.all([
-      sql`SELECT * FROM services ORDER BY name`,
+      sql`SELECT id, name FROM services ORDER BY name`,
       sql`
         SELECT 
           cs.id,
@@ -30,8 +30,7 @@ export async function GET() {
           cs.custom_description,
           cs.notes,
           cs.assigned_at,
-          s.name AS service_name,
-          s.description AS service_description
+          s.name AS service_name
         FROM client_services cs
         LEFT JOIN services s ON cs.service_id = s.id
         ORDER BY cs.assigned_at DESC
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing service_id for predefined service' }, { status: 400 });
   }
 
-  if (is_custom && (!custom_name || !custom_description)) {
+  if (is_custom && (!custom_name?.trim() || !custom_description?.trim())) {
     return NextResponse.json({ error: 'Custom name and description required' }, { status: 400 });
   }
 
@@ -95,12 +94,12 @@ export async function POST(request: Request) {
         ${client_id},
         ${is_custom ? null : service_id},
         ${is_custom},
-        ${is_custom ? custom_name : null},
-        ${is_custom ? custom_description : null},
+        ${is_custom ? custom_name.trim() : null},
+        ${is_custom ? custom_description.trim() : null},
         ${start_date || null},
         ${expiration_date || null},
         ${status},
-        ${notes}
+        ${notes.trim() || null}
       )
     `;
 
