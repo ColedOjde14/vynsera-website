@@ -1,11 +1,24 @@
 // src/app/portal/services/page.tsx
-// NO 'use client' here — this is a Server Component
+// NO 'use client' — this is a Server Component
 
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { neon } from '@neondatabase/serverless';
 import Link from 'next/link';
-import ServiceCardsClient from '@/components/ServiceCardsClient'; // Client wrapper for interactivity
+import ServiceCardsClient from '@/components/ServiceCardsClient';
+
+// Define the shape of each service (matches SQL SELECT exactly)
+interface Service {
+  id: number;
+  status: string;
+  start_date: string | null;
+  expiration_date: string | null;
+  notes: string | null;
+  is_custom: boolean;
+  custom_name: string | null;
+  custom_description: string | null;
+  predefined_name: string | null;
+}
 
 export default async function ClientServices() {
   const user = await currentUser();
@@ -18,7 +31,7 @@ export default async function ClientServices() {
 
   const sql = neon(process.env.DATABASE_URL!);
 
-  const assignedServices = await sql`
+  const assignedServicesRaw = await sql`
     SELECT 
       cs.id,
       cs.status,
@@ -34,6 +47,9 @@ export default async function ClientServices() {
     WHERE cs.client_id = ${clientId}
     ORDER BY cs.assigned_at DESC
   `;
+
+  // Safe type assertion: Neon returns plain objects, but columns match Service exactly
+  const assignedServices = assignedServicesRaw as Service[];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white p-6">
