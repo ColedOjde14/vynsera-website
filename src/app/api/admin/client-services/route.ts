@@ -49,9 +49,10 @@ export async function GET(request: Request) {
       clientServices: clientServices ?? [],
     });
   } catch (error) {
-    console.error('Error fetching client services:', error);
+    console.error('GET client-services error:', error);
     return NextResponse.json({
       error: 'Failed to load data',
+      details: error.message,
       services: [],
       clientServices: [],
     }, { status: 500 });
@@ -78,13 +79,9 @@ export async function POST(request: Request) {
     notes = ''
   } = body;
 
-  if (!client_id) {
-    return NextResponse.json({ error: 'Missing client_id' }, { status: 400 });
-  }
+  if (!client_id) return NextResponse.json({ error: 'Missing client_id' }, { status: 400 });
 
-  if (!is_custom && !service_id) {
-    return NextResponse.json({ error: 'Missing service_id for predefined service' }, { status: 400 });
-  }
+  if (!is_custom && !service_id) return NextResponse.json({ error: 'Missing service_id' }, { status: 400 });
 
   if (is_custom && (!custom_name?.trim() || !custom_description?.trim())) {
     return NextResponse.json({ error: 'Custom name and description required' }, { status: 400 });
@@ -93,6 +90,19 @@ export async function POST(request: Request) {
   const sql = neon(process.env.DATABASE_URL!);
 
   try {
+    // Optional: check for duplicate predefined (prevents 23505 error)
+    if (!is_custom && service_id) {
+      const [existing] = await sql`
+        SELECT id FROM client_services
+        WHERE client_id = ${client_id}
+        AND service_id = ${service_id}
+        AND is_custom = false
+      `;
+      if (existing) {
+        return NextResponse.json({ error: 'Client already has this predefined service' }, { status: 409 });
+      }
+    }
+
     await sql`
       INSERT INTO client_services (
         client_id,
@@ -108,22 +118,24 @@ export async function POST(request: Request) {
         ${client_id},
         ${is_custom ? null : service_id},
         ${is_custom},
-        ${is_custom ? custom_name.trim() : null},
-        ${is_custom ? custom_description.trim() : null},
+        ${custom_name?.trim() || null},
+        ${custom_description?.trim() || null},
         ${start_date || null},
         ${expiration_date || null},
         ${status},
-        ${notes.trim() || null}
+        ${notes?.trim() || null}
       )
     `;
 
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('POST assign error:', error);
     return NextResponse.json({
-      success: true,
-      message: 'Service assigned successfully'
-    });
-  } catch (error) {
-    console.error('Assign service error:', error);
-    return NextResponse.json({ error: 'Failed to assign service' }, { status: 500 });
+      error: 'Failed to assign service',
+      details: error.message,
+      code: error.code,
+      constraint: error.constraint
+    }, { status: 500 });
   }
 }
 
@@ -135,11 +147,9 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json();
-  const { id, status, start_date, expiration_date, notes } = body;
+  const { id, status, start_date, expiration_date, notes, custom_description } = body;
 
-  if (!id) {
-    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-  }
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -151,14 +161,18 @@ export async function PATCH(request: Request) {
         start_date = COALESCE(${start_date}, start_date),
         expiration_date = COALESCE(${expiration_date}, expiration_date),
         notes = COALESCE(${notes}, notes),
+        custom_description = COALESCE(${custom_description}, custom_description),
         updated_at = NOW()
       WHERE id = ${id}
     `;
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Update service error:', error);
-    return NextResponse.json({ error: 'Failed to update service' }, { status: 500 });
+  } catch (error: any) {
+    console.error('PATCH update error:', error);
+    return NextResponse.json({
+      error: 'Failed to update service',
+      details: error.message
+    }, { status: 500 });
   }
 }
 
@@ -171,9 +185,7 @@ export async function DELETE(request: Request) {
 
   const { id } = await request.json();
 
-  if (!id) {
-    return NextResponse.json({ error: 'Missing assignment ID' }, { status: 400 });
-  }
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
   const sql = neon(process.env.DATABASE_URL!);
 
@@ -183,12 +195,9 @@ export async function DELETE(request: Request) {
       WHERE id = ${id}
     `;
 
-    return NextResponse.json({
-      success: true,
-      message: 'Service assignment deleted'
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete service assignment error:', error);
-    return NextResponse.json({ error: 'Failed to delete assignment' }, { status: 500 });
+    console.error('DELETE error:', error);
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }
