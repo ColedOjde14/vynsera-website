@@ -11,7 +11,7 @@ export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false); // Hydration safety
+  const [isMounted, setIsMounted] = useState(false);
 
   // Typing animation phrases
   const phrases = [
@@ -118,7 +118,7 @@ export default function Home() {
     }
   };
 
-  // Carousel data with ultra-detailed, MVP-like code previews
+  // Carousel projects with ultra-detailed, MVP-like code previews
   const carouselProjects = [
     {
       title: "Pulse Dashboard",
@@ -126,58 +126,58 @@ export default function Home() {
       accent: "indigo",
       gradient: "from-indigo-600 via-purple-600 to-pink-600",
       mockUI: (
-        <div className="relative w-full h-64 bg-gradient-to-br from-gray-950 to-black rounded-t-2xl overflow-hidden border-b border-indigo-500/40 shadow-inner">
-          {/* Header Bar */}
+        <div className="relative w-full h-64 bg-gradient-to-br from-gray-950 via-indigo-950/80 to-black rounded-t-2xl overflow-hidden border-b border-indigo-500/40 shadow-inner">
+          {/* Header with Logo & User */}
           <div className="absolute top-0 left-0 right-0 h-10 bg-black/70 backdrop-blur-md border-b border-indigo-500/30 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs text-white font-bold">P</div>
-              <span className="text-sm font-medium text-indigo-300">Pulse</span>
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs text-white font-bold">P</div>
+              <span className="text-sm font-semibold text-indigo-300">Pulse</span>
             </div>
-            <div className="flex gap-3">
-              <div className="w-5 h-5 rounded bg-indigo-500/20" />
-              <div className="w-5 h-5 rounded bg-purple-500/20" />
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-rose-500" />
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                <div className="w-2 h-2 rounded-full bg-red-400" />
+              </div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs font-bold">JD</div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="absolute left-0 top-10 bottom-0 w-16 bg-black/60 backdrop-blur-sm border-r border-indigo-500/20 flex flex-col items-center py-6 gap-5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs font-bold animate-pulse">D</div>
-            <div className="w-8 h-1.5 rounded bg-indigo-500/30" />
-            <div className="w-8 h-1.5 rounded bg-indigo-500/20" />
-            <div className="w-8 h-1.5 rounded bg-indigo-500/10" />
+          {/* Sidebar Navigation */}
+          <div className="absolute left-0 top-10 bottom-0 w-16 bg-black/60 backdrop-blur-sm border-r border-indigo-500/20 flex flex-col items-center py-8 gap-6">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 animate-pulse flex items-center justify-center text-white text-xs">D</div>
+            <div className="w-8 h-1 rounded bg-indigo-500/40" />
+            <div className="w-8 h-1 rounded bg-indigo-500/30" />
+            <div className="w-8 h-1 rounded bg-indigo-500/20" />
           </div>
 
-          {/* Main Content Area */}
-          <div className="absolute inset-0 top-10 left-16 p-4 flex flex-col gap-4">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Active Users", value: "12.4k", color: "indigo" },
-                { label: "Revenue", value: "$47.2k", color: "purple" },
-                { label: "Conversion", value: "4.8%", color: "pink" },
-              ].map((kpi, i) => (
-                <div key={i} className={`bg-black/50 backdrop-blur-md border border-${kpi.color}-500/30 rounded-xl p-3 text-center`}>
-                  <div className={`text-xs text-${kpi.color}-300`}>{kpi.label}</div>
-                  <div className={`text-xl font-bold text-${kpi.color}-100 animate-pulse`}>{kpi.value}</div>
-                </div>
-              ))}
-            </div>
+          {/* KPI Cards */}
+          <div className="absolute inset-0 top-10 left-16 p-4 grid grid-cols-3 gap-3">
+            {[
+              { label: "Active Users", value: "12.4k", color: "indigo" },
+              { label: "Revenue Growth", value: "+47%", color: "purple" },
+              { label: "Conversion Rate", value: "4.8%", color: "pink" },
+            ].map((kpi, i) => (
+              <div key={i} className={`bg-black/50 backdrop-blur-md border border-${kpi.color}-500/30 rounded-xl p-3 text-center shadow-sm`}>
+                <div className={`text-xs text-${kpi.color}-300`}>{kpi.label}</div>
+                <div className={`text-xl font-bold text-${kpi.color}-100 animate-pulse`}>{kpi.value}</div>
+              </div>
+            ))}
+          </div>
 
-            {/* Chart Area */}
-            <div className="flex-1 bg-black/40 rounded-xl border border-purple-500/20 p-3 flex items-center justify-center">
-              <svg className="w-full h-4/5" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.6" />
-                    <stop offset="100%" stopColor="#ec4899" stopOpacity="0.6" />
-                  </linearGradient>
-                </defs>
-                <path d="M0 90 Q20 70 40 80 T80 50 T100 60" fill="none" stroke="url(#grad1)" strokeWidth="3" />
-                <circle cx="40" cy="80" r="3" fill="#ec4899" className="animate-pulse" />
-                <circle cx="80" cy="50" r="3" fill="#a78bfa" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
-              </svg>
-            </div>
+          {/* Detailed Chart */}
+          <div className="absolute bottom-4 left-16 right-4 h-20 bg-black/40 rounded-xl border border-purple-500/20 overflow-hidden">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="pulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#ec4899" stopOpacity="0.5" />
+                </linearGradient>
+              </defs>
+              <path d="M0 90 Q20 70 40 80 T80 50 T100 60" fill="none" stroke="url(#pulseGrad)" strokeWidth="3" />
+              <circle cx="40" cy="80" r="3" fill="#ec4899" className="animate-pulse" />
+              <circle cx="80" cy="50" r="3" fill="#a78bfa" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
+            </svg>
           </div>
         </div>
       ),
@@ -188,29 +188,29 @@ export default function Home() {
       accent: "pink",
       gradient: "from-pink-600 via-rose-600 to-purple-600",
       mockUI: (
-        <div className="relative w-full h-64 bg-gradient-to-br from-rose-950 to-black rounded-t-2xl overflow-hidden border-b border-pink-500/40 shadow-inner">
+        <div className="relative w-full h-64 bg-gradient-to-br from-rose-950 via-pink-950/80 to-black rounded-t-2xl overflow-hidden border-b border-pink-500/40 shadow-inner">
           {/* Navbar */}
-          <div className="absolute top-0 left-0 right-0 h-12 bg-black/70 backdrop-blur-md border-b border-pink-500/30 flex items-center px-5 justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white text-xs font-bold">N</div>
+          <div className="absolute top-0 left-0 right-0 h-10 bg-black/70 backdrop-blur-md border-b border-pink-500/30 flex items-center px-4 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-600 to-rose-600 flex items-center justify-center text-white text-xs font-bold">N</div>
               <span className="text-sm font-semibold text-pink-200">Nova</span>
             </div>
             <div className="flex gap-4">
-              <div className="w-5 h-5 rounded bg-pink-500/20" />
-              <div className="w-5 h-5 rounded bg-white/10" />
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-purple-600" />
+              <div className="px-3 py-1 bg-white/5 rounded-full text-xs text-pink-200">Cart (0)</div>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-purple-600" />
             </div>
           </div>
 
-          {/* Hero Product Showcase */}
-          <div className="absolute inset-0 top-12 flex flex-col items-center justify-center gap-6">
-            <div className="relative w-40 h-40 rounded-2xl bg-gradient-to-br from-pink-700 to-rose-700 flex items-center justify-center overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <span className="text-5xl font-black text-white tracking-wider drop-shadow-lg">NOVA</span>
+          {/* Hero Product */}
+          <div className="absolute inset-0 top-10 flex flex-col items-center justify-center gap-6">
+            <div className="relative w-44 h-44 rounded-2xl bg-gradient-to-br from-pink-700 via-rose-700 to-purple-700 flex items-center justify-center overflow-hidden shadow-2xl">
+              <span className="text-5xl font-black text-white tracking-wider drop-shadow-xl">NOVA</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               <div className="absolute inset-0 bg-white/5 animate-pulse" />
             </div>
-            <div className="flex gap-6">
-              <div className="px-6 py-3 bg-black/50 backdrop-blur-md rounded-full border border-pink-500/30 text-pink-200 font-medium text-sm">
+
+            <div className="flex gap-4">
+              <div className="px-6 py-3 bg-black/50 backdrop-blur-md rounded-full border border-pink-500/30 text-pink-200 font-medium text-sm shadow-inner">
                 $249
               </div>
               <div className="px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 rounded-full text-white font-medium text-sm shadow-lg">
@@ -219,10 +219,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mock Product Cards */}
-          <div className="absolute bottom-6 left-6 right-6 grid grid-cols-3 gap-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-gradient-to-br from-rose-900/60 to-black/60 rounded-lg border border-pink-500/20" />
+          {/* Product Grid Teaser */}
+          <div className="absolute bottom-4 left-4 right-4 grid grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-16 bg-gradient-to-br from-rose-900/60 to-black/60 rounded-lg border border-pink-500/20 animate-pulse" />
             ))}
           </div>
         </div>
@@ -234,11 +234,11 @@ export default function Home() {
       accent: "purple",
       gradient: "from-purple-600 via-indigo-600 to-cyan-600",
       mockUI: (
-        <div className="relative w-full h-64 bg-gradient-to-br from-purple-950 to-black rounded-t-2xl overflow-hidden border-b border-purple-500/40 shadow-inner">
+        <div className="relative w-full h-64 bg-gradient-to-br from-purple-950 via-indigo-950/80 to-black rounded-t-2xl overflow-hidden border-b border-purple-500/40 shadow-inner">
           {/* Top Bar */}
           <div className="absolute top-0 left-0 right-0 h-10 bg-black/70 backdrop-blur-md border-b border-purple-500/30 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-600 to-indigo-600" />
+              <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">F</div>
               <span className="text-sm font-medium text-purple-200">Forge</span>
             </div>
             <div className="flex gap-3">
@@ -247,7 +247,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Kanban-style Board */}
+          {/* Kanban Board */}
           <div className="absolute inset-0 top-10 p-4 grid grid-cols-4 gap-3">
             {['Backlog', 'To Do', 'In Progress', 'Done'].map((col, i) => (
               <div key={col} className="bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-xl p-3 flex flex-col gap-3">
@@ -255,10 +255,13 @@ export default function Home() {
                 {[1, 2, 3].map(n => (
                   <div
                     key={n}
-                    className={`h-12 rounded-lg bg-gradient-to-r from-purple-800/40 to-indigo-800/40 border border-purple-500/20 relative overflow-hidden animate-pulse`}
+                    className="h-12 rounded-lg bg-gradient-to-r from-purple-800/50 to-indigo-800/50 border border-purple-500/20 relative overflow-hidden animate-pulse"
                     style={{ animationDelay: `${i * 0.15 + n * 0.08}s` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+                    <div className="absolute inset-0 flex items-center px-3 text-xs text-purple-200">
+                      Task {n} • {col}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -273,25 +276,21 @@ export default function Home() {
       accent: "cyan",
       gradient: "from-cyan-600 via-blue-600 to-indigo-600",
       mockUI: (
-        <div className="relative w-full h-64 bg-gradient-to-br from-cyan-950 to-black rounded-t-2xl overflow-hidden border-b border-cyan-500/40 shadow-inner">
-          {/* Hero Section */}
+        <div className="relative w-full h-64 bg-gradient-to-br from-cyan-950 via-blue-950/80 to-black rounded-t-2xl overflow-hidden border-b border-cyan-500/40 shadow-inner">
+          {/* Hero Title */}
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
             <div className="relative">
-              <div className="text-6xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-wider drop-shadow-2xl">
+              <div className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-wider drop-shadow-2xl">
                 AETHER
               </div>
-              <div className="absolute inset-0 bg-cyan-500/10 blur-3xl animate-pulse rounded-full scale-150" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 blur-3xl animate-pulse rounded-full scale-150" />
             </div>
 
             {/* Mock Navigation */}
-            <div className="flex gap-6">
-              <div className="px-5 py-2 bg-black/40 backdrop-blur-md rounded-full border border-cyan-500/30 text-cyan-200 text-sm font-medium">
-                Work
-              </div>
-              <div className="px-5 py-2 bg-black/40 backdrop-blur-md rounded-full border border-cyan-500/30 text-cyan-200 text-sm font-medium">
-                About
-              </div>
-              <div className="px-5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full text-white text-sm font-medium shadow-lg">
+            <div className="flex gap-6 px-6 py-3 bg-black/40 backdrop-blur-lg rounded-full border border-cyan-500/30">
+              <div className="text-sm text-cyan-200 font-medium">Work</div>
+              <div className="text-sm text-cyan-200 font-medium">About</div>
+              <div className="text-sm text-white font-medium px-4 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full shadow-lg">
                 Contact
               </div>
             </div>
@@ -457,7 +456,7 @@ export default function Home() {
                           {project.tagline}
                         </p>
 
-                        {/* Detailed Mock UI */}
+                        {/* Ultra-Detailed Mock UI */}
                         <div className="mb-6 rounded-xl overflow-hidden border border-white/10 shadow-inner bg-black/50">
                           {project.mockUI}
                         </div>
