@@ -267,12 +267,13 @@ export default function Home() {
             Where bold vision meets flawless execution.
           </motion.p>
 
-          {/* Animated typing - safe for hydration */}
+          {/* Animated typing - hydration-safe */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 1 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex justify-center"
+            suppressHydrationWarning // Production safety net for any tiny mismatch
           >
             <motion.span
               initial={{ opacity: 0 }}
@@ -288,7 +289,7 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
                 className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
               >
-                {isMounted ? displayText : ''}
+                {isMounted ? displayText : 'We Build...'} {/* Safe fallback */}
               </motion.span>
               <motion.span
                 animate={{ opacity: [1, 0] }}
