@@ -141,7 +141,6 @@ export default function Home() {
             Where bold vision meets flawless execution.
           </motion.p>
 
-          {/* Animated typing - full phrases including "We" */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,18 +208,18 @@ export default function Home() {
 
       {/* Core Engineering Excellence */}
       <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10">
-        <div className="max-w-7xl mx-auto pb-40 lg:pb-56"> {/* Increased bottom padding to prevent cutoff */}
+        <div className="max-w-7xl mx-auto pb-40 lg:pb-56">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-20 sm:mb-24 lg:mb-32 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-24 sm:mb-32 lg:mb-40 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent"
           >
             Core Engineering Excellence
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-8 lg:pb-16"> {/* Extra grid padding */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-16 lg:pb-24">
             {/* Website Development */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
@@ -289,12 +288,12 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-20 sm:mb-24 lg:mb-32 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-24 sm:mb-32 lg:mb-40 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent"
           >
             The Vynsera Difference
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-8 lg:pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-16 lg:pb-24">
             <motion.div
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
