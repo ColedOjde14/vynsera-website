@@ -6,15 +6,13 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import FeaturedProjectsCarousel from '@/components/FeaturedProjectsCarousel';
 
 export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
-  // Typing animation phrases
+  // Animated typing phrases - full "We [action] [service]" cycles
   const phrases = [
     "We Build fast, modern websites",
     "We Design Custom Logos & Branding Identity",
@@ -33,10 +31,6 @@ export default function Home() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
     if (isLoaded && isSignedIn) {
       toast.success("You're now logged in!", {
         duration: 4000,
@@ -45,9 +39,8 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
+  // Smooth typing animation
   useEffect(() => {
-    if (!isMounted) return;
-
     const currentPhrase = phrases[currentIndex];
     let timer: NodeJS.Timeout;
 
@@ -71,7 +64,7 @@ export default function Home() {
     }
 
     return () => clearTimeout(timer);
-  }, [displayText, isDeleting, currentIndex, isMounted]);
+  }, [displayText, isDeleting, currentIndex]);
 
   if (!isLoaded) {
     return <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950" />;
@@ -122,19 +115,19 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white flex flex-col overflow-x-hidden">
       {/* Hero Section */}
-      <header className="relative flex-grow flex items-center justify-center px-6 py-24 sm:py-32 lg:py-40">
+      <header className="relative flex-grow flex items-center justify-center px-6 py-20 sm:py-28 lg:py-36">
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, ease: "easeOut" }}
-            className="relative inline-block mb-12 sm:mb-16 group"
+            className="relative inline-block mb-10 sm:mb-14 group"
           >
             <img
               src="/logo.png"
               alt="Vynsera"
-              className="mx-auto h-56 sm:h-72 lg:h-96 w-auto drop-shadow-2xl transition-all duration-1000 group-hover:scale-105 group-hover:rotate-2"
+              className="mx-auto h-48 sm:h-64 lg:h-80 w-auto drop-shadow-2xl transition-all duration-1000 group-hover:scale-105 group-hover:rotate-2"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-pink-500/20 to-indigo-500/30 blur-3xl opacity-0 group-hover:opacity-70 transition-opacity duration-1000 rounded-full" />
           </motion.div>
@@ -143,24 +136,23 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-light text-indigo-200/90 tracking-wide max-w-4xl mx-auto mb-12 sm:mb-16"
+            className="text-xl sm:text-2xl lg:text-3xl font-light text-indigo-200/90 tracking-wide max-w-4xl mx-auto mb-10 sm:mb-12"
           >
             Where bold vision meets flawless execution.
           </motion.p>
 
-          {/* Animated typing - fully hydration-safe */}
+          {/* Animated typing - full phrases including "We" */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex justify-center"
-            suppressHydrationWarning
+            className="text-2xl sm:text-3xl lg:text-4xl font-light text-indigo-300/80 mb-12 sm:mb-16 flex justify-center"
           >
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 1 }}
-              className="relative inline-block min-w-[320px] sm:min-w-[480px] lg:min-w-[620px] text-center font-medium"
+              className="relative inline-block min-w-[280px] sm:min-w-[420px] lg:min-w-[540px] text-center font-medium"
             >
               <motion.span
                 key={currentIndex}
@@ -170,12 +162,12 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
                 className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
               >
-                {isMounted ? displayText : ''}
+                {displayText}
               </motion.span>
               <motion.span
                 animate={{ opacity: [1, 0] }}
                 transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-                className="absolute -right-2 top-0 text-pink-400"
+                className="absolute -right-1 top-0 text-pink-400"
               >
                 |
               </motion.span>
@@ -215,9 +207,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Featured Creations Carousel */}
-      <FeaturedProjectsCarousel />
-
       {/* Core Engineering Excellence */}
       <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10 min-h-fit flex flex-col justify-center overflow-visible">
         <div className="max-w-7xl mx-auto w-full py-12 lg:py-20">
@@ -226,7 +215,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-24 sm:mb-32 lg:mb-40 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent overflow-visible pb-4"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 lg:mb-32 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent overflow-visible pb-4"
           >
             Core Engineering Excellence
           </motion.h2>
