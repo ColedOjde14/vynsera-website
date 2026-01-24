@@ -208,26 +208,25 @@ export default function Home() {
       </header>
 
       {/* Core Engineering Excellence */}
-      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10 min-h-[80vh] flex items-center">
-        <div className="max-w-7xl mx-auto w-full">
+      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10 min-h-fit flex flex-col justify-center overflow-visible">
+        <div className="max-w-7xl mx-auto w-full py-12 lg:py-20">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 lg:mb-32 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent overflow-visible"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 lg:mb-32 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent overflow-visible pb-4"
           >
             Core Engineering Excellence
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
-            {/* Website Development */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-purple-500/40 rounded-3xl hover:border-purple-400/70 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-700 overflow-hidden"
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-purple-500/40 rounded-3xl hover:border-purple-400/70 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-700 overflow-visible"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
@@ -240,13 +239,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Custom Software */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.4 }}
-              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-hidden"
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-visible"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
@@ -259,13 +257,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Full-Stack Engineering */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-indigo-500/40 rounded-3xl hover:border-indigo-400/70 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-700 overflow-hidden"
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-indigo-500/40 rounded-3xl hover:border-indigo-400/70 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-700 overflow-visible"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
@@ -282,25 +279,25 @@ export default function Home() {
       </section>
 
       {/* Vynsera Difference */}
-      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-pink-500/10">
-        <div className="max-w-7xl mx-auto pb-40 lg:pb-56">
+      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-pink-500/10 min-h-fit flex flex-col justify-center overflow-visible">
+        <div className="max-w-7xl mx-auto w-full py-12 lg:py-20">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-24 sm:mb-32 lg:mb-40 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent overflow-visible"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-24 sm:mb-32 lg:mb-40 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent overflow-visible pb-4"
           >
             The Vynsera Difference
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-16 lg:pb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
             <motion.div
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: 0.1 }}
-              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-visible"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Radical Affordability
@@ -315,7 +312,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: 0.2 }}
-              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-visible"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Lightning Speed
@@ -330,7 +327,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: 0.3 }}
-              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-visible"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Human-First + Custom Portal
