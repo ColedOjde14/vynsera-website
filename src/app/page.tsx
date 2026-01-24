@@ -12,17 +12,21 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
 
-  // Typing animation phrases focused on core services
-  const services = [
-    "fast, modern websites",
-    "custom software that scales",
-    "full-stack web applications",
-    "SaaS platforms & tools",
-    "robust backend systems",
-    "seamless digital experiences"
+  // Expanded typing phrases with multiple flows
+  const phrases = [
+    "We design Custom Logos & Branding Identity",
+    "We craft SEO-optimized Websites",
+    "We engineer Full-Stack Web Applications",
+    "We build Scalable SaaS Platforms",
+    "We create Robust Backend Systems",
+    "We launch Seamless Digital Experiences",
+    "We architect High-Performance Software",
+    "We develop Elegant User Interfaces",
+    "We optimize Lightning-Fast Websites",
+    "We innovate Custom Engineering Solutions"
   ];
 
-  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -35,32 +39,32 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Typing effect
+  // Beautiful typing animation with cursor blink
   useEffect(() => {
-    const currentService = services[currentServiceIndex];
+    const currentPhrase = phrases[currentIndex];
     let timer: NodeJS.Timeout;
 
     if (!isDeleting) {
-      if (displayText.length < currentService.length) {
+      if (displayText.length < currentPhrase.length) {
         timer = setTimeout(() => {
-          setDisplayText(currentService.slice(0, displayText.length + 1));
-        }, 80);
+          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
+        }, 70); // Slightly slower for elegance
       } else {
-        timer = setTimeout(() => setIsDeleting(true), 2200);
+        timer = setTimeout(() => setIsDeleting(true), 2500); // Longer pause for impact
       }
     } else {
       if (displayText.length > 0) {
         timer = setTimeout(() => {
           setDisplayText(displayText.slice(0, -1));
-        }, 50);
+        }, 40); // Faster delete for smooth flow
       } else {
         setIsDeleting(false);
-        setCurrentServiceIndex((prev) => (prev + 1) % services.length);
+        setCurrentIndex((prev) => (prev + 1) % phrases.length);
       }
     }
 
     return () => clearTimeout(timer);
-  }, [displayText, isDeleting, currentServiceIndex]);
+  }, [displayText, isDeleting, currentIndex]);
 
   if (!isLoaded) {
     return <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950" />;
@@ -143,47 +147,53 @@ export default function Home() {
             transition={{ delay: 0.8, duration: 1 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <span>We build</span>
-            <span className="relative inline-block min-w-[320px] sm:min-w-[420px] lg:min-w-[520px] text-center">
+            <span>We</span>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 1 }}
+              className="relative inline-block min-w-[320px] sm:min-w-[480px] lg:min-w-[620px] text-center font-medium"
+            >
               <motion.span
                 key={currentServiceIndex}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.7 }}
-                className="font-medium bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
+                className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
               >
                 {displayText}
-                <motion.span
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-                  className="absolute -right-2 top-0 text-pink-400"
-                >
-                  |
-                </motion.span>
               </motion.span>
-            </span>
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                className="absolute -right-2 top-0 text-pink-400"
+              >
+                |
+              </motion.span>
+            </motion.span>
           </motion.div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
             <Link
               href="/services"
-              className="inline-flex px-10 sm:px-12 py-5 sm:py-6 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-lg sm:text-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.03] active:scale-100"
+              className="inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-xl sm:text-2xl shadow-2xl hover:shadow-pink-500/50 transition-all duration-500 transform hover:scale-105 active:scale-100 relative overflow-hidden group"
             >
-              Explore Our Services
+              <span className="relative z-10">Explore Our Services</span>
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </Link>
 
             {isSignedIn ? (
               <Link
                 href={portalUrl}
-                className="inline-flex px-10 sm:px-12 py-5 sm:py-6 rounded-full border-2 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 transition-all duration-300 text-lg sm:text-xl font-medium backdrop-blur-sm active:scale-100"
+                className="inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full border-2 border-pink-500/50 text-pink-300 hover:bg-pink-500/10 hover:border-pink-400 transition-all duration-300 text-xl sm:text-2xl font-medium backdrop-blur-sm active:scale-100"
               >
                 Access Portal
               </Link>
             ) : (
               <Link
                 href="https://accounts.vynseracorp.com/sign-in"
-                className="inline-flex px-10 sm:px-12 py-5 sm:py-6 rounded-full border-2 border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 transition-all duration-300 text-lg sm:text-xl font-medium backdrop-blur-sm active:scale-100"
+                className="inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full border-2 border-pink-500/40 text-pink-300 hover:bg-pink-500/10 hover:border-pink-400 transition-all duration-300 text-xl sm:text-2xl font-medium backdrop-blur-sm active:scale-100"
               >
                 Client Login
               </Link>
@@ -192,92 +202,74 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Core Engineering Excellence - Eye-catching & animated */}
-      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm border-t border-indigo-500/10">
+      {/* Core Engineering Excellence - Eye-catching, animated, glassy */}
+      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10">
         <div className="max-w-7xl mx-auto">
           <motion.h2
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-20 bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"
+            transition={{ duration: 1.2 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent"
           >
             Core Engineering Excellence
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
             {/* Website Development */}
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-indigo-500/30 rounded-3xl hover:border-indigo-400/70 hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-700 overflow-hidden"
+              transition={{ duration: 1, delay: 0.2 }}
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-purple-500/40 rounded-3xl hover:border-purple-400/70 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-700 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
-                <h3 className="text-2xl sm:text-3xl font-bold text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
+                <h3 className="text-3xl sm:text-4xl font-bold text-purple-200 mb-6 sm:mb-8 group-hover:text-purple-100 transition-colors">
                   Website Development
                 </h3>
-                <p className="text-base sm:text-lg text-indigo-300/90 group-hover:text-indigo-200 transition-colors mb-6">
-                  Lightning-fast, responsive, SEO-optimized sites built to convert and scale — modern Next.js, Tailwind, animations, performance obsessed.
+                <p className="text-lg sm:text-xl text-purple-300/90 group-hover:text-purple-200 transition-colors leading-relaxed">
+                  Lightning-fast, responsive, SEO-optimized websites built with modern Next.js, Tailwind, animations, and obsessive performance tuning.
                 </p>
-                <Link
-                  href="/services/website"
-                  className="inline-flex items-center text-indigo-300 hover:text-indigo-100 transition-colors"
-                >
-                  Learn More →
-                </Link>
               </div>
             </motion.div>
 
             {/* Custom Software */}
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-3xl hover:border-purple-400/70 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-700 overflow-hidden"
+              transition={{ duration: 1, delay: 0.4 }}
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
-                <h3 className="text-2xl sm:text-3xl font-bold text-purple-200 mb-6 sm:mb-8 group-hover:text-purple-100 transition-colors">
+                <h3 className="text-3xl sm:text-4xl font-bold text-pink-200 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                   Custom Software
                 </h3>
-                <p className="text-base sm:text-lg text-purple-300/90 group-hover:text-purple-200 transition-colors mb-6">
+                <p className="text-lg sm:text-xl text-pink-300/90 group-hover:text-pink-200 transition-colors leading-relaxed">
                   Bespoke applications, SaaS platforms, internal tools, automation — engineered for your exact vision with clean code, scalability, and reliability.
                 </p>
-                <Link
-                  href="/services/custom-software"
-                  className="inline-flex items-center text-purple-300 hover:text-purple-100 transition-colors"
-                >
-                  Learn More →
-                </Link>
               </div>
             </motion.div>
 
             {/* Full-Stack Engineering */}
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700 overflow-hidden"
+              transition={{ duration: 1, delay: 0.6 }}
+              className="group relative p-10 sm:p-12 bg-black/50 backdrop-blur-2xl border border-indigo-500/40 rounded-3xl hover:border-indigo-400/70 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-700 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
-                <h3 className="text-2xl sm:text-3xl font-bold text-pink-200 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
+                <h3 className="text-3xl sm:text-4xl font-bold text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
                   Full-Stack Engineering
                 </h3>
-                <p className="text-base sm:text-lg text-pink-300/90 group-hover:text-pink-200 transition-colors mb-6">
+                <p className="text-lg sm:text-xl text-indigo-300/90 group-hover:text-indigo-200 transition-colors leading-relaxed">
                   Robust backend systems, APIs, databases, cloud architecture, and seamless frontend integration — built to last and scale with your business.
                 </p>
-                <Link
-                  href="/services/engineering"
-                  className="inline-flex items-center text-pink-300 hover:text-pink-100 transition-colors"
-                >
-                  Learn More →
-                </Link>
               </div>
             </motion.div>
           </div>
@@ -285,40 +277,40 @@ export default function Home() {
       </section>
 
       {/* Vynsera Difference - Pink theme, emphasized portal */}
-      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm border-t border-pink-500/10">
+      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-sm border-t border-pink-500/10">
         <div className="max-w-5xl mx-auto text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent mb-16 sm:mb-20"
+            transition={{ duration: 1.2 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent mb-16 sm:mb-24"
           >
             The Vynsera Difference
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+              transition={{ duration: 0.9, delay: 0.1 }}
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Radical Affordability
               </h3>
               <p className="text-base sm:text-lg text-pink-200/90 group-hover:text-pink-100 transition-colors">
-                Premium engineering quality at prices 70%+ below market — no compromise, just value.
+                Premium engineering quality at prices 70%+ below market — no compromise, just unmatched value.
               </p>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+              transition={{ duration: 0.9, delay: 0.2 }}
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Lightning Speed
@@ -329,17 +321,17 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+              transition={{ duration: 0.9, delay: 0.3 }}
+              className="group p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/40 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-700"
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Human-First + Custom Portal
               </h3>
               <p className="text-base sm:text-lg text-pink-200/90 group-hover:text-pink-100 transition-colors">
-                Direct, honest collaboration + a dedicated client portal for real-time updates, file sharing, and 24/7 support — your project, your control.
+                Direct, honest collaboration + a dedicated client portal for real-time updates, file sharing, progress tracking, and 24/7 support — your project, your control.
               </p>
             </motion.div>
           </div>
