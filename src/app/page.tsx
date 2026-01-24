@@ -11,6 +11,7 @@ export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // Hydration safety for typing
 
   // Typing animation phrases
   const phrases = [
@@ -30,93 +31,11 @@ export default function Home() {
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      toast.success("You're now logged in!", {
-        duration: 4000,
-        position: 'top-center',
-      });
-    }
-  }, [isLoaded, isSignedIn]);
-
-  // Smooth typing animation
-  useEffect(() => {
-    const currentPhrase = phrases[currentIndex];
-    let timer: NodeJS.Timeout;
-
-    if (!isDeleting) {
-      if (displayText.length < currentPhrase.length) {
-        timer = setTimeout(() => {
-          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
-        }, 70);
-      } else {
-        timer = setTimeout(() => setIsDeleting(true), 2500);
-      }
-    } else {
-      if (displayText.length > 0) {
-        timer = setTimeout(() => {
-          setDisplayText(displayText.slice(0, -1));
-        }, 40);
-      } else {
-        setIsDeleting(false);
-        setCurrentIndex((prev) => (prev + 1) % phrases.length);
-      }
-    }
-
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, currentIndex]);
-
-  if (!isLoaded) {
-    return <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950" />;
-  }
-
-  const role = user?.publicMetadata?.role as string | undefined;
-  const isAdminOrSupport = role === 'admin' || role === 'support';
-  const portalUrl = isAdminOrSupport ? '/admin' : '/portal';
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      message: formData.get('message') as string,
-    };
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setFormStatus('success');
-        form.reset();
-        setTimeout(() => setFormStatus('idle'), 4000);
-      } else {
-        setFormStatus('error');
-        setTimeout(() => setFormStatus('idle'), 4000);
-      }
-    } catch (err) {
-      setFormStatus('error');
-      setTimeout(() => setFormStatus('idle'), 4000);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Carousel data & logic
+  // Carousel data
   const carouselProjects = [
     {
       title: "Pulse Dashboard",
-      tagline: "Real-Time SaaS Analytics",
+      tagline: "Real-Time SaaS Analytics Platform",
       accent: "indigo",
       gradient: "from-indigo-600 via-purple-600 to-pink-600",
       mockUI: (
@@ -155,7 +74,7 @@ export default function Home() {
     },
     {
       title: "Nova Storefront",
-      tagline: "Ultra-Fast E-Commerce",
+      tagline: "Ultra-Fast E-Commerce Experience",
       accent: "pink",
       gradient: "from-pink-600 via-rose-600 to-purple-600",
       mockUI: (
@@ -232,6 +151,84 @@ export default function Home() {
 
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const currentPhrase = phrases[currentIndex];
+    let timer: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      if (displayText.length < currentPhrase.length) {
+        timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
+        }, 70);
+      } else {
+        timer = setTimeout(() => setIsDeleting(true), 2500);
+      }
+    } else {
+      if (displayText.length > 0) {
+        timer = setTimeout(() => {
+          setDisplayText(displayText.slice(0, -1));
+        }, 40);
+      } else {
+        setIsDeleting(false);
+        setCurrentIndex((prev) => (prev + 1) % phrases.length);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, currentIndex, isMounted]);
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950" />;
+  }
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isAdminOrSupport = role === 'admin' || role === 'support';
+  const portalUrl = isAdminOrSupport ? '/admin' : '/portal';
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      message: formData.get('message') as string,
+    };
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setFormStatus('success');
+        form.reset();
+        setTimeout(() => setFormStatus('idle'), 4000);
+      } else {
+        setFormStatus('error');
+        setTimeout(() => setFormStatus('idle'), 4000);
+      }
+    } catch (err) {
+      setFormStatus('error');
+      setTimeout(() => setFormStatus('idle'), 4000);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-950 text-white flex flex-col overflow-x-hidden">
       {/* Hero Section */}
@@ -281,7 +278,7 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
                 className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
               >
-                {displayText}
+                {isMounted ? displayText : 'We Build...'} {/* Safe initial render */}
               </motion.span>
               <motion.span
                 animate={{ opacity: [1, 0] }}
@@ -379,7 +376,8 @@ export default function Home() {
                           {project.tagline}
                         </p>
 
-                        <div className="flex flex-wrap gap-2 mb-6">
+                        {/* Mock UI Preview */}
+                        <div className="mb-6 rounded-xl overflow-hidden border border-white/10 shadow-inner">
                           {project.mockUI}
                         </div>
 
