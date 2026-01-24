@@ -11,7 +11,7 @@ export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false); // Prevents hydration mismatch
+  const [isMounted, setIsMounted] = useState(false);
 
   // Typing animation phrases
   const phrases = [
@@ -44,7 +44,6 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Typing animation - only runs after mount
   useEffect(() => {
     if (!isMounted) return;
 
@@ -268,7 +267,7 @@ export default function Home() {
             Where bold vision meets flawless execution.
           </motion.p>
 
-          {/* Animated typing */}
+          {/* Animated typing - safe for hydration */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
