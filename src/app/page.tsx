@@ -12,18 +12,18 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
 
-  // Typing phrases — focused on core services, no "We" duplication
+  // Animated typing phrases - full "We [action] [service]" cycles
   const phrases = [
-    "Custom Logos & Branding Identity",
-    "SEO-optimized Websites",
-    "Full-Stack Web Applications",
-    "Scalable SaaS Platforms",
-    "Robust Backend Systems",
-    "Seamless Digital Experiences",
-    "High-Performance Software",
-    "Elegant User Interfaces",
-    "Lightning-Fast Websites",
-    "Custom Engineering Solutions"
+    "We Build fast, modern websites",
+    "We Design Custom Logos & Branding Identity",
+    "We Craft SEO-optimized Websites",
+    "We Engineer Full-Stack Web Applications",
+    "We Create Scalable SaaS Platforms",
+    "We Architect Robust Backend Systems",
+    "We Launch Seamless Digital Experiences",
+    "We Develop High-Performance Software",
+    "We Optimize Lightning-Fast Websites",
+    "We Innovate Custom Engineering Solutions"
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,7 +39,7 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Typing animation — prefix "We" outside the animated span to avoid duplication
+  // Smooth typing animation
   useEffect(() => {
     const currentPhrase = phrases[currentIndex];
     let timer: NodeJS.Timeout;
@@ -141,15 +141,13 @@ export default function Home() {
             Where bold vision meets flawless execution.
           </motion.p>
 
+          {/* Animated typing - full phrases including "We" */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex flex-col sm:flex-row items-center justify-center gap-3"
+            className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex justify-center"
           >
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent font-medium">
-              We
-            </span>
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -182,7 +180,7 @@ export default function Home() {
               className="group relative inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-xl sm:text-2xl shadow-2xl hover:shadow-pink-500/60 transition-all duration-500 transform hover:scale-105 active:scale-100 overflow-hidden"
             >
               <span className="relative z-10">Explore Our Services</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <motion.div
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -211,18 +209,18 @@ export default function Home() {
 
       {/* Core Engineering Excellence */}
       <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10">
-        <div className="max-w-7xl mx-auto pb-32 lg:pb-48"> {/* Extra bottom padding to prevent cutoff */}
+        <div className="max-w-7xl mx-auto pb-40 lg:pb-56"> {/* Increased bottom padding to prevent cutoff */}
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-20 sm:mb-24 lg:mb-32 bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent"
           >
             Core Engineering Excellence
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-8 lg:pb-16"> {/* Extra grid padding */}
             {/* Website Development */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
@@ -285,18 +283,18 @@ export default function Home() {
 
       {/* Vynsera Difference */}
       <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-pink-500/10">
-        <div className="max-w-7xl mx-auto pb-32 lg:pb-48">
+        <div className="max-w-7xl mx-auto pb-40 lg:pb-56">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-20 sm:mb-24 lg:mb-32 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent"
           >
             The Vynsera Difference
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 pb-8 lg:pb-16">
             <motion.div
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
