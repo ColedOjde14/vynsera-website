@@ -39,7 +39,7 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Typing animation
+  // Smooth typing animation
   useEffect(() => {
     const currentPhrase = phrases[currentIndex];
     let timer: NodeJS.Timeout;
@@ -112,7 +112,7 @@ export default function Home() {
     }
   };
 
-  // Featured Projects Carousel Data
+  // Carousel data & logic
   const carouselProjects = [
     {
       title: "Pulse Dashboard",
@@ -342,10 +342,10 @@ export default function Home() {
           <div className="relative">
             <div className="flex justify-center items-center gap-6 sm:gap-12 overflow-hidden px-4">
               <AnimatePresence mode="wait">
-                {projects.map((project, index) => {
+                {carouselProjects.map((project, index) => {
                   const isActive = index === activeIndex;
-                  const isPrev = index === (activeIndex - 1 + projects.length) % projects.length;
-                  const isNext = index === (activeIndex + 1) % projects.length;
+                  const isPrev = index === (activeIndex - 1 + carouselProjects.length) % carouselProjects.length;
+                  const isNext = index === (activeIndex + 1) % carouselProjects.length;
 
                   if (!isActive && !isPrev && !isNext) return null;
 
@@ -376,18 +376,11 @@ export default function Home() {
                         </h3>
 
                         <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                          {project.description}
+                          {project.tagline}
                         </p>
 
                         <div className="flex flex-wrap gap-2 mb-6">
-                          {project.features.map((feature, i) => (
-                            <span
-                              key={i}
-                              className="px-3 py-1.5 bg-white/5 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium text-gray-200 border border-white/10 group-hover:border-white/20 transition-colors"
-                            >
-                              {feature}
-                            </span>
-                          ))}
+                          {project.mockUI}
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -405,7 +398,7 @@ export default function Home() {
 
             {/* Navigation Dots */}
             <div className="flex justify-center gap-4 mt-12">
-              {projects.map((_, index) => (
+              {carouselProjects.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveIndex(index)}
