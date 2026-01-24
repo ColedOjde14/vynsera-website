@@ -11,7 +11,7 @@ const projects = [
     accent: "indigo",
     gradient: "from-indigo-600 via-purple-600 to-pink-600",
     mockUI: (
-      <div className="relative w-full h-64 bg-gradient-to-br from-gray-900 to-black rounded-t-2xl overflow-hidden border-b border-indigo-500/30">
+      <div className="relative w-full h-64 bg-gradient-to-br from-gray-950 to-black rounded-t-2xl overflow-hidden border-b border-indigo-500/30">
         <div className="absolute left-0 top-0 bottom-0 w-14 bg-black/60 backdrop-blur-sm border-r border-indigo-500/20 flex flex-col items-center py-6 gap-6">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 animate-pulse" />
           <div className="w-6 h-6 rounded bg-indigo-500/30" />
@@ -74,9 +74,59 @@ const projects = [
       </div>
     ),
   },
-  // ... (the other two projects remain the same, no changes needed)
-  // Copy the rest from your previous version if you have them
+  {
+    title: "Forge Workflow",
+    tagline: "Team Automation Suite",
+    accent: "purple",
+    gradient: "from-purple-600 via-indigo-600 to-cyan-600",
+    mockUI: (
+      <div className="relative w-full h-64 bg-gradient-to-br from-purple-950 to-black rounded-t-2xl overflow-hidden border-b border-purple-500/30">
+        <div className="absolute inset-0 top-0 p-6 grid grid-cols-4 gap-4">
+          {['To Do', 'In Progress', 'Review', 'Done'].map((col, i) => (
+            <div key={col} className="bg-black/40 backdrop-blur-md rounded-xl border border-purple-500/20 p-3 flex flex-col gap-3">
+              <div className="text-sm font-medium text-purple-300">{col}</div>
+              {[1, 2, 3].map(n => (
+                <div
+                  key={n}
+                  className="h-16 bg-gradient-to-r from-purple-800/40 to-indigo-800/40 rounded-lg animate-pulse"
+                  style={{ animationDelay: `${i * 0.2 + n * 0.1}s` }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    title: "Aether Portfolio",
+    tagline: "Elegant Creative Showcase",
+    accent: "cyan",
+    gradient: "from-cyan-600 via-blue-600 to-indigo-600",
+    mockUI: (
+      <div className="relative w-full h-64 bg-gradient-to-br from-cyan-950 to-black rounded-t-2xl overflow-hidden border-b border-cyan-500/30">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-6xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent relative">
+            AETHER
+            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl animate-pulse rounded-full" />
+          </div>
+        </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="w-3 h-3 rounded-full bg-cyan-400 animate-bounce" />
+          <div className="w-3 h-3 rounded-full bg-cyan-400/50" />
+          <div className="w-3 h-3 rounded-full bg-cyan-400/30" />
+        </div>
+      </div>
+    ),
+  },
 ];
+
+const accentClasses = {
+  indigo: 'text-indigo-300 group-hover:text-indigo-200',
+  pink: 'text-pink-300 group-hover:text-pink-200',
+  purple: 'text-purple-300 group-hover:text-purple-200',
+  cyan: 'text-cyan-300 group-hover:text-cyan-200',
+} as const;
 
 export default function FeaturedProjectsCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -130,21 +180,13 @@ export default function FeaturedProjectsCarousel() {
                         {project.title}
                       </h3>
 
-                      {/* FIXED: use tagline instead of description */}
                       <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
                         {project.tagline}
                       </p>
 
-                      {/* Mock UI Preview */}
-                      <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
+                      {/* Detailed Mock UI */}
+                      <div className="mb-6 rounded-xl overflow-hidden border border-white/10 shadow-inner bg-black/50">
                         {project.mockUI}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className={`text-sm font-medium text-${project.accent}-300 group-hover:text-${project.accent}-200 transition-colors`}>
-                          View Project →
-                        </span>
-                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${project.gradient} opacity-30 blur-md group-hover:opacity-60 transition-opacity`} />
                       </div>
                     </div>
                   </motion.div>
