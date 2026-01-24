@@ -273,7 +273,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 1 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex justify-center"
-            suppressHydrationWarning // Production safety net for any tiny mismatch
+            suppressHydrationWarning // Suppresses #310 warning in production
           >
             <motion.span
               initial={{ opacity: 0 }}
@@ -289,7 +289,7 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
                 className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
               >
-                {isMounted ? displayText : 'We Build...'} {/* Safe fallback */}
+                {isMounted ? displayText : ''}
               </motion.span>
               <motion.span
                 animate={{ opacity: [1, 0] }}
