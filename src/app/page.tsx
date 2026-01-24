@@ -12,18 +12,18 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
 
-  // Expanded typing phrases with multiple flows
+  // Typing phrases — focused on core services, no "We" duplication
   const phrases = [
-    "We design Custom Logos & Branding Identity",
-    "We craft SEO-optimized Websites",
-    "We engineer Full-Stack Web Applications",
-    "We build Scalable SaaS Platforms",
-    "We create Robust Backend Systems",
-    "We launch Seamless Digital Experiences",
-    "We architect High-Performance Software",
-    "We develop Elegant User Interfaces",
-    "We optimize Lightning-Fast Websites",
-    "We innovate Custom Engineering Solutions"
+    "Custom Logos & Branding Identity",
+    "SEO-optimized Websites",
+    "Full-Stack Web Applications",
+    "Scalable SaaS Platforms",
+    "Robust Backend Systems",
+    "Seamless Digital Experiences",
+    "High-Performance Software",
+    "Elegant User Interfaces",
+    "Lightning-Fast Websites",
+    "Custom Engineering Solutions"
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,7 +39,7 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Beautiful typing animation with cursor blink
+  // Typing animation — prefix "We" outside the animated span to avoid duplication
   useEffect(() => {
     const currentPhrase = phrases[currentIndex];
     let timer: NodeJS.Timeout;
@@ -48,15 +48,15 @@ export default function Home() {
       if (displayText.length < currentPhrase.length) {
         timer = setTimeout(() => {
           setDisplayText(currentPhrase.slice(0, displayText.length + 1));
-        }, 70); // Slightly slower for elegance
+        }, 70);
       } else {
-        timer = setTimeout(() => setIsDeleting(true), 2500); // Longer pause for impact
+        timer = setTimeout(() => setIsDeleting(true), 2500);
       }
     } else {
       if (displayText.length > 0) {
         timer = setTimeout(() => {
           setDisplayText(displayText.slice(0, -1));
-        }, 40); // Faster delete for smooth flow
+        }, 40);
       } else {
         setIsDeleting(false);
         setCurrentIndex((prev) => (prev + 1) % phrases.length);
@@ -147,7 +147,9 @@ export default function Home() {
             transition={{ delay: 0.8, duration: 1 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <span>We</span>
+            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent font-medium">
+              We
+            </span>
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -155,7 +157,7 @@ export default function Home() {
               className="relative inline-block min-w-[320px] sm:min-w-[480px] lg:min-w-[620px] text-center font-medium"
             >
               <motion.span
-                key={currentIndex}  // FIXED: use currentIndex here
+                key={currentIndex}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -177,10 +179,15 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
             <Link
               href="/services"
-              className="inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-xl sm:text-2xl shadow-2xl hover:shadow-pink-500/50 transition-all duration-500 transform hover:scale-105 active:scale-100 relative overflow-hidden group"
+              className="group relative inline-flex px-12 sm:px-16 py-6 sm:py-8 rounded-full bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-xl sm:text-2xl shadow-2xl hover:shadow-pink-500/60 transition-all duration-500 transform hover:scale-105 active:scale-100 overflow-hidden"
             >
               <span className="relative z-10">Explore Our Services</span>
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/20 to-purple-500/20 blur-xl opacity-50"
+              />
             </Link>
 
             {isSignedIn ? (
@@ -202,9 +209,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Core Engineering Excellence - Eye-catching, animated, glassy */}
+      {/* Core Engineering Excellence */}
       <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-purple-500/10">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto pb-32 lg:pb-48"> {/* Extra bottom padding to prevent cutoff */}
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -276,20 +283,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Vynsera Difference - Pink theme, emphasized portal */}
-      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-sm border-t border-pink-500/10">
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Vynsera Difference */}
+      <section className="py-24 sm:py-32 lg:py-40 px-6 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl border-t border-pink-500/10">
+        <div className="max-w-7xl mx-auto pb-32 lg:pb-48">
           <motion.h2
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent mb-16 sm:mb-24"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-24 bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent"
           >
             The Vynsera Difference
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
             <motion.div
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
