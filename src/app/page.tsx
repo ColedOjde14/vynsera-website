@@ -12,7 +12,7 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
 
-  // Typing animation phrases focused on development & engineering
+  // Typing animation phrases focused on core services
   const services = [
     "fast, modern websites",
     "custom software that scales",
@@ -115,44 +115,35 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center max-w-5xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
             className="relative inline-block mb-12 sm:mb-16 group"
           >
             <img
               src="/logo.png"
-              alt="Vynsera Logo"
-              className="mx-auto h-48 sm:h-64 lg:h-80 w-auto drop-shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:rotate-2"
+              alt="Vynsera"
+              className="mx-auto h-56 sm:h-72 lg:h-96 w-auto drop-shadow-2xl transition-all duration-1000 group-hover:scale-105 group-hover:rotate-2"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 blur-3xl opacity-0 group-hover:opacity-70 transition-opacity duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-pink-500/20 to-indigo-500/30 blur-3xl opacity-0 group-hover:opacity-70 transition-opacity duration-1000 rounded-full" />
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 1 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent leading-tight mb-6 sm:mb-8"
-          >
-            Vynsera
-          </motion.h1>
-
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 1 }}
-            className="text-xl sm:text-2xl lg:text-3xl text-indigo-200/90 font-light tracking-wide max-w-3xl mx-auto mb-10 sm:mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-2xl sm:text-3xl lg:text-4xl font-light text-indigo-200/90 tracking-wide max-w-4xl mx-auto mb-12 sm:mb-16"
           >
-            Engineering excellence. Delivered fast.
+            Where bold vision meets flawless execution.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-light text-indigo-300/80 mb-12 sm:mb-16"
+            transition={{ delay: 0.8, duration: 1 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-light text-indigo-300/80 mb-16 sm:mb-20 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            We build{' '}
+            <span>We build</span>
             <span className="relative inline-block min-w-[320px] sm:min-w-[420px] lg:min-w-[520px] text-center">
               <motion.span
                 key={currentServiceIndex}
@@ -166,7 +157,7 @@ export default function Home() {
                 <motion.span
                   animate={{ opacity: [1, 0] }}
                   transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-                  className="absolute -right-2 top-0 text-purple-400"
+                  className="absolute -right-2 top-0 text-pink-400"
                 >
                   |
                 </motion.span>
@@ -201,81 +192,156 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Core Services Overview - Focused on Development */}
-      <section className="py-20 sm:py-32 px-6 bg-black/20 backdrop-blur-sm border-t border-indigo-500/10">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-center mb-16 sm:mb-20 bg-gradient-to-r from-indigo-200 to-purple-200 bg-clip-text text-transparent">
+      {/* Core Engineering Excellence - Eye-catching & animated */}
+      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm border-t border-indigo-500/10">
+        <div className="max-w-7xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-center mb-16 sm:mb-20 bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"
+          >
             Core Engineering Excellence
-          </h2>
+          </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 text-center">
-            {/* Website Development - Lead */}
-            <div className="group p-8 sm:p-12 bg-black/30 rounded-3xl border border-indigo-500/20 hover:border-indigo-400 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500">
-              <h3 className="text-2xl sm:text-3xl font-medium text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
-                Website Development
-              </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Lightning-fast, responsive, SEO-optimized sites built to convert and scale.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
+            {/* Website Development */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-indigo-500/30 rounded-3xl hover:border-indigo-400/70 hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-700 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10">
+                <h3 className="text-2xl sm:text-3xl font-bold text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
+                  Website Development
+                </h3>
+                <p className="text-base sm:text-lg text-indigo-300/90 group-hover:text-indigo-200 transition-colors mb-6">
+                  Lightning-fast, responsive, SEO-optimized sites built to convert and scale — modern Next.js, Tailwind, animations, performance obsessed.
+                </p>
+                <Link
+                  href="/services/website"
+                  className="inline-flex items-center text-indigo-300 hover:text-indigo-100 transition-colors"
+                >
+                  Learn More →
+                </Link>
+              </div>
+            </motion.div>
 
             {/* Custom Software */}
-            <div className="group p-8 sm:p-12 bg-black/30 rounded-3xl border border-indigo-500/20 hover:border-indigo-400 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500">
-              <h3 className="text-2xl sm:text-3xl font-medium text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
-                Custom Software
-              </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Bespoke applications, SaaS platforms, internal tools — engineered for your exact needs.
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-3xl hover:border-purple-400/70 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-700 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10">
+                <h3 className="text-2xl sm:text-3xl font-bold text-purple-200 mb-6 sm:mb-8 group-hover:text-purple-100 transition-colors">
+                  Custom Software
+                </h3>
+                <p className="text-base sm:text-lg text-purple-300/90 group-hover:text-purple-200 transition-colors mb-6">
+                  Bespoke applications, SaaS platforms, internal tools, automation — engineered for your exact vision with clean code, scalability, and reliability.
+                </p>
+                <Link
+                  href="/services/custom-software"
+                  className="inline-flex items-center text-purple-300 hover:text-purple-100 transition-colors"
+                >
+                  Learn More →
+                </Link>
+              </div>
+            </motion.div>
 
             {/* Full-Stack Engineering */}
-            <div className="group p-8 sm:p-12 bg-black/30 rounded-3xl border border-indigo-500/20 hover:border-indigo-400 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500">
-              <h3 className="text-2xl sm:text-3xl font-medium text-indigo-200 mb-6 sm:mb-8 group-hover:text-indigo-100 transition-colors">
-                Full-Stack Engineering
-              </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Robust backend systems, APIs, databases, and seamless frontend integration.
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="group relative p-8 sm:p-12 bg-black/40 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10">
+                <h3 className="text-2xl sm:text-3xl font-bold text-pink-200 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
+                  Full-Stack Engineering
+                </h3>
+                <p className="text-base sm:text-lg text-pink-300/90 group-hover:text-pink-200 transition-colors mb-6">
+                  Robust backend systems, APIs, databases, cloud architecture, and seamless frontend integration — built to last and scale with your business.
+                </p>
+                <Link
+                  href="/services/engineering"
+                  className="inline-flex items-center text-pink-300 hover:text-pink-100 transition-colors"
+                >
+                  Learn More →
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Vynsera Promise */}
-      <section className="py-20 sm:py-32 px-6 bg-black/30 backdrop-blur-sm border-t border-indigo-500/10">
+      {/* Vynsera Difference - Pink theme, emphasized portal */}
+      <section className="py-20 sm:py-32 px-6 bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-sm border-t border-pink-500/10">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light mb-16 sm:mb-20 bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">
+          <motion.h2
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-pink-300 via-rose-300 to-purple-300 bg-clip-text text-transparent mb-16 sm:mb-20"
+          >
             The Vynsera Difference
-          </h2>
+          </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
-            <div className="p-8 sm:p-12 bg-black/20 rounded-3xl border border-green-500/20 backdrop-blur-sm hover:border-green-400/40 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 group">
-              <h3 className="text-2xl sm:text-3xl font-medium text-green-300 mb-6 sm:mb-8 group-hover:text-green-200 transition-colors">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+            >
+              <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Radical Affordability
               </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Premium engineering at prices others can't match — 70%+ below market.
+              <p className="text-base sm:text-lg text-pink-200/90 group-hover:text-pink-100 transition-colors">
+                Premium engineering quality at prices 70%+ below market — no compromise, just value.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-8 sm:p-12 bg-black/20 rounded-3xl border border-green-500/20 backdrop-blur-sm hover:border-green-400/40 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 group">
-              <h3 className="text-2xl sm:text-3xl font-medium text-green-300 mb-6 sm:mb-8 group-hover:text-green-200 transition-colors">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+            >
+              <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
                 Lightning Speed
               </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Rapid development cycles that respect your timeline.
+              <p className="text-base sm:text-lg text-pink-200/90 group-hover:text-pink-100 transition-colors">
+                Rapid development cycles that respect your timeline — fast delivery without cutting corners.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-8 sm:p-12 bg-black/20 rounded-3xl border border-green-500/20 backdrop-blur-sm hover:border-green-400/40 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 group">
-              <h3 className="text-2xl sm:text-3xl font-medium text-green-300 mb-6 sm:mb-8 group-hover:text-green-200 transition-colors">
-                Human First
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="group p-8 sm:p-12 bg-black/30 backdrop-blur-xl border border-pink-500/30 rounded-3xl hover:border-pink-400/70 hover:shadow-2xl hover:shadow-pink-500/30 transition-all duration-700"
+            >
+              <h3 className="text-2xl sm:text-3xl font-bold text-pink-300 mb-6 sm:mb-8 group-hover:text-pink-100 transition-colors">
+                Human-First + Custom Portal
               </h3>
-              <p className="text-lg sm:text-xl text-indigo-300/80 group-hover:text-indigo-200 transition-colors">
-                Direct, honest collaboration — your vision, our engineering obsession.
+              <p className="text-base sm:text-lg text-pink-200/90 group-hover:text-pink-100 transition-colors">
+                Direct, honest collaboration + a dedicated client portal for real-time updates, file sharing, and 24/7 support — your project, your control.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
