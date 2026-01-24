@@ -155,7 +155,7 @@ export default function Home() {
               className="relative inline-block min-w-[320px] sm:min-w-[480px] lg:min-w-[620px] text-center font-medium"
             >
               <motion.span
-                key={currentServiceIndex}
+                key={currentIndex}  // FIXED: use currentIndex here
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
