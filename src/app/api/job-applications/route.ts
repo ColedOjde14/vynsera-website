@@ -34,7 +34,6 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
 
-    // Extract ALL fields from your form
     const first_name = formData.get('first_name')?.toString().trim() || '';
     const last_name = formData.get('last_name')?.toString().trim() || '';
     const name = `${first_name} ${last_name}`.trim();
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
     const disability_status = formData.get('disability_status')?.toString() || null;
     const veteran_status = formData.get('veteran_status')?.toString() || null;
 
-    // Basic validation
+    // Validation
     if (!name || !email || !position_applying_for || !why_interested) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
     }
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Save to database (adjust columns if your table schema is different)
+    // Save to database
     const [application] = await sql`
       INSERT INTO applications (
         name, email, phone, authorized_to_work_us, requires_sponsorship,
@@ -75,19 +74,19 @@ export async function POST(request: Request) {
       RETURNING id, name, email, position_applying_for, created_at
     `;
 
-    // 1. Confirmation to applicant
+    // 1. Confirmation to applicant (using backticks for interpolation)
     await resend.emails.send({
       from: 'Vynsera Careers <careers@vynseracorp.com>',
       to: [email],
       subject: 'Application Received - Vynsera',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #0f0f1a; color: #e2e8f0;">
-          <h1 style="color: #c084fc;">Hello ${first_name},</h1>
+          <h1 style="color: #c084fc;">Hello ${first_name || name},</h1>
           <p style="font-size: 18px; line-height: 1.6;">
-            Thank you for applying to Vynsera! We've received your application for <strong>${position_applying_for}</strong> and our team will review it soon.
+            Thank you for applying to Vynsera! We've received your application for <strong>${position_applying_for}</strong>.
           </p>
           <p style="font-size: 16px; opacity: 0.9;">
-            We'll be in touch if your experience aligns with what we're looking for. In the meantime, feel free to explore our <a href="https://vynseracorp.com" style="color: #a78bfa;">website</a>.
+            Our team will review it and be in touch if there's a fit. In the meantime, feel free to explore our <a href="https://vynseracorp.com" style="color: #a78bfa;">website</a>.
           </p>
           <p style="margin-top: 32px;">Best regards,<br/>The Vynsera Team</p>
           <hr style="border: 1px solid #4c1d95; margin: 32px 0;" />
@@ -109,7 +108,7 @@ export async function POST(request: Request) {
           <div style="background: #1a1a2e; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #4c1d95;">
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #a78bfa;">${email}</a></p>
-            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
             <p><strong>Position:</strong> ${position_applying_for}</p>
             <p><strong>Authorized to work in US:</strong> ${authorized_to_work_us ? 'Yes' : 'No'}</p>
             <p><strong>Requires sponsorship:</strong> ${requires_sponsorship ? 'Yes' : 'No'}</p>
@@ -118,11 +117,6 @@ export async function POST(request: Request) {
           <div style="background: #1a1a2e; padding: 20px; border-radius: 12px; border-left: 4px solid #c084fc;">
             <p style="margin: 0 0 12px; opacity: 0.8;"><strong>Why interested:</strong></p>
             <p style="margin: 0; white-space: pre-wrap;">${why_interested}</p>
-          </div>
-
-          <div style="background: #1a1a2e; padding: 20px; border-radius: 12px; border-left: 4px solid #c084fc; margin-top: 20px;">
-            <p style="margin: 0 0 12px; opacity: 0.8;"><strong>Message:</strong></p>
-            <p style="margin: 0; white-space: pre-wrap;">${onmessage}</p>
           </div>
 
           ${work_experience ? `
