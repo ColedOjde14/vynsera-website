@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
           <div style="background: #1a1a2e; padding: 20px; border-radius: 12px; border-left: 4px solid #c084fc; margin-top: 20px;">
             <p style="margin: 0 0 12px; opacity: 0.8;"><strong>Message:</strong></p>
-            <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+            <p style="margin: 0; white-space: pre-wrap;">${onmessage}</p>
           </div>
 
           ${work_experience ? `
