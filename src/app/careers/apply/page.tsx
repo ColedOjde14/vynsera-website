@@ -3,14 +3,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function VynseraApplication() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setFormStatus('idle');
+    setErrorMessage(null);
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
@@ -24,13 +28,19 @@ export default function VynseraApplication() {
       if (response.ok) {
         setFormStatus('success');
         form.reset();
+        toast.success('Application submitted! Check your email for confirmation.');
         setTimeout(() => setFormStatus('idle'), 10000);
       } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || 'Submission failed. Please try again.');
         setFormStatus('error');
+        toast.error(errorData.error || 'Something went wrong.');
         setTimeout(() => setFormStatus('idle'), 8000);
       }
     } catch (err) {
+      setErrorMessage('Network error. Please check your connection and try again.');
       setFormStatus('error');
+      toast.error('Network error');
       setTimeout(() => setFormStatus('idle'), 8000);
       console.error(err);
     } finally {
@@ -66,7 +76,7 @@ export default function VynseraApplication() {
           <div className="text-center py-12 bg-red-900/30 border border-red-500/40 rounded-2xl p-10">
             <h2 className="text-3xl font-bold text-red-300 mb-4">Submission Failed</h2>
             <p className="text-lg text-indigo-200">
-              Something went wrong. Please try again or email your application directly to hr@vynseracorp.com.
+              {errorMessage || 'Something went wrong. Please try again or email your application directly to hr@vynseracorp.com.'}
             </p>
           </div>
         ) : (
