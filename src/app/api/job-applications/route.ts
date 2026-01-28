@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     const first_name = formData.get('first_name')?.toString().trim() || '';
     const last_name = formData.get('last_name')?.toString().trim() || '';
-    const name = `${first_name} ${last_name}`.trim(); // for emails
+    const name = `${first_name} ${last_name}`.trim();
     const email = formData.get('email')?.toString().trim();
     const phone = formData.get('phone')?.toString().trim() || null;
     const authorized_to_work_us = formData.get('authorized_to_work_us')?.toString() === 'true';
@@ -59,21 +59,33 @@ export async function POST(request: Request) {
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Save using your actual columns (first_name + last_name)
-    const [application] = await sql`
-      INSERT INTO applications (
-        first_name, last_name, email, phone, authorized_to_work_us, requires_sponsorship,
-        work_experience, education, position_applying_for, why_interested,
-        salary_expectations, disability_status, veteran_status, created_at
-      )
-      VALUES (
-        ${first_name}, ${last_name}, ${email}, ${phone}, ${authorized_to_work_us}, ${requires_sponsorship},
-        ${work_experience}, ${education}, ${position_applying_for}, ${why_interested},
-        ${salary_expectations}, ${disability_status}, ${veteran_status}, NOW()
-      )
-      RETURNING id, first_name, last_name, email, position_applying_for, created_at
-    `;
+    // Save to database - catch duplicate email specifically
+    let application;
+    try {
+      [application] = await sql`
+        INSERT INTO applications (
+          first_name, last_name, email, phone, authorized_to_work_us, requires_sponsorship,
+          work_experience, education, position_applying_for, why_interested,
+          salary_expectations, disability_status, veteran_status, created_at
+        )
+        VALUES (
+          ${first_name}, ${last_name}, ${email}, ${phone}, ${authorized_to_work_us}, ${requires_sponsorship},
+          ${work_experience}, ${education}, ${position_applying_for}, ${why_interested},
+          ${salary_expectations}, ${disability_status}, ${veteran_status}, NOW()
+        )
+        RETURNING id, first_name, last_name, email, position_applying_for, created_at
+      `;
+    } catch (dbError: any) {
+      if (dbError.code === '23505' && dbError.constraint === 'applications_email_key') {
+        return NextResponse.json(
+          { error: 'This email has already been used for an application. Please use a different email or contact support.' },
+          { status: 409 } // Conflict - duplicate
+        );
+      }
+      throw dbError; // rethrow other DB errors
+    }
 
+    // If we reach here, DB save succeeded → send emails
     // 1. Confirmation to applicant
     await resend.emails.send({
       from: 'Vynsera Careers <careers@vynseracorp.com>',
@@ -143,6 +155,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, message: 'Application submitted successfully!' });
   } catch (error: any) {
     console.error('Job application error:', error);
+
+    // Handle duplicate email specifically
+    if (error.code === '23505' && error.constraint === 'applications_email_key') {
+      return NextResponse.json(
+        { error: 'This email has already been used for an application. Please use a different email or contact support.' },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || 'Failed to submit application. Please try again.' },
       { status: 500 }
