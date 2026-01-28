@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     const first_name = formData.get('first_name')?.toString().trim() || '';
     const last_name = formData.get('last_name')?.toString().trim() || '';
-    const name = `${first_name} ${last_name}`.trim();
+    const name = `${first_name} ${last_name}`.trim(); // for emails
     const email = formData.get('email')?.toString().trim();
     const phone = formData.get('phone')?.toString().trim() || null;
     const authorized_to_work_us = formData.get('authorized_to_work_us')?.toString() === 'true';
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const veteran_status = formData.get('veteran_status')?.toString() || null;
 
     // Validation
-    if (!name || !email || !position_applying_for || !why_interested) {
+    if (!first_name || !last_name || !email || !position_applying_for || !why_interested) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -59,29 +59,29 @@ export async function POST(request: Request) {
 
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Save to database
+    // Save using your actual columns (first_name + last_name)
     const [application] = await sql`
       INSERT INTO applications (
-        name, email, phone, authorized_to_work_us, requires_sponsorship,
+        first_name, last_name, email, phone, authorized_to_work_us, requires_sponsorship,
         work_experience, education, position_applying_for, why_interested,
         salary_expectations, disability_status, veteran_status, created_at
       )
       VALUES (
-        ${name}, ${email}, ${phone}, ${authorized_to_work_us}, ${requires_sponsorship},
+        ${first_name}, ${last_name}, ${email}, ${phone}, ${authorized_to_work_us}, ${requires_sponsorship},
         ${work_experience}, ${education}, ${position_applying_for}, ${why_interested},
         ${salary_expectations}, ${disability_status}, ${veteran_status}, NOW()
       )
-      RETURNING id, name, email, position_applying_for, created_at
+      RETURNING id, first_name, last_name, email, position_applying_for, created_at
     `;
 
-    // 1. Confirmation to applicant (using backticks for interpolation)
+    // 1. Confirmation to applicant
     await resend.emails.send({
       from: 'Vynsera Careers <careers@vynseracorp.com>',
       to: [email],
       subject: 'Application Received - Vynsera',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #0f0f1a; color: #e2e8f0;">
-          <h1 style="color: #c084fc;">Hello ${first_name || name},</h1>
+          <h1 style="color: #c084fc;">Hello ${first_name},</h1>
           <p style="font-size: 18px; line-height: 1.6;">
             Thank you for applying to Vynsera! We've received your application for <strong>${position_applying_for}</strong>.
           </p>
@@ -99,14 +99,14 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from: 'Vynsera Applications <careers@vynseracorp.com>',
       to: [process.env.COMPANY_EMAIL || 'support@vynseracorp.com'],
-      subject: `New Application: ${name} for ${position_applying_for}`,
+      subject: `New Application: ${first_name} ${last_name} for ${position_applying_for}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 24px; background: #0f0f1a; color: #e2e8f0;">
           <h1 style="color: #c084fc;">New Career Application</h1>
           <p style="opacity: 0.9;">Submitted just now:</p>
           
           <div style="background: #1a1a2e; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #4c1d95;">
-            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Name:</strong> ${first_name} ${last_name}</p>
             <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #a78bfa;">${email}</a></p>
             ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
             <p><strong>Position:</strong> ${position_applying_for}</p>
