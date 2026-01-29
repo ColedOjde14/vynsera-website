@@ -98,13 +98,17 @@ export default function Home() {
       if (response.ok) {
         setFormStatus('success');
         form.reset();
+        toast.success("Message sent! Check your email for confirmation.");
         setTimeout(() => setFormStatus('idle'), 4000);
       } else {
+        // Show the exact error from the server
         setFormStatus('error');
+        toast.error(result.error || "Failed to send message.");
         setTimeout(() => setFormStatus('idle'), 4000);
       }
     } catch (err) {
       setFormStatus('error');
+      toast.error("Network error. Please try again.");
       setTimeout(() => setFormStatus('idle'), 4000);
       console.error(err);
     } finally {
